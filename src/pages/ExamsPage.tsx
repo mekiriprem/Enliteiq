@@ -1,82 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, BookOpen, Calendar, Clock, Award } from "lucide-react";
-import ExamCard from "../components/exams/ExamCard";
+import { Link } from "react-router-dom";
 
 const ExamsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample data for exams
-  const exams = [
-    {
-      id: "math-olympiad",
-      title: "Mathematics Olympiad",
-      subject: "Mathematics",
-      date: "June 10, 2025",
-      duration: "2 hours",
-      difficulty: "Medium" as const,
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "science-challenge",
-      title: "National Science Challenge",
-      subject: "Science",
-      date: "July 15, 2025",
-      duration: "2.5 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "english-proficiency",
-      title: "English Proficiency Test",
-      subject: "English",
-      date: "May 28, 2025",
-      duration: "1.5 hours",
-      difficulty: "Easy" as const,
-      image: "https://images.unsplash.com/photo-1456513080867-f24f76ced9b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "physics-championship",
-      title: "Physics Championship",
-      subject: "Physics",
-      date: "August 5, 2025",
-      duration: "3 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "chemistry-quiz",
-      title: "Chemistry Quiz Competition",
-      subject: "Chemistry",
-      date: "September 12, 2025",
-      duration: "1 hour",
-      difficulty: "Medium" as const,
-      image: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "history-challenge",
-      title: "World History Challenge",
-      subject: "History",
-      date: "October 3, 2025",
-      duration: "2 hours",
-      difficulty: "Easy" as const,
-      image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-  ];
+  // Fetch exams from the API
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:8081/api/exams");
+        if (!response.ok) {
+          throw new Error("Failed to fetch exams");
+        }
+        const data = await response.json();
+        // Log the data to verify unique IDs
+        console.log("Fetched exams:", data);
+        setExams(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExams();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Filter the exams based on search term, subject, and difficulty
   const filteredExams = exams.filter(exam => {
-    const matchesSearch = exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         exam.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = 
+      (exam.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (exam.subject?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesSubject = selectedSubject ? exam.subject === selectedSubject : true;
-    const matchesDifficulty = selectedDifficulty ? exam.difficulty === selectedDifficulty : true;
+    const matchesDifficulty = selectedDifficulty ? (exam.difficulty || "") === selectedDifficulty : true;
     
     return matchesSearch && matchesSubject && matchesDifficulty;
   });
 
   // Get unique subjects
-  const subjects = [...new Set(exams.map(exam => exam.subject))];
+  const subjects = [...new Set(exams.map(exam => exam.subject).filter(subject => subject))];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -183,10 +152,50 @@ const ExamsPage = () => {
             </div>
           </div>
           
-          {filteredExams.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <h3 className="text-xl font-medium text-education-dark mb-2">Loading exams...</h3>
+              <p className="text-gray-600">Please wait while we fetch the exams.</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <h3 className="text-xl font-medium text-education-dark mb-2">Error</h3>
+              <p className="text-gray-600">{error}</p>
+            </div>
+          ) : filteredExams.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredExams.map((exam) => (
-                <ExamCard key={exam.id} {...exam} />
+                <Link
+                  key={exam.id}
+                  to={`/exam/${exam.id}`}
+                  className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                >
+                  <div className="flex flex-col h-full">
+                    <img
+                      src={exam.image || "https://images.unsplash.com/photo-1509228623518-827b9141b9d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"}
+                      alt={exam.title || "Untitled Exam"}
+                      className="w-full h-48 object-cover rounded-md mb-4"
+                    />
+                    <h3 className="text-xl font-semibold text-education-dark mb-2">
+                      {exam.title || "Untitled Exam"}
+                    </h3>
+                    <p className="text-gray-600 mb-2">
+                      <strong>ID:</strong> {exam.id}
+                    </p>
+                    <p className="text-gray-600 mb-2">
+                      <strong>Subject34:</strong> {exam.subject || "Unknown Subject"}
+                    </p>
+                    <p className="text-gray-600 mb-2">
+                      <strong>Date:</strong> {exam.date || "TBD"}
+                    </p>
+                    <p className="text-gray-600 mb-2">
+                      <strong>Duration:</strong> {exam.duration || "Not specified"}
+                    </p>
+                    <p className="text645-600">
+                      <strong>Difficulty:</strong> {exam.difficulty || "Unknown"}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (

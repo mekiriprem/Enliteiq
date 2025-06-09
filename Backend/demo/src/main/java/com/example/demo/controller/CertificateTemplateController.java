@@ -5,8 +5,10 @@ import com.example.demo.dto.CertificateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.ui.Model;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -78,17 +81,27 @@ public class CertificateTemplateController {
     }
 
     // Preview Template (used in Thymeleaf view rendering, not API response)
-    @GetMapping("/preview/{templateName}")
-    public String previewTemplate(@PathVariable String templateName, Model model) {
-        model.addAttribute("name", "John Doe");
-        model.addAttribute("email", "john@example.com");
-        model.addAttribute("phone", "1234567890");
-        model.addAttribute("percentage", "95%");
-        model.addAttribute("subject", "Mathematics");
-        model.addAttribute("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-        return templateName;
-    }
+    @GetMapping(value = "/preview/{templateName}", produces = MediaType.TEXT_HTML_VALUE)
+    public String previewTemplate(@PathVariable String templateName, Model model) throws IOException {
+        // Replace placeholders in the file manually if needed
+        ClassPathResource resource = new ClassPathResource("templates/" + templateName + ".html");
 
+        if (!resource.exists()) {
+            return "<h2>Template not found: " + templateName + "</h2>";
+        }
+
+        String html = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+
+        // Optional: Replace placeholders like {{name}}, {{email}}, etc.
+        html = html.replace("{{name}}", "John Doe")
+                   .replace("{{email}}", "john@example.com")
+                   .replace("{{phone}}", "1234567890")
+                   .replace("{{percentage}}", "95%")
+                   .replace("{{subject}}", "Mathematics")
+                   .replace("{{date}}", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+
+        return html;
+    }
     // ✅ Get certificates by student name
     @GetMapping("/certificates/student/{studentName}")
     public ResponseEntity<List<String>> getCertificatesByStudent(@PathVariable String studentName) throws IOException, InterruptedException {

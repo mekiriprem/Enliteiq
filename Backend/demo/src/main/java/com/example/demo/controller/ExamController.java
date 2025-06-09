@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +25,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.Repository.ExamRepository;
 import com.example.demo.Service.ExamService;
 import com.example.demo.model.Exam;
 
 @RestController
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api")
 public class ExamController {
 
     @Autowired
     private ExamService examService;
+    
+    @Autowired
+    private ExamRepository ExamRepository;
 
     @Value("${supabase.url}")
     private String supabaseUrl;
@@ -50,9 +54,17 @@ public class ExamController {
     public List<Exam> getAllExams() {
         return examService.getAllExams();
     }
+    
+
+    @GetMapping("/exams/{id}")
+    public ResponseEntity<?> getExamById(@PathVariable UUID id) {
+        return examService.getExamById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     // 🔵 Add exam
-    @PostMapping("/exams")
+    @PostMapping(value = "/exams", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Exam> addExam(@RequestBody Exam exam) {
         Exam savedExam = examService.saveExam(exam);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedExam);
@@ -119,6 +131,30 @@ public class ExamController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload image to Supabase"));
+        }
+    }
+    
+    @PostMapping("/recommend")
+    public ResponseEntity<String> recommendExam(@RequestParam UUID examId) {
+        // Step 1: Reset all "recommended" statuses
+        List<Exam> recommendedExams = ExamRepository.findByStatus("recommended");
+        for (Exam exam : recommendedExams) {
+            exam.setStatus(null);
+        }
+
+        // Step 2: Set the target exam as recommended
+        Optional<Exam> targetExamOpt = ExamRepository.findById(examId);
+        if (targetExamOpt.isPresent()) {
+            Exam targetExam = targetExamOpt.get();
+            targetExam.setStatus("recommended");
+
+            // Save all changes at once
+            recommendedExams.add(targetExam);
+            ExamRepository.saveAll(recommendedExams);
+
+            return ResponseEntity.ok("Exam recommended successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Exam not found for ID: " + examId);
         }
     }
     

@@ -181,7 +181,7 @@ const App = () => (
               <Route path="/login" element={<Login/>} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/exams" element={<ExamsPage />} />
-              <Route path="/exams/:id" element={<ExamDetailPage />} />
+              <Route path="/exam/:id" element={<ExamDetailPage />} />
               <Route path="/mock-tests" element={<MockTestsPage />} /> {/* Add this route */}
               <Route path="/mock-tests/:id" element={<MockTestPage />} />
               <Route path="/exam-results/:id" element={<ExamResultPage />} />

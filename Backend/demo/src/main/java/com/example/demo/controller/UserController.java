@@ -1,14 +1,22 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.Service.UserService;
+import com.example.demo.dto.UserDTO;
+import com.example.demo.dto.UserExamResultDTO;
 import com.example.demo.model.User;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -16,7 +24,8 @@ import com.example.demo.model.User;
 @RequestMapping("/api")
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private  UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -41,6 +50,35 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+    
+  
+
+
+        @PostMapping("/user/{userId}/exam/{examId}")
+        public ResponseEntity<String> registerUserToExam(
+                @PathVariable Long userId,
+                @PathVariable UUID examId) {
+            userService.registerUserToExam(userId, examId);
+            return ResponseEntity.ok("User registered to exam successfully.");
+        }
+        
+        @GetMapping("/getallUsers")
+        public ResponseEntity<List<UserDTO>> getAllUsers() {
+            return ResponseEntity.ok(userService.getAllUsers());
+        }
+
+        @GetMapping("/{userId}")
+        public ResponseEntity<UserDTO> getUserByUserId(@PathVariable Long userId) {
+            return ResponseEntity.ok(userService.getUserByUserId(userId));
+        }
+        
+        @GetMapping("/users/{id}/exam-results")
+        public ResponseEntity<List<UserExamResultDTO>> getUserExamResults(@PathVariable Long id) {
+            List<UserExamResultDTO> results = userService.getUserExamResults(id);
+            return ResponseEntity.ok(results);
+        }
+
+
 
     // Inner class for login request data transfer object (DTO)
     private static class LoginRequest {

@@ -10,4 +10,5 @@ import com.example.demo.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     Optional<User> findByEmail(String email); // Add this line
+    Optional<User> findByUserId(String userId);
 }

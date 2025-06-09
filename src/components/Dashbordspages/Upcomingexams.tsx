@@ -340,6 +340,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       userId: student.userId,
       percentage: student.percentage,
       subject: selectedExam.subject,
+      examId:selectedExam.id,
       templateName: selectedTemplate
     }));
     try {
