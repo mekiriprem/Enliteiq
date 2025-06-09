@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
+import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon, Search } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import domtoimage from 'dom-to-image';
 
@@ -55,10 +55,11 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const [templateImages, setTemplateImages] = useState<Map<string, string>>(new Map());
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());  const [templateImages, setTemplateImages] = useState<Map<string, string>>(new Map());
   const [loadingTemplates, setLoadingTemplates] = useState<Set<string>>(new Set());
   const [previewImage, setPreviewImage] = useState<string>('');
+  const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -163,9 +164,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       }
     };
     fetchExams();
-  }, []);
-
-  useEffect(() => {
+  }, []);  useEffect(() => {
     setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
     
     const loadTemplateImages = async () => {
@@ -190,39 +189,64 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     loadTemplateImages();
   }, []);
 
-  const handleUpdateExamStatus = async (id: String, recommend: boolean) => {
+  // Handle escape key for certificate modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showCertificateModal) {
+        setShowCertificateModal(false);
+      }
+    };
+
+    if (showCertificateModal) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [showCertificateModal]);
+  const handleUpdateExamStatus = async (id: string, recommend: boolean) => {
     try {
       setIsProcessing(true);
-      const endpoint = recommend
-        ? 'http://localhost:8081/api/exams/recommend' : {}
+      
+      if (recommend) {
+        // Use the recommend API for recommending an exam
+        const response = await fetch(`http://localhost:8081/api/recommend?examId=${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
         
-      const response = await fetch(`${endpoint}?examId=${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to update exam status: ${response.status}`);
-      }
-      const result = await response.text();
-      console.log(result);
-      setExams(prevExams => {
-        if (recommend) {
-          return prevExams.map(exam => 
-            exam.id ===id 
-              ? { ...exam, status: 'recommended' }
-              : { ...exam, status: null }
-          );
-        } else {
-          return prevExams.map(exam => 
-            exam.id === id 
-              ? { ...exam, status: null }
-              : exam
-          );
+        if (!response.ok) {
+          throw new Error(`Failed to recommend exam: ${response.status}`);
         }
-      });
+        
+        const result = await response.text();
+        console.log('API Response:', result);
+      } else {
+        // Use the exam update API to set status to null since there's no unrecommend API
+        const response = await fetch(`http://localhost:8081/api/exams/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: null }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update exam status: ${response.status}`);
+        }
+      }
+      
+      // Update the local state
+      setExams(prevExams => 
+        prevExams.map(exam => 
+          exam.id === id 
+            ? { ...exam, status: recommend ? 'recommended' : null }
+            : exam
+        )
+      );
+      
     } catch (error) {
       console.error('Error updating exam status:', error);
-      alert(`Failed to update exam status: ${error}`);
+      alert(`Failed to update exam status: ${error.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -544,24 +568,34 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     );
   }
 
-  return (
-    <div className="p-3 sm:p-4 md:p-6">
+  return (    <div className="p-3 sm:p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Upcoming Exams</h1>
         {(userType === 'admin' || userType === 'school') && (
           <button 
             onClick={() => {
-              setShowAddExam(true);
-              setIsEditing(false);
-              setEditingExamId(null);
-              setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
-              setImagePreview('');
-              setImageFile(null);
+              if (showAddExam) {
+                // Hide the form
+                setShowAddExam(false);
+                setIsEditing(false);
+                setEditingExamId(null);
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                setImagePreview('');
+                setImageFile(null);
+              } else {
+                // Show the form
+                setShowAddExam(true);
+                setIsEditing(false);
+                setEditingExamId(null);
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                setImagePreview('');
+                setImageFile(null);
+              }
             }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus size={16} />
-            Add Exam
+            {showAddExam ? 'Cancel' : 'Add Exam'}
           </button>
         )}
       </div>
@@ -958,112 +992,206 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             >
               {isProcessing || isUploadingImage ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Exam' : 'Add Exam')}
             </button>
-          </div>
-        </div>
+          </div>        </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {exams.length > 0 ? (
-          exams.map(exam => (
-            <div key={exam.id} className="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
-              <div className="flex flex-col md:flex-row">
-                {exam.image && (
-                  <div className="md:w-48 h-48 md:h-auto overflow-hidden flex-shrink-0">
-                    <img 
-                      src={exam.image} 
-                      alt={exam.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNjLMMiI9TDE4LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
-                        e.currentTarget.alt = 'Failed to load exam image';
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="flex-1 p-6">
-                  <div className="flex flex-col h-full">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-800">{exam.title}</h3>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 text-blue-500" />
-                        <span>{formatDate(exam.date)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-blue-500" />
-                        <span>{exam.time}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Info className="h-4 w-4 text-blue-500" />
-                        <span>{exam.subject}</span>
-                      </div>
+      {/* Search and Filter Section - moved below the form */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+        {/* Search Input */}
+        <div className="mb-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={18} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search exams by title or subject..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Filter Toggle Buttons */}
+        <div className="filter-buttons">
+          <div className="btn-group flex">
+            <button
+              className={`px-4 py-2 rounded-l-lg border-2 border-blue-600 transition-colors ${
+                examFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'
+              }`}
+              onClick={() => setExamFilter('all')}
+            >
+              All Exams
+            </button>
+            <button
+              className={`px-4 py-2 border-t-2 border-b-2 border-green-600 transition-colors ${
+                examFilter === 'recommended' ? 'bg-green-600 text-white' : 'bg-white text-green-600 hover:bg-green-50'
+              }`}
+              onClick={() => setExamFilter('recommended')}
+            >
+              Recommended
+            </button>
+            <button
+              className={`px-4 py-2 rounded-r-lg border-2 border-gray-600 transition-colors ${
+                examFilter === 'not_recommended' ? 'bg-gray-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setExamFilter('not_recommended')}
+            >
+              Not Recommended
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">        {exams.length > 0 ? (
+          exams
+            .filter(exam => {
+              // Filter by status
+              const statusMatch = (() => {
+                if (examFilter === 'all') return true;
+                if (examFilter === 'recommended') return exam.status === 'recommended';
+                if (examFilter === 'not_recommended') return exam.status === null;
+                return true;
+              })();
+
+              // Filter by search term
+              const searchMatch = searchTerm === '' || 
+                exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                exam.subject.toLowerCase().includes(searchTerm.toLowerCase());
+
+              return statusMatch && searchMatch;
+            })
+            .map(exam => (
+            <div key={exam.id} className="group bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
+              {/* Image on top */}
+              {exam.image && (
+                <div className="h-48 overflow-hidden relative">
+                  <img 
+                    src={exam.image} 
+                    alt={exam.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA5TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
+                      e.currentTarget.alt = 'Failed to load exam image';
+                    }}
+                  />
+                  {/* Status indicator overlay */}
+                  {exam.status === 'recommended' && (
+                    <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      Recommended
                     </div>
-                    {exam.description && (
-                      <p className="text-sm text-gray-600 mb-3">{exam.description}</p>
-                    )}
-                    {(userType === 'admin' || userType === 'school') && (
-                      <div className="flex items-center gap-4 mb-3">
-                        <label className="flex items-center text-sm text-gray-700">
+                  )}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                </div>
+              )}
+              
+              {/* Content below image */}
+              <div className="p-6">
+                <div className="flex flex-col h-full">
+                  <h3 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                    {exam.title}
+                  </h3>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 text-blue-500" />
+                      <span>{formatDate(exam.date)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="h-4 w-4 text-blue-500" />
+                      <span>{exam.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Info className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium">{exam.subject}</span>
+                    </div>
+                  </div>
+                  
+                  {exam.description && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{exam.description}</p>
+                  )}
+                  
+                  {/* Status controls for admin/school */}
+                  {(userType === 'admin' || userType === 'school') && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center text-sm text-gray-700 cursor-pointer">
                           <input
                             type="radio"
                             name={`status-${exam.id}`}
                             checked={exam.status === 'recommended'}
                             onChange={() => handleUpdateExamStatus(exam.id, true)}
                             disabled={isProcessing}
-                            className="mr-2 accent-blue-600"
+                            className="mr-2 accent-green-600"
                           />
-                          Recommend
+                          <span className="text-green-700 font-medium">Recommend</span>
                         </label>
-                        <label className="flex items-center text-sm text-gray-700">
+                        <label className="flex items-center text-sm text-gray-700 cursor-pointer">
                           <input
                             type="radio"
                             name={`status-${exam.id}`}
                             checked={exam.status === null}
                             onChange={() => handleUpdateExamStatus(exam.id, false)}
                             disabled={isProcessing}
-                            className="mr-2 accent-blue-600"
+                            className="mr-2 accent-gray-600"
                           />
-                          Not Recommended
+                          <span className="text-gray-700 font-medium">Not Recommended</span>
                         </label>
                       </div>
-                    )}
-                    <div className="flex items-center space-x-2 mt-auto">
-                      {userType === 'student' && (
-                        <button 
-                          className="flex items-center gap-1 px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                          onClick={() => { /* Add download materials functionality */ }}
-                        >
-                          <Download size={16} />
-                          Materials
-                        </button>
-                      )}
-                      {(userType === 'admin' || userType === 'school') && (
-                        <>
-                          <button
-                            onClick={() => handleGenerateCertificate(exam.id)}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                          >
-                            Generate Certificates
-                          </button>
-                          <button
-                            onClick={() => handleEditExam(exam)}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                          >
-                            Edit
-                          </button>
-                        </>
-                      )}
                     </div>
+                  )}
+                  
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    {userType === 'student' && (
+                      <button 
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-1 justify-center"
+                        onClick={() => { /* Add download materials functionality */ }}
+                      >
+                        <Download size={16} />
+                        Materials
+                      </button>
+                    )}
+                    {(userType === 'admin' || userType === 'school') && (
+                      <>
+                        <button
+                          onClick={() => handleGenerateCertificate(exam.id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex-1 justify-center"
+                        >
+                          <FileText size={16} />
+                          Certificates
+                        </button>
+                        <button
+                          onClick={() => handleEditExam(exam)}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="col-span-1 md:col-span-3 flex items-center bg-white p-8 rounded-lg shadow-sm border border-gray-600 text-center justify-center">
-            <p className="text-gray-500">
-              {isLoading ? 'Loading exams...' : 'No upcoming exams.'}
-            </p>
-            {(userType === 'admin' || userType === 'school') && !isLoading && (
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center bg-white p-12 rounded-lg shadow-sm border border-gray-200 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <Calendar className="h-8 w-8 text-gray-400" />
+            </div>            <h3 className="text-lg font-medium text-gray-900 mb-2">No exams found</h3>
+            <p className="text-gray-500 mb-6">
+              {searchTerm !== '' 
+                ? `No exams match your search "${searchTerm}".`
+                : examFilter === 'recommended' 
+                ? 'No recommended exams available.' 
+                : examFilter === 'not_recommended' 
+                ? 'No non-recommended exams available.' 
+                : isLoading 
+                ? 'Loading exams...' 
+                : 'No upcoming exams scheduled.'}
+            </p>            {(userType === 'admin' || userType === 'school') && !isLoading && searchTerm === '' && examFilter === 'all' && (
               <button
                 onClick={() => {
                   setShowAddExam(true);
@@ -1073,9 +1201,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                   setImagePreview('');
                   setImageFile(null);
                 }}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                Add New Exam
+                <Plus size={16} />
+                Add Your First Exam
               </button>
             )}
           </div>
