@@ -113,6 +113,7 @@ public class CertificateTemplateService {
         }
     }
 
+    
     public void processCertificates(List<CertificateRequest> certificates) throws IOException, InterruptedException {
         for (CertificateRequest cert : certificates) {
             
