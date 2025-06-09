@@ -376,7 +376,7 @@ const DashboardPage = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                           No recent results available.
                         </td>
                       </tr>

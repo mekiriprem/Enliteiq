@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, UUID> {
     List<Exam> findByStatus(String status);
+    
 }

@@ -3,17 +3,27 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Award, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
+interface Exam {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  subject: string;
+  description?: string;
+  image?: string;
+  status?: string | null;
+}
+
 const ExamCard = ({ exam }: { exam: {
   id: string;
   title: string;
   subject: string;
   date: string;
   duration: string;
-  difficulty: "Easy" | "Medium" | "Hard";
   image: string;
 }}) => {
   return (
-    <Link to={`/exams/${exam.id}`} className="lg:w-5/12 lg:pl-8">
+    <Link to={`/exam/${exam.id}`} className="lg:w-5/12 lg:pl-8">
       <div className="bg-white rounded-xl shadow-xl overflow-hidden">
         <img 
           src={exam.image} 
@@ -28,8 +38,8 @@ const ExamCard = ({ exam }: { exam: {
             <span className="text-sm text-gray-500">Starts {exam.date}</span>
           </div>
           <h3 className="text-xl font-semibold mb-2">{exam.title}</h3>
-          <p className="text-gray-600 mb-4">Prepare for this {exam.difficulty.toLowerCase()} {exam.subject.toLowerCase()} exam with our comprehensive mock tests and study materials.</p>
-          <Link to={`/exams/${exam.id}`} className="text-education-blue font-medium hover:underline flex items-center">
+          <p className="text-gray-600 mb-4">Prepare for this {exam.subject.toLowerCase()} exam with our comprehensive mock tests and study materials.</p>
+          <Link to={`/exam/${exam.id}`} className="text-education-blue font-medium hover:underline flex items-center">
             Learn More <ArrowRight size={16} className="ml-1" />
           </Link>
         </div>
@@ -40,80 +50,77 @@ const ExamCard = ({ exam }: { exam: {
 
 const Hero = () => {
   const [currentExamIndex, setCurrentExamIndex] = useState(0);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  const exams = [
-    {
-      id: "science-olympiad",
-      title: "National Science Olympiad",
-      subject: "Science",
-      date: "May 15, 2025",
-      duration: "3 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "math-olympiad",
-      title: "Mathematics Olympiad",
-      subject: "Mathematics",
-      date: "June 10, 2025",
-      duration: "2 hours",
-      difficulty: "Medium" as const,
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "science-challenge",
-      title: "National Science Challenge",
-      subject: "Science",
-      date: "July 15, 2025",
-      duration: "2.5 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "english-proficiency",
-      title: "English Proficiency Test",
-      subject: "English",
-      date: "May 28, 2025",
-      duration: "1.5 hours",
-      difficulty: "Easy" as const,
-      image: "https://images.unsplash.com/photo-1456513080867-f24f76ced9b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "physics-championship",
-      title: "Physics Championship",
-      subject: "Physics",
-      date: "August 5, 2025",
-      duration: "3 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "chemistry-quiz",
-      title: "Chemistry Quiz Competition",
-      subject: "Chemistry",
-      date: "September 12, 2025",
-      duration: "1 hour",
-      difficulty: "Medium" as const,
-      image: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "history-challenge",
-      title: "World History Challenge",
-      subject: "History",
-      date: "October 3, 2025",
-      duration: "2 hours",
-      difficulty: "Easy" as const,
-      image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-  ];
+  // Fetch recommended exams from the API
+  useEffect(() => {
+    const fetchRecommendedExams = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8081/api/recommended');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);
+        }
+        
+        const fetchedExams = await response.json();
+        console.log('Fetched recommended exams for Hero:', fetchedExams);
+        
+        // Take first 6 exams for animation
+        setExams(fetchedExams.slice(0, 6));
+      } catch (error) {
+        console.error('Error fetching recommended exams for Hero:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch exams');
+        
+        // Fallback to sample data if API fails
+        setExams([
+          {
+            id: "science-olympiad",
+            title: "National Science Olympiad",
+            subject: "Science",
+            date: "May 15, 2025",
+            time: "10:00",
+            description: "Comprehensive science examination",
+            image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            id: "math-olympiad",
+            title: "Mathematics Olympiad",
+            subject: "Mathematics",
+            date: "June 10, 2025",
+            time: "14:00",
+            description: "Advanced mathematics competition",
+            image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendedExams();
+  }, []);
+  // Helper function to map backend exam data to ExamCard format
+  const mapExamToCardFormat = (exam: Exam) => ({
+    id: exam.id,
+    title: exam.title,
+    subject: exam.subject,
+    date: exam.date,
+    duration: "2 hours", // Default duration since it's not in backend model
+    image: exam.image || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+  });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentExamIndex((prevIndex) => (prevIndex + 1) % 6);
-    }, 3000);
+    if (exams.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentExamIndex((prevIndex) => (prevIndex + 1) % Math.min(exams.length, 6));
+      }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [exams.length]);
   
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-20">
@@ -134,21 +141,41 @@ const Hero = () => {
                 Explore Exams <ArrowRight size={18} className="ml-2" />
               </Link>
             </div>
-          </div>
-
-          <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '520px' }}>
-            {exams.slice(0, 6).map((exam, index) => (
-              <div
-                key={exam.id}
-                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                  index === currentExamIndex
-                    ? 'transform translate-x-0 opacity-100' 
-                    : 'transform translate-x-full opacity-0'
-                }`}
-              >
-                <ExamCard exam={exam} />
+          </div>          <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '520px' }}>
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-education-blue"></div>
               </div>
-            ))}
+            ) : error ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <p className="text-red-600 mb-2">Failed to load exams</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="text-education-blue hover:text-blue-700 font-medium"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            ) : exams.length > 0 ? (
+              exams.slice(0, 6).map((exam, index) => (
+                <div
+                  key={exam.id}
+                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                    index === currentExamIndex
+                      ? 'transform translate-x-0 opacity-100' 
+                      : 'transform translate-x-full opacity-0'
+                  }`}
+                >
+                  <ExamCard exam={mapExamToCardFormat(exam)} />
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-600">No exams available</p>
+              </div>
+            )}
           </div>
         </div>
         

@@ -3,6 +3,7 @@ import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
 import TestimonialCard from "../components/home/TestimonialCard";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   ArrowRight, School,
   Users,
@@ -10,93 +11,28 @@ import {
 } from "lucide-react";
 import ExamCard from "../components/exams/ExamCard";
 
+interface Exam {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  subject: string;
+  description?: string;
+  image?: string;
+  status?: string | null;
+}
+
 const HomePage = () => {
-  // State for modal visibility
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // State for form data
-  const [formData, setFormData] = useState({
-    schoolName: "",
-    schoolAddress: "",
-    schoolEmail: "",
-    schoolRegistrationId: "",
-    schoolAdminName: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission
-  const handleSubmit = async () => {
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    // Prepare data for API (exclude confirmPassword)
-    const schoolData = {
-      schoolName: formData.schoolName,
-      schoolAddress: formData.schoolAddress,
-      schoolEmail: formData.schoolEmail,
-      schoolRegistrationId: formData.schoolRegistrationId,
-      schoolAdminName: formData.schoolAdminName,
-      password: formData.password,
-    };
-
-    try {
-      const response = await fetch("http://localhost:8081/api/schools/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(schoolData),
-      });
-
-      if (response.ok) {
-        alert("School registered successfully!");
-        // Reset form and close modal
-        setFormData({
-          schoolName: "",
-          schoolAddress: "",
-          schoolEmail: "",
-          schoolRegistrationId: "",
-          schoolAdminName: "",
-          password: "",
-          confirmPassword: "",
-        });
-        setIsModalOpen(false);
-      } else {
-        const error = await response.text();
-        alert(`Registration failed: ${error}`);
-      }
-    } catch (error) {
-      alert(`Error submitting form: ${error.message}`);
-    }
-  };
-
   // Sample data for featured exams
-  const featuredExams: Array<{
-    id: string;
-    title: string;
-    subject: string;
-    date: string;
-    duration: string;
-    difficulty: "Medium" | "Hard" | "Easy";
-    image: string;
-  }> = [
+  const featuredExams = [
     {
       id: "math-olympiad",
       title: "Mathematics Olympiad",
       subject: "Mathematics",
       date: "June 10, 2025",
       duration: "2 hours",
-      difficulty: "Medium",
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      difficulty: "Medium" as const,
+      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "science-challenge",
@@ -104,8 +40,8 @@ const HomePage = () => {
       subject: "Science",
       date: "July 15, 2025",
       duration: "2.5 hours",
-      difficulty: "Hard",
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      difficulty: "Hard" as const,
+      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "english-proficiency",
@@ -113,8 +49,8 @@ const HomePage = () => {
       subject: "English",
       date: "May 28, 2025",
       duration: "1.5 hours",
-      difficulty: "Easy",
-      image: "https://images.unsplash.com/photo-1456513080867-f24f76ced9b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      difficulty: "Easy" as const,
+      image: "https://images.unsplash.com/photo-1456513080867-f24f76ced9b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     },
   ];
 
@@ -142,7 +78,6 @@ const HomePage = () => {
       rating: 5,
     },
   ];
-
   return (
     <div>
       <Hero />
@@ -159,6 +94,7 @@ const HomePage = () => {
               View All <ArrowRight size={18} className="ml-1" />
             </Link>
           </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredExams.map((exam) => (
               <ExamCard key={exam.id} {...exam} />

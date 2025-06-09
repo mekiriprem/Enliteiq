@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.Service.CertificateTemplateService;
 import com.example.demo.dto.CertificateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -10,7 +11,10 @@ import org.springframework.http.*;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,6 +30,7 @@ import java.util.*;
 public class CertificateTemplateController {
 
     private final CertificateTemplateService service;
+    private final TemplateEngine templateEngine;
 
     @Value("${supabase.url}")
     private String supabaseUrl;
@@ -37,8 +42,12 @@ public class CertificateTemplateController {
     private String supabaseKey;
 
     @Autowired
-    public CertificateTemplateController(CertificateTemplateService service) {
+    public CertificateTemplateController(
+            CertificateTemplateService service,
+            TemplateEngine templateEngine
+    ) {
         this.service = service;
+        this.templateEngine = templateEngine;
     }
 
     public static class ApiResponse {
@@ -74,34 +83,56 @@ public class CertificateTemplateController {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse("error", "Invalid input: " + e.getMessage()));
         } catch (Exception e) {
-            e.printStackTrace(); // For backend debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("error", "Internal server error: " + e.getMessage()));
         }
     }
 
-    // Preview Template (used in Thymeleaf view rendering, not API response)
-    @GetMapping(value = "/preview/{templateName}", produces = MediaType.TEXT_HTML_VALUE)
-    public String previewTemplate(@PathVariable String templateName, Model model) throws IOException {
-        // Replace placeholders in the file manually if needed
-        ClassPathResource resource = new ClassPathResource("templates/" + templateName + ".html");
+    // ✅ Preview Certificate Template as PDF
+    @GetMapping(value = "/preview/{templateName}", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> previewTemplateAsPdf(@PathVariable String templateName) throws IOException {
+        try {
+            List<String> allowedTemplates = List.of("template1", "template2", "template3");
+            if (!allowedTemplates.contains(templateName)) {
+                String errorHtml = "<h2>Invalid template: " + templateName + "</h2>";
+                return ResponseEntity.status(400)
+                        .contentType(MediaType.TEXT_HTML)
+                        .body(errorHtml.getBytes(StandardCharsets.UTF_8));
+            }
 
-        if (!resource.exists()) {
-            return "<h2>Template not found: " + templateName + "</h2>";
+            // Sample data for preview
+            Context context = new Context();
+            context.setVariable("name", "John Doe");
+            context.setVariable("email", "john@example.com");
+            context.setVariable("phone", "1234567890");
+            context.setVariable("percentage", "95%");
+            context.setVariable("subject", "Mathematics");
+            context.setVariable("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+
+            // Process HTML with Thymeleaf
+            String html = templateEngine.process(templateName, context);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, null);
+            builder.toStream(outputStream);
+            builder.useFastMode();
+            builder.run();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=certificate-preview.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(outputStream.toByteArray());
+
+        } catch (Exception e) {
+            String errorHtml = "<h2>Failed to render PDF: " + e.getMessage() + "</h2>";
+            return ResponseEntity.status(500)
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(errorHtml.getBytes(StandardCharsets.UTF_8));
         }
-
-        String html = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-
-        // Optional: Replace placeholders like {{name}}, {{email}}, etc.
-        html = html.replace("{{name}}", "John Doe")
-                   .replace("{{email}}", "john@example.com")
-                   .replace("{{phone}}", "1234567890")
-                   .replace("{{percentage}}", "95%")
-                   .replace("{{subject}}", "Mathematics")
-                   .replace("{{date}}", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-
-        return html;
     }
+
     // ✅ Get certificates by student name
     @GetMapping("/certificates/student/{studentName}")
     public ResponseEntity<List<String>> getCertificatesByStudent(@PathVariable String studentName) throws IOException, InterruptedException {

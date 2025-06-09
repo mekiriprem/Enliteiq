@@ -7,25 +7,10 @@ interface ExamCardProps {
   subject: string;
   date: string;
   duration: string;
-  difficulty: "Easy" | "Medium" | "Hard";
   image: string;
 }
 
-const ExamCard = ({ id, title, subject, date, duration, difficulty, image }: ExamCardProps) => {
-  // Function to get the badge color based on difficulty
-  const getDifficultyColor = () => {
-    switch (difficulty) {
-      case "Easy":
-        return "bg-green-100 text-green-800";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "Hard":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-blue-100 text-blue-800";
-    }
-  };
-
+const ExamCard = ({ id, title, subject, date, duration, image }: ExamCardProps) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 card-hover">
       <div className="relative overflow-hidden">
@@ -34,11 +19,6 @@ const ExamCard = ({ id, title, subject, date, duration, difficulty, image }: Exa
           alt={title} 
           className="w-full h-48 object-cover transition-transform duration-500 ease-in-out hover:scale-110"
         />
-        <div className="absolute top-3 right-3 z-10">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDifficultyColor()}`}>
-            {difficulty}
-          </span>
-        </div>
       </div>
       
       <div className="p-5">
