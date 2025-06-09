@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 const ExamsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,16 +31,14 @@ const ExamsPage = () => {
 
     fetchExams();
   }, []); // Empty dependency array means this runs once on mount
-
-  // Filter the exams based on search term, subject, and difficulty
+  // Filter the exams based on search term and subject
   const filteredExams = exams.filter(exam => {
     const matchesSearch = 
       (exam.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (exam.subject?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesSubject = selectedSubject ? exam.subject === selectedSubject : true;
-    const matchesDifficulty = selectedDifficulty ? (exam.difficulty || "") === selectedDifficulty : true;
     
-    return matchesSearch && matchesSubject && matchesDifficulty;
+    return matchesSearch && matchesSubject;
   });
 
   // Get unique subjects
@@ -56,10 +53,9 @@ const ExamsPage = () => {
             Browse our collection of exams and mock tests to help you prepare for your upcoming academic challenges.
           </p>
         </div>
-        
-        {/* Search and Filter Section */}
+          {/* Search and Filter Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search bar */}
             <div className="relative mt-[21px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -89,24 +85,6 @@ const ExamsPage = () => {
                 {subjects.map((subject) => (
                   <option key={subject} value={subject}>{subject}</option>
                 ))}
-              </select>
-            </div>
-            
-            {/* Difficulty filter */}
-            <div>
-              <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty
-              </label>
-              <select
-                id="difficulty"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-              >
-                <option value="">All Levels</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
               </select>
             </div>
           </div>
@@ -187,12 +165,8 @@ const ExamsPage = () => {
                     </p>
                     <p className="text-gray-600 mb-2">
                       <strong>Date:</strong> {exam.date || "TBD"}
-                    </p>
-                    <p className="text-gray-600 mb-2">
+                    </p>                    <p className="text-gray-600 mb-2">
                       <strong>Duration:</strong> {exam.duration || "Not specified"}
-                    </p>
-                    <p className="text645-600">
-                      <strong>Difficulty:</strong> {exam.difficulty || "Unknown"}
                     </p>
                   </div>
                 </Link>

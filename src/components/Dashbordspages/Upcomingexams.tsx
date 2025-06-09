@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon, Search } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import domtoimage from 'dom-to-image';
 
 interface Exam {
   id: string;
@@ -48,11 +46,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddExam, setShowAddExam] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingExamId, setEditingExamId] = useState<string | null>(null);
-  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [editingExamId, setEditingExamId] = useState<string | null>(null);  const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('template1');
-  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [studentData, setStudentData] = useState<StudentData[]>([]);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,9 +58,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());  const [templateImages, setTemplateImages] = useState<Map<string, string>>(new Map());
-  const [loadingTemplates, setLoadingTemplates] = useState<Set<string>>(new Set());
-  const [previewImage, setPreviewImage] = useState<string>('');  const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
+  const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [selectedExamResults, setSelectedExamResults] = useState<ExamResult[]>([]);
@@ -73,7 +67,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-
   const [newExam, setNewExam] = useState<Partial<Exam>>({
     title: '',
     date: '',
@@ -83,79 +76,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     image: '',
     status: null
   });
-
-  const convertHtmlToPng = async (templateName: string, previewUrl: string): Promise<string> => {
-    try {
-      setLoadingTemplates(prev => new Set(prev).add(templateName));
-      
-      const response = await fetch(previewUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch template HTML: ${response.status}`);
-      }
-      
-      const htmlContent = await response.text();
-      
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlContent;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.width = '800px';
-      tempDiv.style.height = '600px';
-      tempDiv.style.padding = '20px';
-      tempDiv.style.backgroundColor = 'white';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      
-      document.body.appendChild(tempDiv);
-      
-      try {
-        const canvas = await html2canvas(tempDiv, {
-          width: 800,
-          height: 600,
-          scale: 1,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true,
-          allowTaint: true
-        });
-        
-        const pngDataUrl = canvas.toDataURL('image/png', 0.9);
-        
-        setTemplateImages(prev => new Map(prev).set(templateName, pngDataUrl));
-        
-        return pngDataUrl;
-      } catch (canvasError) {
-        console.warn('html2canvas failed, trying dom-to-image:', canvasError);
-        
-        const pngDataUrl = await domtoimage.toPng(tempDiv, {
-          width: 800,
-          height: 600,
-          style: {
-            backgroundColor: '#ffffff'
-          }
-        });
-        
-        setTemplateImages(prev => new Map(prev).set(templateName, pngDataUrl));
-        return pngDataUrl;
-      } finally {
-        document.body.removeChild(tempDiv);
-        setLoadingTemplates(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(templateName);
-          return newSet;
-        });
-      }
-    } catch (error) {
-      console.error(`Failed to convert template ${templateName} to PNG:`, error);
-      setFailedImages(prev => new Set(prev).add(previewUrl));
-      setLoadingTemplates(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(templateName);
-        return newSet;
-      });
-      throw error;
-    }
-  };
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -172,32 +92,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       } finally {
         setIsLoading(false);
       }
-    };
-    fetchExams();
-  }, []);  useEffect(() => {
-    setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
-    
-    const loadTemplateImages = async () => {
-      try {
-        const firstTemplate = CERTIFICATE_TEMPLATES[0];
-        const pngDataUrl = await convertHtmlToPng(firstTemplate.name, firstTemplate.previewUrl);
-        setPreviewImage(pngDataUrl);
-        
-        for (let i = 1; i < CERTIFICATE_TEMPLATES.length; i++) {
-          const template = CERTIFICATE_TEMPLATES[i];
-          try {
-            await convertHtmlToPng(template.name, template.previewUrl);
-          } catch (error) {
-            console.error(`Failed to load template image for ${template.name}:`, error);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load initial template image:', error);
-      }
-    };
-    
-    loadTemplateImages();
+    };    fetchExams();
   }, []);
+
   // Handle escape key for certificate modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -487,8 +384,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     } else {
       alert('Please fill in all required fields (Title, Subject, Date, Time).');
     }
-  };
-  const handleGenerateCertificate = (examId: string) => {
+  };  const handleGenerateCertificate = (examId: string) => {
     const exam = exams.find(e => e.id === examId);
     if (exam) {
       setSelectedExam(exam);
@@ -497,9 +393,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setCsvFile(null);
       setShowPreview(false);
       setSelectedTemplate('template1');
-      setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
-      setFailedImages(new Set());
-    }  };
+    }
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -673,80 +568,45 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 </div>
                 <div className="p-6">
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {CERTIFICATE_TEMPLATES.map((template) => (
                         <div
                           key={template.name}
                           onClick={() => {
                             setSelectedTemplate(template.name);
-                            setPreviewUrl(template.previewUrl);
-                            const templateImage = templateImages.get(template.name);
-                            if (templateImage) {
-                              setPreviewImage(templateImage);
-                            } else {
-                              convertHtmlToPng(template.name, template.previewUrl)
-                                .then(pngDataUrl => {
-                                  setPreviewImage(pngDataUrl);
-                                })
-                                .catch(error => {
-                                  console.error('Failed to load template image:', error);
-                                });
-                            }
                           }}
                           className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                             selectedTemplate === template.name
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-blue-300'
                           }`}
-                        >
-                          <div className="h-32 bg-gray-100 rounded mb-3 overflow-hidden">
-                            {loadingTemplates.has(template.name) ? (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                              </div>
-                            ) : failedImages.has(template.previewUrl) ? (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <svg className="h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12 2L15.09 8.26L22 9L15.09 15.74L12 22L8.91 15.74L2 9L8.91 8.26L12 2Z" fill="#999" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
-                            ) : templateImages.has(template.name) ? (
-                              <img
-                                src={templateImages.get(template.name)!}
-                                alt={template.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <svg className="h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12 2L15.09 8.26L22 9L15.09 15.74L12 22L8.91 15.74L2 9L8.91 8.26L12 2Z" fill="#999" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
-                            )}
+                        >                          <div className="h-32 bg-gray-100 rounded mb-3 overflow-hidden flex items-center justify-center">
+                            <div className="text-center">
+                              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-500">PDF Template</p>
+                            </div>
                           </div>
                           <h4 className="font-medium">{template.title}</h4>
                           <p className="text-sm text-gray-600">{template.title} Template</p>
-                          {selectedTemplate === template.name && (
-                            <div className="mt-2 flex items-center text-blue-600">
-                              <Check size={16} className="mr-1" />
-                              <span className="text-sm">Selected</span>
-                            </div>
-                          )}
+                          <div className="mt-2 flex items-center justify-between">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(template.previewUrl, '_blank');
+                              }}
+                              className="text-sm text-blue-600 hover:text-blue-800 underline"
+                            >
+                              Preview
+                            </button>
+                            {selectedTemplate === template.name && (
+                              <div className="flex items-center text-blue-600">
+                                <Check size={16} className="mr-1" />
+                                <span className="text-sm">Selected</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                    {previewImage && (
-                      <div className="mt-6 border rounded shadow p-4 h-96">
-                        <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded">
-                          <img
-                            src={previewImage}
-                            alt="Template Preview"
-                            className="max-w-full max-h-full object-contain rounded"
-                          />
-                        </div>
-                      </div>
-                    )}
+                      ))}                    </div>
                   </div>
                   <div className="mb-8">
                     <h3 className="text-lg font-medium mb-4">Step 2: Upload Student Data (CSV)</h3>

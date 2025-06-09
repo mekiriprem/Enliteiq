@@ -52,7 +52,8 @@ const MockTestsPage = () => {
           throw new Error('Failed to fetch mock tests');
         }
         const data = await response.json();
-          // Transform API data to match MockTest interface
+        
+        // Transform API data to match MockTest interface
         const transformedTests: MockTest[] = data.map((exam: any) => ({
           id: exam.id,
           title: exam.title,
@@ -74,7 +75,8 @@ const MockTestsPage = () => {
       } catch (error) {
         console.error('Error fetching mock tests:', error);
         setError('Failed to load mock tests. Please try again later.');
-          // Fallback to static data if API fails
+        
+        // Fallback to static data if API fails
         setMockTests([
           {
             id: "math-olympiad-1",
@@ -131,6 +133,7 @@ const MockTestsPage = () => {
       [testId]: !prev[testId]
     }));
   };
+
   // Get unique subjects from the loaded tests
   const subjects = ["All", ...Array.from(new Set(mockTests.map(test => test.subject)))];
 
@@ -244,9 +247,9 @@ const MockTestsPage = () => {
       <div className="education-container py-12">
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search */}
-            <div className="md:col-span-2 relative">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
@@ -269,19 +272,6 @@ const MockTestsPage = () => {
                 ))}
               </select>
             </div>
-
-            {/* Difficulty Filter */}
-            <div>
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {difficulties.map(difficulty => (
-                  <option key={difficulty} value={difficulty}>{difficulty}</option>
-                ))}
-              </select>
-            </div>
           </div>
         </div>
 
@@ -291,7 +281,6 @@ const MockTestsPage = () => {
             Showing <span className="font-semibold">{filteredTests.length}</span> mock tests
             {searchTerm && ` for "${searchTerm}"`}
             {selectedSubject !== "All" && ` in ${selectedSubject}`}
-            {selectedDifficulty !== "All" && ` (${selectedDifficulty} difficulty)`}
           </p>
         </div>
 
@@ -330,13 +319,6 @@ const MockTestsPage = () => {
                       Free
                     </Badge>
                   )}
-                </div>
-
-                {/* Difficulty Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <Badge className={getDifficultyColor(test.difficulty)}>
-                    {test.difficulty}
-                  </Badge>
                 </div>
               </div>
 
@@ -407,7 +389,6 @@ const MockTestsPage = () => {
               onClick={() => {
                 setSearchTerm("");
                 setSelectedSubject("All");
-                setSelectedDifficulty("All");
               }}
               variant="outline"
             >

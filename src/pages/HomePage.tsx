@@ -3,6 +3,7 @@ import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
 import TestimonialCard from "../components/home/TestimonialCard";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   ArrowRight, School,
   Users,
@@ -11,37 +12,57 @@ import {
 } from "lucide-react";
 import ExamCard from "../components/exams/ExamCard";
 
+interface Exam {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  subject: string;
+  description?: string;
+  image?: string;
+  status?: string | null;
+}
+
 const HomePage = () => {
-  // Sample data for featured exams
-  const featuredExams = [
-    {
-      id: "math-olympiad",
-      title: "Mathematics Olympiad",
-      subject: "Mathematics",
-      date: "June 10, 2025",
-      duration: "2 hours",
-      difficulty: "Medium" as const,
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "science-challenge",
-      title: "National Science Challenge",
-      subject: "Science",
-      date: "July 15, 2025",
-      duration: "2.5 hours",
-      difficulty: "Hard" as const,
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "english-proficiency",
-      title: "English Proficiency Test",
-      subject: "English",
-      date: "May 28, 2025",
-      duration: "1.5 hours",
-      difficulty: "Easy" as const,
-      image: "https://images.unsplash.com/photo-1456513080867-f24f76ced9b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-  ];
+  const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch recommended exams from the API
+  useEffect(() => {
+    const fetchRecommendedExams = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8081/api/recommended');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);
+        }
+        
+        const exams = await response.json();
+        console.log('Fetched recommended exams:', exams);
+        
+        // Take first 3 exams for featured section
+        setFeaturedExams(exams.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching recommended exams:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch exams');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendedExams();
+  }, []);
+  // Helper function to map backend exam data to ExamCard format
+  const mapExamToCardFormat = (exam: Exam) => ({
+    id: exam.id,
+    title: exam.title,
+    subject: exam.subject,
+    date: exam.date,
+    duration: "2 hours", // Default duration since it's not in backend model
+    image: exam.image || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+  });
 
   // Sample data for testimonials
   const testimonials = [
@@ -67,7 +88,6 @@ const HomePage = () => {
       rating: 5
     }
   ];
-
   return (
     <div>
       <Hero />
@@ -85,11 +105,35 @@ const HomePage = () => {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredExams.map((exam) => (
-              <ExamCard key={exam.id} {...exam} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-education-blue mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading featured exams...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-education-blue hover:text-blue-700 font-medium"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : featuredExams.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredExams.map((exam) => (
+                <ExamCard key={exam.id} {...mapExamToCardFormat(exam)} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No featured exams available at the moment.</p>
+              <Link to="/exams" className="text-education-blue hover:text-blue-700 font-medium">
+                View All Exams
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
