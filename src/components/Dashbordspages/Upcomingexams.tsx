@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image';
 
 interface Exam {
   id: string;
@@ -27,6 +29,12 @@ interface Template {
   previewUrl: string;
 }
 
+const CERTIFICATE_TEMPLATES: Template[] = [
+  { name: 'template1', title: 'Classic', previewUrl: 'http://localhost:8081/api/templates/preview/template1' },
+  { name: 'template2', title: 'Gold', previewUrl: 'http://localhost:8081/api/templates/preview/template2' },
+  { name: 'template3', title: 'Blue', previewUrl: 'http://localhost:8081/api/templates/preview/template3' }
+];
+
 const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,9 +52,11 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [imageUploadType, setImageUploadType] = useState<'url' | 'file'>('url');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);  const [isDragOver, setIsDragOver] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [templateImages, setTemplateImages] = useState<Map<string, string>>(new Map());
+  const [loadingTemplates, setLoadingTemplates] = useState<Set<string>>(new Set());
+  const [previewImage, setPreviewImage] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -57,14 +67,89 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     time: '',
     subject: '',
     description: '',
-    image: ''
-  });
+    image: ''  });
 
-  const certificateTemplates: Template[] = [
-    { name: 'template1', title: 'Classic', previewUrl: 'http://localhost:8081/api/templates/preview/template1' },
-    { name: 'template2', title: 'Gold', previewUrl: 'http://localhost:8081/api/templates/preview/template2' },
-    { name: 'template3', title: 'Blue', previewUrl: 'http://localhost:8081/api/templates/preview/template3' }
-  ];
+  // Function to convert HTML to PNG image
+  const convertHtmlToPng = async (templateName: string, previewUrl: string): Promise<string> => {
+    try {
+      setLoadingTemplates(prev => new Set(prev).add(templateName));
+      
+      // Fetch HTML content from the preview URL
+      const response = await fetch(previewUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch template HTML: ${response.status}`);
+      }
+      
+      const htmlContent = await response.text();
+      
+      // Create a temporary div to render the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '800px';
+      tempDiv.style.height = '600px';
+      tempDiv.style.padding = '20px';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      
+      // Add to DOM temporarily
+      document.body.appendChild(tempDiv);
+      
+      try {
+        // Convert to image using html2canvas
+        const canvas = await html2canvas(tempDiv, {
+          width: 800,
+          height: 600,
+          scale: 1,
+          backgroundColor: '#ffffff',
+          logging: false,
+          useCORS: true,
+          allowTaint: true
+        });
+        
+        // Convert canvas to PNG data URL
+        const pngDataUrl = canvas.toDataURL('image/png', 0.9);
+        
+        // Store in state
+        setTemplateImages(prev => new Map(prev).set(templateName, pngDataUrl));
+        
+        return pngDataUrl;
+      } catch (canvasError) {
+        console.warn('html2canvas failed, trying dom-to-image:', canvasError);
+        
+        // Fallback to dom-to-image
+        const pngDataUrl = await domtoimage.toPng(tempDiv, {
+          width: 800,
+          height: 600,
+          style: {
+            backgroundColor: '#ffffff'
+          }
+        });
+        
+        setTemplateImages(prev => new Map(prev).set(templateName, pngDataUrl));
+        return pngDataUrl;
+      } finally {
+        // Clean up
+        document.body.removeChild(tempDiv);
+        setLoadingTemplates(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(templateName);
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to convert template ${templateName} to PNG:`, error);
+      setFailedImages(prev => new Set(prev).add(previewUrl));
+      setLoadingTemplates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(templateName);
+        return newSet;
+      });
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -83,10 +168,31 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       }
     };
     fetchExams();
-  }, []);
-
-  useEffect(() => {
-    setPreviewUrl(certificateTemplates[0].previewUrl);
+  }, []);  useEffect(() => {
+    setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
+    
+    // Load template images on component mount
+    const loadTemplateImages = async () => {
+      try {
+        const firstTemplate = CERTIFICATE_TEMPLATES[0];
+        const pngDataUrl = await convertHtmlToPng(firstTemplate.name, firstTemplate.previewUrl);
+        setPreviewImage(pngDataUrl);
+        
+        // Load remaining templates in background
+        for (let i = 1; i < CERTIFICATE_TEMPLATES.length; i++) {
+          const template = CERTIFICATE_TEMPLATES[i];
+          try {
+            await convertHtmlToPng(template.name, template.previewUrl);
+          } catch (error) {
+            console.error(`Failed to load template image for ${template.name}:`, error);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load initial template image:', error);
+      }
+    };
+    
+    loadTemplateImages();
   }, []);
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -276,11 +382,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     if (exam) {
       setSelectedExam(exam);
       setShowCertificateModal(true);
-      setStudentData([]);
-      setCsvFile(null);
+      setStudentData([]);      setCsvFile(null);
       setShowPreview(false);
       setSelectedTemplate('template1');
-      setPreviewUrl(certificateTemplates[0].previewUrl);
+      setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
       setFailedImages(new Set());
     }
   };
@@ -447,35 +552,55 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 </div>
                 <div className="p-6">
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {certificateTemplates.map((template) => (
+                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {CERTIFICATE_TEMPLATES.map((template) => (
                         <div
-                          key={template.name}
-                          onClick={() => {
+                          key={template.name}                          onClick={() => {
                             setSelectedTemplate(template.name);
                             setPreviewUrl(template.previewUrl);
+                            // Set the preview image if available
+                            const templateImage = templateImages.get(template.name);
+                            if (templateImage) {
+                              setPreviewImage(templateImage);
+                            } else {
+                              // If not loaded yet, try to load it
+                              convertHtmlToPng(template.name, template.previewUrl)
+                                .then(pngDataUrl => {
+                                  setPreviewImage(pngDataUrl);
+                                })
+                                .catch(error => {
+                                  console.error('Failed to load template image:', error);
+                                });
+                            }
                           }}
                           className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                             selectedTemplate === template.name
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-blue-300'
                           }`}
-                        >
-                          <div className="h-32 bg-gray-100 rounded mb-3 overflow-hidden">
-                            {failedImages.has(template.previewUrl) ? (
+                        >                          <div className="h-32 bg-gray-100 rounded mb-3 overflow-hidden">
+                            {loadingTemplates.has(template.name) ? (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                              </div>
+                            ) : failedImages.has(template.previewUrl) ? (
                               <div className="w-full h-full flex items-center justify-center bg-gray-100">
                                 <svg className="h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 2L15.09 8.26L22 9L15.09 15.74L12 22L8.91 15.74L2 9L8.91 8.26L12 2Z" fill="#999" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                               </div>
-                            ) : (
+                            ) : templateImages.has(template.name) ? (
                               <img
-                                src={template.previewUrl}
+                                src={templateImages.get(template.name)!}
                                 alt={template.title}
                                 className="w-full h-full object-cover"
-                                onError={() => setFailedImages(prev => new Set(prev).add(template.previewUrl))}
                               />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                <svg className="h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 2L15.09 8.26L22 9L15.09 15.74L12 22L8.91 15.74L2 9L8.91 8.26L12 2Z" fill="#999" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
                             )}
                           </div>
                           <h4 className="font-medium">{template.title}</h4>
@@ -488,17 +613,15 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                           )}
                         </div>
                       ))}
-                    </div>
-                    {previewUrl && (
+                    </div>                    {previewImage && (
                       <div className="mt-6 border rounded shadow p-4 h-96">
-                        <iframe
-                          src={previewUrl}
-                          title="Template Preview"
-                          className="w-full h-full rounded"
-                          frameBorder="0"
-                          sandbox="allow-scripts allow-same-origin"
-                          onError={() => alert('Failed to load template preview. Please check the preview URL.')}
-                        />
+                        <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded">
+                          <img
+                            src={previewImage}
+                            alt="Template Preview"
+                            className="max-w-full max-h-full object-contain rounded"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
