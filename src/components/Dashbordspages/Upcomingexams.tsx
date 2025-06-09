@@ -14,6 +14,13 @@ interface Exam {
   status?: string | null;
 }
 
+interface ExamResult {
+  studentName: string;
+  certificateUrl: string;
+  percentage: number;
+  examTitle: string;
+}
+
 interface UpcomingExamsProps {
   userType: 'student' | 'school' | 'admin' | 'sales';
 }
@@ -57,9 +64,12 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());  const [templateImages, setTemplateImages] = useState<Map<string, string>>(new Map());
   const [loadingTemplates, setLoadingTemplates] = useState<Set<string>>(new Set());
-  const [previewImage, setPreviewImage] = useState<string>('');
-  const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
+  const [previewImage, setPreviewImage] = useState<string>('');  const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [selectedExamResults, setSelectedExamResults] = useState<ExamResult[]>([]);
+  const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
+  const [loadingResults, setLoadingResults] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -188,23 +198,66 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     
     loadTemplateImages();
   }, []);
-
   // Handle escape key for certificate modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showCertificateModal) {
-        setShowCertificateModal(false);
+      if (event.key === 'Escape') {
+        if (showCertificateModal) {
+          setShowCertificateModal(false);
+        }
+        if (showResultsModal) {
+          setShowResultsModal(false);
+        }
       }
     };
 
-    if (showCertificateModal) {
+    if (showCertificateModal || showResultsModal) {
       document.addEventListener('keydown', handleEscapeKey);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [showCertificateModal]);
+    };  }, [showCertificateModal, showResultsModal]);
+
+  // Handle viewing exam results
+  const handleViewResults = async (examId: string) => {
+    try {
+      setLoadingResults(true);
+      setSelectedExamResults([]);
+      setSelectedExamForResults(null);
+      setShowResultsModal(true);
+
+      // Find the exam details
+      const exam = exams.find(e => e.id === examId);
+      if (exam) {
+        setSelectedExamForResults(exam);
+      }
+
+      // Fetch exam results from API
+      const response = await fetch(`http://localhost:8081/api/exam/${examId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch exam results: ${response.status} ${response.statusText}`);
+      }
+
+      const results = await response.json();
+      console.log('Fetched exam results:', results);
+      setSelectedExamResults(results);
+
+    } catch (error) {
+      console.error('Error fetching exam results:', error);
+      alert(`Failed to fetch exam results: ${error.message || error}`);
+      setShowResultsModal(false);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+
   const handleUpdateExamStatus = async (id: string, recommend: boolean) => {
     try {
       setIsProcessing(true);
@@ -435,7 +488,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       alert('Please fill in all required fields (Title, Subject, Date, Time).');
     }
   };
-
   const handleGenerateCertificate = (examId: string) => {
     const exam = exams.find(e => e.id === examId);
     if (exam) {
@@ -447,8 +499,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setSelectedTemplate('template1');
       setPreviewUrl(CERTIFICATE_TEMPLATES[0].previewUrl);
       setFailedImages(new Set());
-    }
-  };
+    }  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -1142,17 +1193,25 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                       </div>
                     </div>
                   )}
-                  
-                  {/* Action buttons */}
+                    {/* Action buttons */}
                   <div className="flex flex-wrap gap-2 mt-auto">
                     {userType === 'student' && (
-                      <button 
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-1 justify-center"
-                        onClick={() => { /* Add download materials functionality */ }}
-                      >
-                        <Download size={16} />
-                        Materials
-                      </button>
+                      <>
+                        <button 
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-1 justify-center"
+                          onClick={() => { /* Add download materials functionality */ }}
+                        >
+                          <Download size={16} />
+                          Materials
+                        </button>
+                        <button
+                          onClick={() => handleViewResults(exam.id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
+                        >
+                          <Info size={16} />
+                          Results
+                        </button>
+                      </>
                     )}
                     {(userType === 'admin' || userType === 'school') && (
                       <>
@@ -1162,6 +1221,13 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                         >
                           <FileText size={16} />
                           Certificates
+                        </button>
+                        <button
+                          onClick={() => handleViewResults(exam.id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
+                        >
+                          <Info size={16} />
+                          Results
                         </button>
                         <button
                           onClick={() => handleEditExam(exam)}
@@ -1205,11 +1271,154 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
               >
                 <Plus size={16} />
                 Add Your First Exam
-              </button>
-            )}
+              </button>            )}
           </div>
         )}
       </div>
+
+      {/* Results Modal */}
+      {showResultsModal && (
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-bold">Exam Results</h2>
+                    {selectedExamForResults && (
+                      <p className="text-purple-100 mt-1">
+                        {selectedExamForResults.title} - {selectedExamForResults.subject}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowResultsModal(false)}
+                    className="text-white hover:text-gray-300 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                {loadingResults ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    <span className="ml-3 text-gray-600">Loading results...</span>
+                  </div>
+                ) : selectedExamResults.length > 0 ? (
+                  <div>
+                    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                      <h3 className="font-semibold text-blue-800 mb-2">
+                        Results Summary
+                      </h3>
+                      <p className="text-blue-700">
+                        Total Students: <span className="font-bold">{selectedExamResults.length}</span>
+                      </p>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">
+                              Student Name
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">
+                              Percentage
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">
+                              Grade
+                            </th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">
+                              Certificate
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedExamResults.map((result, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="border border-gray-300 px-4 py-3">
+                                <div className="font-medium text-gray-900">
+                                  {result.studentName || 'Unknown Student'}
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-4 py-3">
+                                <div className="flex items-center">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    result.percentage >= 80 
+                                      ? 'bg-green-100 text-green-800'
+                                      : result.percentage >= 60 
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {result.percentage !== null ? `${result.percentage}%` : 'N/A'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-4 py-3">
+                                <span className={`font-medium ${
+                                  result.percentage >= 80 
+                                    ? 'text-green-600'
+                                    : result.percentage >= 60 
+                                    ? 'text-yellow-600'
+                                    : 'text-red-600'
+                                }`}>
+                                  {result.percentage >= 80 ? 'A' 
+                                   : result.percentage >= 60 ? 'B'
+                                   : result.percentage >= 40 ? 'C'
+                                   : 'F'}
+                                </span>
+                              </td>
+                              <td className="border border-gray-300 px-4 py-3">
+                                {result.certificateUrl ? (
+                                  <a
+                                    href={result.certificateUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                                  >
+                                    <FileText size={14} />
+                                    View Certificate
+                                  </a>
+                                ) : (
+                                  <span className="text-gray-400 text-sm">Not Available</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Info className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Results Found</h3>
+                    <p className="text-gray-500">
+                      No results are available for this exam yet.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-50 px-6 py-4 border-t">
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowResultsModal(false)}
+                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
