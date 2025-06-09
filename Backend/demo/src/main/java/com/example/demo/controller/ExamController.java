@@ -135,27 +135,26 @@ public class ExamController {
     }
     
     @PostMapping("/recommend")
-    public ResponseEntity<String> recommendExam(@RequestParam UUID examId) {
-        // Step 1: Reset all "recommended" statuses
-        List<Exam> recommendedExams = ExamRepository.findByStatus("recommended");
-        for (Exam exam : recommendedExams) {
-            exam.setStatus(null);
-        }
-
-        // Step 2: Set the target exam as recommended
+    public ResponseEntity<String> toggleRecommendation(@RequestParam UUID examId) {
         Optional<Exam> targetExamOpt = ExamRepository.findById(examId);
-        if (targetExamOpt.isPresent()) {
-            Exam targetExam = targetExamOpt.get();
-            targetExam.setStatus("recommended");
-
-            // Save all changes at once
-            recommendedExams.add(targetExam);
-            ExamRepository.saveAll(recommendedExams);
-
-            return ResponseEntity.ok("Exam recommended successfully.");
-        } else {
+        
+        if (targetExamOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Exam not found for ID: " + examId);
         }
+
+        Exam exam = targetExamOpt.get();
+
+        // Toggle logic
+        if ("recommended".equalsIgnoreCase(exam.getStatus())) {
+            exam.setStatus(null);
+        } else {
+            exam.setStatus("recommended");
+        }
+
+        ExamRepository.save(exam);
+
+        return ResponseEntity.ok("Exam status updated to: " + exam.getStatus());
     }
+
     
 }

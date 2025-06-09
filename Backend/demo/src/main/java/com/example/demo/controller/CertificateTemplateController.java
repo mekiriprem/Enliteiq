@@ -196,4 +196,39 @@ public class CertificateTemplateController {
 
         return ResponseEntity.ok(urls);
     }
+    
+//    @GetMapping(value = "/preview/{templateName}", produces = MediaType.APPLICATION_PDF_VALUE)
+//    public ResponseEntity<byte[]> previewTemplateAsPdf(@PathVariable String templateName) throws IOException {
+//        ClassPathResource resource = new ClassPathResource("templates/" + templateName + ".html");
+//
+//        if (!resource.exists()) {
+//            String errorHtml = "<h2>Template not found: " + templateName + "</h2>";
+//            return ResponseEntity.status(404)
+//                    .contentType(MediaType.TEXT_HTML)
+//                    .body(errorHtml.getBytes(StandardCharsets.UTF_8));
+//        }
+//
+//        String html = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+//
+//        html = html.replace("{{name}}", "John Doe")
+//                   .replace("{{email}}", "john@example.com")
+//                   .replace("{{phone}}", "1234567890")
+//                   .replace("{{percentage}}", "95%")
+//                   .replace("{{subject}}", "Mathematics")
+//                   .replace("{{date}}", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+//
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        PdfRendererBuilder builder = new PdfRendererBuilder();
+//        builder.withHtmlContent(html, null);
+//        builder.toStream(outputStream);
+//        builder.run();
+//
+//        byte[] pdfBytes = outputStream.toByteArray();
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=certificate.pdf")
+//                .contentType(MediaType.APPLICATION_PDF)
+//                .body(pdfBytes);
+//    }
+
 }
