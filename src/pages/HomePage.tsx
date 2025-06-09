@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
 import TestimonialCard from "../components/home/TestimonialCard";
@@ -23,6 +23,36 @@ interface Exam {
 }
 
 const HomePage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // State for school registration form
+  const [formData, setFormData] = useState({
+    schoolName: "",
+    schoolAddress: "",
+    schoolEmail: "",
+    schoolRegistrationId: "",
+    schoolAdminName: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  // Handler for input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handler for form submission (dummy for now)
+  const handleSubmit = (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (e) e.preventDefault();
+    // Add your form submission logic here
+    setIsModalOpen(false);
+    // Optionally reset formData here
+  };
+
   // Sample data for featured exams
   const featuredExams = [
     {
