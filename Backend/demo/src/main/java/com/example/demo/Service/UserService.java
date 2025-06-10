@@ -56,10 +56,10 @@ public class UserService {
         String email = user.getEmail();
 
         boolean emailExists =
-                userRepository.findByEmail(email) ||
-                schoolRepository.findByschoolEmail(email) ||
-                salesManRepository.findByEmail(email) ||
-                adminRepository.findByEmail(email);
+                userRepository.existsByEmail(email) ||
+                schoolRepository.existsBySchoolEmail(email) ||
+                salesManRepository.existsByEmail(email) ||
+//                adminRepository.existsByEmail(email);
 
         if (emailExists) {
             throw new IllegalArgumentException("Email already registered in the system");
