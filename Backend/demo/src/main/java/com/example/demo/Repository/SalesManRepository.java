@@ -6,6 +6,7 @@ import com.example.demo.model.SalesMan;
 
 public interface SalesManRepository extends JpaRepository<SalesMan, Integer>{
     boolean existsByEmail(String email);
+    SalesMan findByEmail(String email);
     
 
 }

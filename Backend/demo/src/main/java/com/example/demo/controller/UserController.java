@@ -40,16 +40,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        try {
-            User user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
-    }
+//
+//    @PostMapping("/login")
+//    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+//        try {
+//            User user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+//            return ResponseEntity.ok(user);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+//        }
+//    }
     
   
 

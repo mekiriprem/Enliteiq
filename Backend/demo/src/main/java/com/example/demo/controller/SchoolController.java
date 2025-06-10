@@ -33,7 +33,7 @@ public class SchoolController {
     }
     @PutMapping("/{schoolRegistrationId}")
     public ResponseEntity<?> updateSchool(
-            @PathVariable String schoolRegistrationId,
+            @PathVariable Long schoolRegistrationId,
             @RequestBody School school) {
         try {
             School updatedSchool = schoolService.updateSchool(schoolRegistrationId, school);
@@ -44,7 +44,7 @@ public class SchoolController {
     }
 
     @DeleteMapping("/{schoolRegistrationId}")
-    public ResponseEntity<?> deleteSchool(@PathVariable String schoolRegistrationId) {
+    public ResponseEntity<?> deleteSchool(@PathVariable Long schoolRegistrationId) {
         try {
             schoolService.deleteSchool(schoolRegistrationId);
             return ResponseEntity.ok().body("School deleted successfully");

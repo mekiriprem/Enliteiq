@@ -50,8 +50,9 @@ public class UserService {
     }
 
     public User loginUser(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+        User user = userRepository.findByEmail(email);
+                
+        
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Invalid password");

@@ -37,7 +37,7 @@ public class SchoolService {
         return schoolRepository.findAll();
     }
 
-    public School updateSchool(String schoolRegistrationId, School school) throws Exception {
+    public School updateSchool(Long schoolRegistrationId, School school) throws Exception {
         Optional<School> existingSchoolOpt = schoolRepository.findById(schoolRegistrationId);
         if (!existingSchoolOpt.isPresent()) {
             throw new Exception("School not found with ID: " + schoolRegistrationId);
@@ -67,7 +67,7 @@ public class SchoolService {
         return schoolRepository.save(existingSchool);
     }
 
-    public void deleteSchool(String schoolRegistrationId) throws Exception {
+    public void deleteSchool(Long schoolRegistrationId) throws Exception {
         if (!schoolRepository.existsById(schoolRegistrationId)) {
             throw new Exception("School not found with ID: " + schoolRegistrationId);
         }
