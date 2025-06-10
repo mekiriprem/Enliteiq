@@ -1,9 +1,14 @@
 package com.example.demo.Service;
 
 
+import com.example.demo.Repository.AdminRepository;
+import com.example.demo.Repository.ExamRepository;
 import com.example.demo.Repository.SalesManRepository;
 import com.example.demo.Repository.SchoolRepository;
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.model.SalesMan;
+
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +25,45 @@ public class SalesManService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private SchoolRepository schoolRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ExamRepository examRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+    @Transactional
     public SalesMan registerSalesMan(SalesMan salesMan) throws Exception {
-        if (salesManRepository.existsByEmail(salesMan.getEmail())) {
+        // Validate input
+        if (salesMan == null || salesMan.getEmail() == null) {
+            throw new IllegalArgumentException("SalesMan or email cannot be null");
+        }
+
+        String email = salesMan.getEmail();
+
+        // Check if email already exists in any repository
+        boolean emailExists = 
+                salesManRepository.existsByEmail(email) ||
+                userRepository.existsByEmail(email) ||
+                schoolRepository.existsBySchoolEmail(email) || 
+                adminRepository.findByEmail(email) != null;
+
+        if (emailExists) {
             throw new Exception("Email already registered");
         }
 
+        // Encrypt password
         salesMan.setPassword(passwordEncoder.encode(salesMan.getPassword()));
-        return salesManRepository.save(salesMan);
+
+        // Save to repository via Spring Data JPA
+        SalesMan savedSalesMan = salesManRepository.save(salesMan);
+
+        return savedSalesMan;
     }
     
     public List<SalesMan> getAllSalesmen() {
