@@ -24,7 +24,9 @@ public class User {
     private String email;
 
     private String phone;
+    
     private String school;
+
 
     @Column(name = "class")
     private String userClass; // 'class' is reserved in Java, so we use userClass
