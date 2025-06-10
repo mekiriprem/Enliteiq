@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Service.UserService;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.dto.UserExamResultDTO;
+import com.example.demo.model.Admin;
 import com.example.demo.model.User;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -30,6 +31,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+    
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -40,6 +42,24 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    @PostMapping("/register")
+    public ResponseEntity<?> registerAdmin(@RequestBody Admin user) {
+        try {
+            String result = userService.registerAdmin(user);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            // Log the actual error for debugging, don't expose it directly to the client
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to register admin. Please try again later.");
+        }
+    }
+
 //
 //    @PostMapping("/login")
 //    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
