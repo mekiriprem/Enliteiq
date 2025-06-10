@@ -39,9 +39,9 @@ const ExamCard = ({ exam }: { exam: {
           </div>
           <h3 className="text-xl font-semibold mb-2">{exam.title}</h3>
           <p className="text-gray-600 mb-4">Prepare for this {exam.subject.toLowerCase()} exam with our comprehensive mock tests and study materials.</p>
-          <Link to={`/exam/${exam.id}`} className="text-education-blue font-medium hover:underline flex items-center">
+          <div className="text-education-blue font-medium hover:underline flex items-center">
             Learn More <ArrowRight size={16} className="ml-1" />
-          </Link>
+          </div>
         </div>
       </div>
     </Link>
