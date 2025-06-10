@@ -1,7 +1,14 @@
 package com.example.demo.Service;
 
 import com.example.demo.model.School;
+
+import jakarta.transaction.Transactional;
+
+import com.example.demo.Repository.AdminRepository;
+import com.example.demo.Repository.ExamRepository;
+import com.example.demo.Repository.SalesManRepository;
 import com.example.demo.Repository.SchoolRepository;
+import com.example.demo.Repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,11 +23,36 @@ public class SchoolService {
     @Autowired
     private SchoolRepository schoolRepository;
 
+    @Autowired
+    private SalesManRepository salesManRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ExamRepository examRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Transactional
     public School registerSchool(School school) throws Exception {
-        // Check if email already exists
-        if (schoolRepository.existsBySchoolEmail(school.getSchoolEmail())) {
+        // Validate input
+        if (school == null || school.getSchoolEmail() == null) {
+            throw new IllegalArgumentException("School or school email cannot be null");
+        }
+
+        String email = school.getSchoolEmail();
+
+        // Check if email already exists in any repository
+        boolean emailExists = 
+                schoolRepository.existsBySchoolEmail(email) ||
+                userRepository.existsByEmail(email) ||
+                salesManRepository.existsByEmail(email) || 
+                adminRepository.findByEmail(email) != null;
+
+        if (emailExists) {
             throw new Exception("School email already registered");
         }
 

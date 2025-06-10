@@ -18,6 +18,7 @@ import com.example.demo.Repository.UserRepository;
 import com.example.demo.dto.ExamSummaryDTO;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.dto.UserExamResultDTO;
+import com.example.demo.model.Admin;
 import com.example.demo.model.Exam;
 import com.example.demo.model.User;
 
@@ -59,7 +60,7 @@ public class UserService {
                 userRepository.existsByEmail(email) ||
                 schoolRepository.existsBySchoolEmail(email) ||
                 salesManRepository.existsByEmail(email) ||
-//                adminRepository.existsByEmail(email);
+                adminRepository.findByEmail(email)!=null;
 
         if (emailExists) {
             throw new IllegalArgumentException("Email already registered in the system");
@@ -169,5 +170,34 @@ public class UserService {
             return dto;
         }).collect(Collectors.toList());
     }
+    
+    
+    @Transactional
+    public String registerAdmin(Admin user) {
+        String email = user.getEmail();
+
+        // Check if email already exists in any repository
+        boolean emailExists = 
+                userRepository.existsByEmail(email) || 
+                schoolRepository.existsBySchoolEmail(email) || 
+                salesManRepository.existsByEmail(email) || 
+                adminRepository.findByEmail(email) != null;
+
+        if (emailExists) {
+            throw new IllegalArgumentException("Email already registered in the system");
+        }
+
+        // Encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        // Save the user and get the generated ID
+        Admin savedUser = adminRepository.save(user);
+        
+        
+        return "admin saved sucessfully";
+    }
+    
+    
+    
 
 }
