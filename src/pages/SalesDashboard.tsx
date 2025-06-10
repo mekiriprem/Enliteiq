@@ -136,33 +136,6 @@ const SalesDashboard: React.FC = () => {
 
   return (
     <>
-      <div className="mb-4 md:mb-6 flex border-b border-gray-200 bg-white overflow-x-auto">
-        <button
-          onClick={() => setActiveSection('dashboard')}
-          className={`px-6 py-3 text-sm font-medium ${activeSection === 'dashboard' 
-            ? 'text-education-blue border-b-2 border-education-blue' 
-            : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          Dashboard
-        </button>
-        <button
-          onClick={() => setActiveSection('schools')}
-          className={`px-6 py-3 text-sm font-medium ${activeSection === 'schools' 
-            ? 'text-education-blue border-b-2 border-education-blue' 
-            : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          Schools
-        </button>
-        <button
-          onClick={() => setActiveSection('tasks')}
-          className={`px-6 py-3 text-sm font-medium ${activeSection === 'tasks' 
-            ? 'text-education-blue border-b-2 border-education-blue' 
-            : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          Tasks
-        </button>
-      </div>
-
       {renderContent()}
     </>
   );

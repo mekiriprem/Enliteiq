@@ -1,34 +1,84 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type User = {
-  userType(userType: any): unknown;
+  id: number;
+  name: string;
   email: string;
-  role: "student" | "school" | "sales" | "admin";
+  role: "admin" | "student" | "school" | "salesman";
 };
 
 type AuthContextType = {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for stored user data on app load
+  useEffect(() => {
+    const checkStoredAuth = () => {
+      try {
+        // Check localStorage first (remember me)
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setIsLoading(false);
+          return;
+        }
+
+        // Check sessionStorage (temporary login)
+        const sessionUser = sessionStorage.getItem("user");
+        if (sessionUser) {
+          const userData = JSON.parse(sessionUser);
+          setUser(userData);
+          setIsLoading(false);
+          return;
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error parsing stored user data:", error);
+        // Clear corrupted data
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+        setIsLoading(false);
+      }
+    };
+
+    checkStoredAuth();
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
-    // You can add localStorage here for persistence
+    // Store in localStorage for persistence (can be modified based on "remember me")
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    // Also remove from localStorage if you persist
+    // Clear all stored data
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   };
 
+  const isAuthenticated = user !== null;
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isAuthenticated,
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

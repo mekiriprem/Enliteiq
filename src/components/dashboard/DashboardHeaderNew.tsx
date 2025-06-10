@@ -12,9 +12,9 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Rahul Gupta', onMenuToggle, isSidebarOpen = false }) => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
+
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -26,30 +26,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
     // Add event listener
     window.addEventListener('resize', checkIfMobile);
     
-    // Click outside handler for mobile menu
-    const handleClickOutside = (event: MouseEvent) => {
-      if (showMobileMenu) {
-        const target = event.target as Element;
-        if (!target.closest('.dashboard-header')) {
-          setShowMobileMenu(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    
     // Clean up
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showMobileMenu]);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   const toggleUserDropdown = () => {
     setShowUserDropdown(!showUserDropdown);
-  };
-
-  const toggleMobileMenu = () => {
-    setShowMobileMenu(!showMobileMenu);
   };
 
   const handleMenuToggle = () => {
@@ -78,8 +60,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
       default:
         return "/dashboard";
     }
-  };  return (
-    <div className="dashboard-header bg-white py-2 md:py-4 px-3 md:px-6 flex items-center justify-between border-b sticky top-0 z-40 shadow-sm">
+  };
+
+  return (
+    <div className="bg-white py-2 md:py-4 px-3 md:px-6 flex items-center justify-between border-b sticky top-0 z-40 shadow-sm">
       {/* Left section */}
       <div className="flex items-center gap-2 md:gap-3 overflow-hidden">
         {onMenuToggle && (
@@ -127,16 +111,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
           </div>
         </div>
       </div>
-        {/* Right section */}
+      
+      {/* Right section */}
       <div className="flex items-center gap-3 md:gap-4">
-        {/* Mobile Navigation Menu Button */}
-        <button 
-          onClick={toggleMobileMenu}
-          className="lg:hidden p-2 rounded-md text-education-dark hover:text-education-blue focus:outline-none"
-        >
-          <Menu size={20} />
-        </button>
-
         <button className="relative p-1 hover:bg-gray-100 rounded-full">
           <Bell size={20} className="text-gray-600" />
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
@@ -163,7 +140,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
                 Dashboard
               </Link>
               <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</Link>
-              <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>              <button
+              <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
+              <button
                 onClick={handleLogout}
                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
               >
@@ -174,49 +152,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
           )}
         </div>
       </div>
-
-      {/* Mobile Navigation Menu */}
-      {showMobileMenu && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-t shadow-lg z-50">
-          <div className="px-4 py-2 space-y-1">
-            <Link 
-              to="/" 
-              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/exams" 
-              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Exams
-            </Link>
-            <Link 
-              to="/mock-tests" 
-              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Mock Tests
-            </Link>
-            <Link 
-              to="/blog" 
-              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Blog
-            </Link>
-            <Link 
-              to="/contact" 
-              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Contact
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

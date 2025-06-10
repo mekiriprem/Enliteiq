@@ -2,6 +2,8 @@ import React, { useState, useMemo, useContext } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import AuthRedirect from "./components/auth/AuthRedirect";
 import ScrollToTop from "./components/ScrollToTop";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -175,132 +177,170 @@ const App = () => (
           <ScrollToTop /> {/* Add this component */}
           <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-grow">
-            <Routes>
+            <main className="flex-grow">            <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<Login/>} />
+              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/exams" element={<ExamsPage />} />
               <Route path="/exam/:id" element={<ExamDetailPage />} />
-              <Route path="/mock-tests" element={<MockTestsPage />} /> {/* Add this route */}
+              <Route path="/mock-tests" element={<MockTestsPage />} />
               <Route path="/mock-tests/:id" element={<MockTestPage />} />
               <Route path="/exam-results/:id" element={<ExamResultPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-
               <Route path="/forgotpassword" element={<Forgotpassword />} />
-              
-              {/* Dashboard Routes - All using the DashboardLayout */}
-              <Route path="/student-dashboard" element={<StudentDashboardWithLayout />} />
-              <Route path="/school-dashboard" element={<SchoolDashboard />} />
-              <Route path="/school/:id" element={<SchoolDetail />} />
-              <Route path="/sales-dashboard" element={<SalesDashboardWithLayout />} />
-              <Route path="/admin-dashboard" element={<AdminDashboardWithLayout />} />
-              <Route path="/schools" element={<Schools userType="admin" />} />
-              <Route path="/admin/dashboard" element={<SchoolDashboard />} />
-              <Route path="/admin/school/:schoolId" element={<SchoolDetail />} />
-              <Route path="/admin/tasks" element={<Tasks userType="admin" />} />
-              <Route path="*" element={<div>404 - Page Not Found</div>} />
-              <Route path="/admin/task/:taskId" element={<TaskDetail />} />  
-              
-              {/* Student Dashboard Pages */}
-              <Route path="/student-exam-results" element={<StudentExamResultsWithLayout />} />
-              <Route path="/student-upcoming-exams" element={
-                <DashboardLayout userType="student" title="Upcoming Exams" userName="Rahul Gupta">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <UpcomingExams userType="student" />
-                  </div>
-                </DashboardLayout>
+
+              {/* Auth Redirect - determines dashboard based on role */}
+              <Route path="/dashboard" element={<AuthRedirect />} />
+
+              {/* Protected Dashboard Routes */}
+              <Route path="/student-dashboard" element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <StudentDashboardWithLayout />
+                </ProtectedRoute>
               } />
-              
-              {/* Admin Dashboard Pages */}
-              <Route path="/admin-exam-results" element={<AdminExamResultsWithLayout />} />
+              <Route path="/school-dashboard" element={
+                <ProtectedRoute allowedRoles={['school']}>
+                  <SchoolDashboardWithLayout />
+                </ProtectedRoute>
+              } />
+              <Route path="/sales-dashboard" element={
+                <ProtectedRoute allowedRoles={['salesman']}>
+                  <SalesDashboardWithLayout />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-dashboard" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboardWithLayout />
+                </ProtectedRoute>
+              } />
+
+              {/* Protected Student Pages */}
+              <Route path="/student-exam-results" element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <StudentExamResultsWithLayout />
+                </ProtectedRoute>
+              } />
+              <Route path="/student-upcoming-exams" element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <DashboardLayout userType="student" title="Upcoming Exams" userName="Rahul Gupta">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <UpcomingExams userType="student" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+
+              {/* Protected Admin Pages */}
+              <Route path="/admin-exam-results" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminExamResultsWithLayout />
+                </ProtectedRoute>
+              } />
               <Route path="/admin-schools" element={
-                <DashboardLayout userType="admin" title="Schools" userName="Admin">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Schools userType="admin" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Schools" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Schools userType="admin" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
               <Route path="/admin-tasks" element={
-                <DashboardLayout userType="admin" title="Tasks" userName="Admin">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Tasks userType="admin" />
-                  </div>
-                </DashboardLayout>
-              } />              <Route path="/admin-upcoming-exams" element={
-                <DashboardLayout userType="admin" title="Upcoming Exams" userName="Admin">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <UpcomingExams userType="admin" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Tasks" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Tasks userType="admin" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-upcoming-exams" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Upcoming Exams" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <UpcomingExams userType="admin" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
               <Route path="/admin-sales-team" element={
-                <DashboardLayout userType="admin" title="Sales Team Management" userName="Admin">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <SalesTeam />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Sales Team Management" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <SalesTeam />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
-              
-              {/* School Dashboard Pages */}
-              <Route path="/school-exam-results" element={<SchoolExamResultsWithLayout />} />
+
+              {/* Protected School Pages */}
+              <Route path="/school-exam-results" element={
+                <ProtectedRoute allowedRoles={['school']}>
+                  <SchoolExamResultsWithLayout />
+                </ProtectedRoute>
+              } />
               <Route path="/school-students" element={
-                <DashboardLayout userType="school" title="Students" userName="Delhi Public School">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Schools userType="school" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['school']}>
+                  <DashboardLayout userType="school" title="Students" userName="Delhi Public School">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Schools userType="school" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
               <Route path="/school-upcoming-exams" element={
-                <DashboardLayout userType="school" title="Upcoming Exams" userName="Delhi Public School">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <UpcomingExams userType="school" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['school']}>
+                  <DashboardLayout userType="school" title="Upcoming Exams" userName="Delhi Public School">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <UpcomingExams userType="school" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
-              
-              {/* Sales Dashboard Pages */}
-              <Route path="/sales-team" element={<SalesTeamWithLayout />} />
+
+              {/* Protected Sales Pages */}
+              <Route path="/sales-team" element={
+                <ProtectedRoute allowedRoles={['salesman']}>
+                  <SalesTeamWithLayout />
+                </ProtectedRoute>
+              } />
               <Route path="/sales-schools" element={
-                <DashboardLayout userType="sales" title="Schools" userName="Sales Team">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Schools userType="sales" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['salesman']}>
+                  <DashboardLayout userType="sales" title="Schools" userName="Sales Team">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Schools userType="sales" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
               <Route path="/sales-tasks" element={
-                <DashboardLayout userType="sales" title="Tasks" userName="Sales Team">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <Tasks userType="sales" />
-                  </div>
-                </DashboardLayout>
+                <ProtectedRoute allowedRoles={['salesman']}>
+                  <DashboardLayout userType="sales" title="Tasks" userName="Sales Team">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Tasks userType="sales" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
               } />
-              
+
+              {/* Protected Detail Pages */}
+              <Route path="/school/:id" element={
+                <ProtectedRoute allowedRoles={['admin', 'salesman']}>
+                  <SchoolDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/task/:taskId" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <TaskDetail />
+                </ProtectedRoute>
+              } />
+
               {/* Catch-all Route */}
-
               <Route path="*" element={<NotFound />} />
-              <Route path="/sales-dashboard" element={<SalesDashboard />} />
-              <Route path="/school-dashboard" element={<SchoolDashboard />} />
-              <Route path="/school/:id" element={<SchoolDetails />} />
-              <Route path="/student-dashboard" element={<StudentDashboard />} />
-              <Route path="/student-exams" element={<ExamResultsPage userType="student" />} />
-              <Route path="/student-exam-results" element={<ExamResultsPage userType="student" />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-
-              <Route path="/forgotpassword" element={<Forgotpassword />} />
-
-              <Route path="/admin-exam-results" element={<ExamResultsPage userType="admin" />} />
-              <Route path="/school-exam-results" element={<ExamResultsPage userType="school" />} />
-              <Route path="/sales-team" element={<SalesTeam />} />
-              <Route path="/schools" element={<Schools userType="admin" />} />
-              <Route path="/tasks" element={<Tasks userType="admin" />} />
-              <Route path="/upcoming-exams" element={<UpcomingExams userType="admin" />} />
             </Routes>
           </main>
             <Footer />
