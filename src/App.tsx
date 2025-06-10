@@ -233,11 +233,17 @@ const App = () => (
                     <Tasks userType="admin" />
                   </div>
                 </DashboardLayout>
-              } />
-              <Route path="/admin-upcoming-exams" element={
+              } />              <Route path="/admin-upcoming-exams" element={
                 <DashboardLayout userType="admin" title="Upcoming Exams" userName="Admin">
                   <div className="p-3 sm:p-4 md:p-6">
                     <UpcomingExams userType="admin" />
+                  </div>
+                </DashboardLayout>
+              } />
+              <Route path="/admin-sales-team" element={
+                <DashboardLayout userType="admin" title="Sales Team Management" userName="Admin">
+                  <div className="p-3 sm:p-4 md:p-6">
+                    <SalesTeam />
                   </div>
                 </DashboardLayout>
               } />
