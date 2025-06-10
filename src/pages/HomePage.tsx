@@ -24,18 +24,15 @@ interface Exam {
 
 const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   // State for school registration form
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
     schoolEmail: "",
-    schoolRegistrationId: "",
     schoolAdminName: "",
     password: "",
     confirmPassword: "",
   });
-
   // Handler for input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,14 +40,144 @@ const HomePage = () => {
       ...prev,
       [name]: value,
     }));
-  };
 
-  // Handler for form submission (dummy for now)
-  const handleSubmit = (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    // Real-time validation
+    if (name === 'schoolEmail') {
+      if (value.trim() === '') {
+        setEmailError(null);
+      } else if (!isValidEmail(value)) {
+        setEmailError('Please enter a valid email address');
+      } else {
+        setEmailError(null);
+      }
+    }
+
+    if (name === 'confirmPassword' || name === 'password') {
+      const currentPassword = name === 'password' ? value : formData.password;
+      const currentConfirmPassword = name === 'confirmPassword' ? value : formData.confirmPassword;
+      
+      if (currentConfirmPassword.trim() === '') {
+        setPasswordError(null);
+      } else if (currentPassword !== currentConfirmPassword) {
+        setPasswordError('Passwords do not match');
+      } else {
+        setPasswordError(null);
+      }
+    }
+  };// State for form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Real-time validation states
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  // Validation function
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // Check all required fields
+    if (!formData.schoolName.trim()) errors.push("School name is required");
+    if (!formData.schoolAddress.trim()) errors.push("School address is required");
+    if (!formData.schoolEmail.trim()) errors.push("School email is required");
+    if (!formData.schoolAdminName.trim()) errors.push("School admin name is required");
+    if (!formData.password.trim()) errors.push("Password is required");
+    if (!formData.confirmPassword.trim()) errors.push("Confirm password is required");
+
+    // Email validation
+    if (formData.schoolEmail && !isValidEmail(formData.schoolEmail)) {
+      errors.push("Please enter a valid email address");
+    }
+
+    // Password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      errors.push("Passwords do not match");
+    }
+
+    // Password strength (optional)
+    if (formData.password && formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters long");
+    }
+
+    return errors;
+  };
+  // Handler for form submission
+  const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (e) e.preventDefault();
-    // Add your form submission logic here
-    setIsModalOpen(false);
-    // Optionally reset formData here
+    
+    // Reset previous errors/success
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    setEmailError(null);
+    setPasswordError(null);
+
+    // Validate form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setSubmitError(validationErrors.join('. '));
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {      // Prepare data for API (exclude confirmPassword)
+      const apiData = {
+        schoolName: formData.schoolName.trim(),
+        schoolAddress: formData.schoolAddress.trim(),
+        schoolEmail: formData.schoolEmail.trim(),
+        schoolAdminName: formData.schoolAdminName.trim(),
+        password: formData.password
+      };
+
+      const response = await fetch('http://localhost:8081/api/schools/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Registration failed: ${response.status} - ${errorData}`);
+      }
+
+      const result = await response.json();
+      console.log('School registration successful:', result);
+      
+      // Show success message
+      setSubmitSuccess(true);      // Reset form
+      setFormData({
+        schoolName: "",
+        schoolAddress: "",
+        schoolEmail: "",
+        schoolAdminName: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      // Clear real-time validation errors
+      setEmailError(null);
+      setPasswordError(null);
+
+      // Close modal after a short delay to show success message
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSubmitSuccess(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error registering school:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
    const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
@@ -316,8 +443,26 @@ const HomePage = () => {
           <div
             className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
             onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">School Registration</h2>
+          >            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">School Registration</h2>
+            
+            {/* Success Message */}
+            {submitSuccess && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-800 text-sm text-center">
+                  Registration successful! Welcome to EduVerse.
+                </p>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {submitError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-800 text-sm">
+                  {submitError}
+                </p>
+              </div>
+            )}
+
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolName">
@@ -346,8 +491,7 @@ const HomePage = () => {
                   placeholder="Enter school address"
                   required
                 />
-              </div>
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolEmail">
                   School Email
                 </label>
@@ -356,24 +500,17 @@ const HomePage = () => {
                   name="schoolEmail"
                   value={formData.schoolEmail}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
+                    emailError 
+                      ? 'border-red-300 focus:ring-red-500' 
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                   placeholder="Enter school email"
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolRegistrationId">
-                  School Registration ID
-                </label>
-                <input
-                  type="text"
-                  name="schoolRegistrationId"
-                  value={formData.schoolRegistrationId}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter registration ID"
-                  required
-                />
+                {emailError && (
+                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolAdminName">
@@ -402,8 +539,7 @@ const HomePage = () => {
                   placeholder="Enter password"
                   required
                 />
-              </div>
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
@@ -412,24 +548,32 @@ const HomePage = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
+                    passwordError 
+                      ? 'border-red-300 focus:ring-red-500' 
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                   placeholder="Confirm password"
                   required
                 />
+                {passwordError && (
+                  <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                )}
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            </div>            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 text-sm sm:text-base transition-all duration-300"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transition-all duration-300"
               >
                 Close
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm sm:text-base font-semibold transition-all duration-300"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold transition-all duration-300"
               >
-                Submit
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </div>
@@ -458,14 +602,10 @@ const HomePage = () => {
             </Link>
           </div>
         </div>
-      </section>
-
-      {/* Testimonials Section */}
-      {/* End Olympiad Coordinator Section */}
-      {/* Testimonials Section */}
-      <section className="py-16 bg-white py-16 bg-white">
+      </section>      {/* Testimonials Section */}
+      <section className="py-16 bg-white">
         <div className="education-container">
-          <div className="text-center mb-8 text-center mb-4">
+          <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-blue-800 mb-4">What Our Users Say</h2>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
               Hear from students, parents, and schools who have experienced success with EduVerse.

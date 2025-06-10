@@ -66,7 +66,8 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin-dashboard' },
           { icon: <Users size={20} />, label: 'Schools', path: '/admin-schools' },
           { icon: <FileText size={20} />, label: 'Exam Results', path: '/admin-upcoming-exams'},
-          { icon: <Check size={20} />, label: 'Tasks', path: '/admin-tasks' },
+          { icon: <Check size={20} />, label: 'Sales Tasks', path: '/admin-tasks' },
+          { icon: <Users size={20} />, label: 'Sales Team', path: '/admin-sales-team' },
         ];
       default:
         return [];
