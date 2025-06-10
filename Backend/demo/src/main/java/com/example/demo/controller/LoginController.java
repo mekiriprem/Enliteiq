@@ -6,6 +6,7 @@ import com.example.demo.Repository.SchoolRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.LoginResponse;
+import com.example.demo.dto.SalesManDTO;
 import com.example.demo.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,20 @@ public class LoginController {
 
         // 1. Check SalesMan
         SalesMan sm = salesManRepository.findByEmail(email);
-        if (sm != null && passwordEncoder.matches(password, sm.getPassword())) {
+        if (sm != null && "active".equalsIgnoreCase(sm.getStatus()) && passwordEncoder.matches(password, sm.getPassword())) {
+            // Build response without status field
             LoginResponse res = new LoginResponse();
             res.setRole("salesman");
-            res.setData(sm);
-            return ResponseEntity.ok(res);
-        }
 
+            // Create a response DTO without the `status` field
+            SalesManDTO dto = new SalesManDTO();
+            dto.setId(sm.getId());
+            dto.setName(sm.getName());
+            dto.setEmail(sm.getEmail());
+
+            res.setData(dto);
+            return ResponseEntity.ok(res); // ✅ wrap in ResponseEntity
+        }
         // 2. Check Admin
         Admin admin = adminRepository.findByEmail(email);
         if (admin != null && passwordEncoder.matches(password, admin.getPassword())) {

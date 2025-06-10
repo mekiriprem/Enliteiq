@@ -10,7 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.Repository.AdminRepository;
 import com.example.demo.Repository.ExamRepository;
+import com.example.demo.Repository.SalesManRepository;
+import com.example.demo.Repository.SchoolRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.dto.ExamSummaryDTO;
 import com.example.demo.dto.UserDTO;
@@ -20,6 +23,18 @@ import com.example.demo.model.User;
 
 @Service
 public class UserService {
+    
+    
+    
+  
+    @Autowired
+    private SchoolRepository schoolRepository;
+
+    @Autowired
+    private SalesManRepository salesManRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
     
     @Value("${supabase.url}")
     private String supabaseUrl;
@@ -38,15 +53,23 @@ public class UserService {
 
     @Transactional
     public User registerUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
+        String email = user.getEmail();
+
+        boolean emailExists =
+                userRepository.findByEmail(email) ||
+                schoolRepository.findByschoolEmail(email) ||
+                salesManRepository.findByEmail(email) ||
+                adminRepository.findByEmail(email);
+
+        if (emailExists) {
+            throw new IllegalArgumentException("Email already registered in the system");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user = userRepository.save(user);
-
         user.setUserId("user" + user.getId());
-        return userRepository.save(user);
+
+        return userRepository.save(user); // Save updated userId
     }
 
     public User loginUser(String email, String password) {
