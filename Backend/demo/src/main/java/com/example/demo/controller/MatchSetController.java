@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import com.example.demo.Repository.MatchSetRepository;
 import com.example.demo.Service.MatchSetService;
 import com.example.demo.dto.AnswerDto;
 import com.example.demo.dto.MatchSetDto;
+import com.example.demo.dto.MatchSetSummaryDto;
 import com.example.demo.dto.QuestionDto;
 import com.example.demo.dto.ResultDto;
 import com.example.demo.dto.StudentAnswerDto;
@@ -28,6 +30,9 @@ import com.example.demo.model.Question;
 @RestController
 @RequestMapping("/api/matchsets")
 public class MatchSetController {
+    
+    @Autowired
+    private MatchSetRepository  matchSetRepository;
 
     @Autowired
     private MatchSetService matchSetService;
@@ -88,5 +93,37 @@ public class MatchSetController {
         matchSetService.bulkDeleteQuestions(matchSetId, questionIds);
         return ResponseEntity.ok("Questions deleted successfully");
     }
+    
+    @GetMapping
+    public ResponseEntity<List<MatchSetSummaryDto>> getAllMatchSets() {
+        List<MatchSet> matchSets = matchSetRepository.findAll();
+        List<MatchSetSummaryDto> summaries = matchSets.stream().map(ms -> {
+            MatchSetSummaryDto dto = new MatchSetSummaryDto();
+            dto.setId(ms.getId());
+            dto.setTitle(ms.getTitle());
+            dto.setSubject(ms.getSubject());
+            dto.setDate(ms.getDate());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(summaries);
+    }
+    
+    @GetMapping("/{matchSetId}/questions")
+    public ResponseEntity<List<QuestionDto>> getQuestionsByMatchSet(@PathVariable Long matchSetId) {
+        MatchSet matchSet = matchSetRepository.findById(matchSetId)
+            .orElseThrow(() -> new RuntimeException("MatchSet not found"));
+
+        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
+            QuestionDto dto = new QuestionDto();
+            dto.setId(q.getId());
+            dto.setQuestionText(q.getQuestionText());
+            dto.setOptions(q.getOptions());
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(questions);
+    }
+
 }
 
