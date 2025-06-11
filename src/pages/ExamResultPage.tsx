@@ -26,7 +26,7 @@ interface BackendQuestion {
   id: number;
   questionText: string;
   options: string[];
-  correctAnswer?: number; // May not be provided in details response
+  correctAnswer?: number | string; // Can be either index number or answer text
 }
 
 // Interface for exam details from backend
@@ -154,13 +154,29 @@ const ExamResultPage = () => {
     // Use questions from state first, then from fetched exam details
     const questionsToTransform = stateData?.questions || examDetails?.questions || [];
     
-    return questionsToTransform.map(q => ({
-      id: q.id,
-      text: q.questionText,
-      options: q.options,
-      correctAnswer: q.correctAnswer || 0, // Default to 0 if not provided
-      difficulty: "medium" as const // Default difficulty since backend doesn't provide it
-    }));
+    return questionsToTransform.map(q => {      // Convert correctAnswer from string to index
+      let correctAnswerIndex = 0;
+      if (q.correctAnswer && typeof q.correctAnswer === 'string') {
+        // Find the index of the correct answer in the options array
+        const index = q.options.findIndex(option => 
+          option.trim().toLowerCase() === (q.correctAnswer as string).trim().toLowerCase()
+        );
+        correctAnswerIndex = index !== -1 ? index : 0;
+        
+        // Debug log to verify conversion
+        console.log(`Question ${q.id}: "${q.correctAnswer}" -> Index ${correctAnswerIndex} (Options: ${q.options})`);
+      } else if (typeof q.correctAnswer === 'number') {
+        correctAnswerIndex = q.correctAnswer;
+      }
+      
+      return {
+        id: q.id,
+        text: q.questionText,
+        options: q.options,
+        correctAnswer: correctAnswerIndex,
+        difficulty: "medium" as const // Default difficulty since backend doesn't provide it
+      };
+    });
   }, [stateData?.questions, examDetails?.questions]);
     // Calculate result statistics
   // If we have a backend result, use those values directly; otherwise calculate from answers

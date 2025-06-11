@@ -33,11 +33,13 @@ const QuestionReview = ({ questions, answers, examId }: QuestionReviewProps) => 
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {questions.map((question, index) => {
+        <div className="space-y-6">          {questions.map((question, index) => {
             const userAnswer = answers[index];
             const isCorrect = userAnswer === question.correctAnswer;
             const isAnswered = userAnswer !== null;
+            
+            // Debug log to verify comparison
+            console.log(`Question ${index + 1}: User answer: ${userAnswer} (${typeof userAnswer}), Correct answer: ${question.correctAnswer} (${typeof question.correctAnswer}), Match: ${isCorrect}`);
             
             return (
               <div 
