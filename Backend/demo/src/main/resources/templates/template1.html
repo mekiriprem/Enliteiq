@@ -14,78 +14,162 @@
             height: 210mm;
             margin: 0;
             padding: 0;
-            font-family: 'Georgia', serif;
-            background: #fdf6e3;
+            font-family: 'Times New Roman', Georgia, serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .certificate-container {
-            border: 10px solid #1e293b;
+            width: 257mm;
+            height: 170mm;
             margin: 20mm;
-            padding: 20mm;
-            text-align: center;
+            padding: 10mm;
+            background: #ffffff;
+            border: 8px double #1e293b;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
-            height: 150mm;
-            background-color: #ffffff;
+            text-align: center;
+            position: relative;
         }
 
         .certificate-inner {
-            border: 4px dashed #334155;
-            padding: 20mm;
-            box-sizing: border-box;
+            border: 3px solid #d4af37;
+            padding: 10mm;
             height: 100%;
+            box-sizing: border-box;
+            background: linear-gradient(to bottom, #fff, #f9f9f9);
+        }
+
+        .logo {
+            position: absolute;
+            top: 8mm;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40mm;
+            height: 40mm;
+            opacity: 0.1;
         }
 
         h1 {
             font-size: 36pt;
             color: #1e3a8a;
-            margin: 0;
+            margin: 8px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
 
         .subtitle {
             font-size: 18pt;
-            margin: 20px 0;
+            color: #334155;
+            margin: 12px 0;
+            font-style: italic;
         }
 
         .content {
-            font-size: 16pt;
+            font-size: 14pt;
             line-height: 1.6;
             color: #1f2937;
+            margin: 15px auto;
+            max-width: 220mm;
         }
 
         .highlight {
             font-weight: bold;
-            color: #dc2626;
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 14pt;
-            color: #64748b;
-        }
-
-        .signature-table {
-            margin: 40px auto 0 auto;
-            width: 80%;
-        }
-
-        .sign-box {
-            border-top: 1px solid #000;
-            padding-top: 10px;
-            font-size: 12pt;
-            text-align: center;
-            width: 50%;
+            color: #b91c1c;
+            font-size: 16pt;
         }
 
         .contact-info {
-            font-size: 14pt;
-            margin-top: 15px;
+            font-size: 12pt;
             color: #334155;
+            margin-top: 15px;
+            max-width: 200mm;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .signature-table {
+            margin: 20px auto 0;
+            width: 60%;
+            border-collapse: collapse;
+        }
+
+        .sign-box {
+            border-top: 2px solid #1e293b;
+            padding-top: 8px;
+            font-size: 10pt;
+            text-align: center;
+            width: 50%;
+            color: #1f2937;
+        }
+
+        .ornament {
+            position: absolute;
+            width: 25mm;
+            height: 25mm;
+            opacity: 0.2;
+        }
+
+        .ornament.top-left {
+            top: 5mm;
+            left: 5mm;
+        }
+
+        .ornament.top-right {
+            top: 5mm;
+            right: 5mm;
+            transform: rotate(90deg);
+        }
+
+        .ornament.bottom-left {
+            bottom: 5mm;
+            left: 5mm;
+            transform: rotate(-90deg);
+        }
+
+        .ornament.bottom-right {
+            bottom: 5mm;
+            right: 5mm;
+            transform: rotate(180deg);
+        }
+
+        @media print {
+            body {
+                background: none;
+            }
+            .certificate-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 10mm;
+            }
+            .logo, .ornament {
+                opacity: 0.3;
+            }
+            .certificate-inner {
+                padding: 10mm;
+            }
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
         <div class="certificate-inner">
+            <!-- Placeholder for logo (optional, replace with your image) -->
+            <img class="logo" src="https://via.placeholder.com/120x120?text=Logo" alt="Institution Logo" />
+            <!-- Decorative ornaments (using placeholder images) -->
+            <img class="ornament top-left" src="https://via.placeholder.com/80x80?text=Ornament" alt="Ornament" />
+            <img class="ornament top-right" src="https://via.placeholder.com/80x80?text=Ornament" alt="Ornament" />
+            <img class="ornament bottom-left" src="https://via.placeholder.com/80x80?text=Ornament" alt="Ornament" />
+            <img class="ornament bottom-right" src="https://via.placeholder.com/80x80?text=Ornament" alt="Ornament" />
+
             <h1>Certificate of Completion</h1>
             <div class="subtitle">This certificate is proudly presented to</div>
 
