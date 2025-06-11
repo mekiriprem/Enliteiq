@@ -24,6 +24,7 @@ import com.example.demo.dto.MatchSetSummaryDto;
 import com.example.demo.dto.QuestionDto;
 import com.example.demo.dto.ResultDto;
 import com.example.demo.dto.StudentAnswerDto;
+import com.example.demo.dto.TestWithQuestionsDto;
 import com.example.demo.model.MatchSet;
 import com.example.demo.model.Question;
 
@@ -103,6 +104,7 @@ public class MatchSetController {
             dto.setTitle(ms.getTitle());
             dto.setSubject(ms.getSubject());
             dto.setDate(ms.getDate());
+            dto.getDurationMinutes();
             return dto;
         }).collect(Collectors.toList());
 
@@ -119,11 +121,39 @@ public class MatchSetController {
             dto.setId(q.getId());
             dto.setQuestionText(q.getQuestionText());
             dto.setOptions(q.getOptions());
+            dto.getDurationMinutes();
+            
             return dto;
         }).toList();
 
         return ResponseEntity.ok(questions);
     }
+    
+    @GetMapping("/{matchSetId}/details")
+    public ResponseEntity<TestWithQuestionsDto> getTestDetails(@PathVariable Long matchSetId) {
+        MatchSet matchSet = matchSetRepository.findById(matchSetId)
+            .orElseThrow(() -> new RuntimeException("MatchSet not found"));
+
+        TestWithQuestionsDto dto = new TestWithQuestionsDto();
+        dto.setId(matchSet.getId());
+        dto.setTitle(matchSet.getTitle());
+        dto.setSubject(matchSet.getSubject());
+        dto.setDate(matchSet.getDate());
+        dto.setDurationMinutes(matchSet.getDurationMinutes());
+
+        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
+            QuestionDto qDto = new QuestionDto();
+            qDto.setId(q.getId());
+            qDto.setQuestionText(q.getQuestionText());
+            qDto.setOptions(q.getOptions());
+            return qDto;
+        }).toList();
+
+        dto.setQuestions(questions);
+
+        return ResponseEntity.ok(dto);
+    }
+
 
 }
 

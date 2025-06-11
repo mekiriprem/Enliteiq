@@ -11,5 +11,8 @@ public class MatchSetDto {
     private String subject;
     private LocalDate date;
     private List<QuestionDto> questions;
+   
+    private Integer durationMinutes;
+    
 }
 

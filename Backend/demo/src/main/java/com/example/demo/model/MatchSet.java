@@ -22,6 +22,8 @@ public class MatchSet {
     private String title;
     private String subject;
     private LocalDate date;
+    // ✅ Duration of the exam in minutes
+    private Integer durationMinutes;
 
     @OneToMany(mappedBy = "matchSet", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();
