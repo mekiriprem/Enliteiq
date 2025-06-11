@@ -35,16 +35,14 @@ const LoginForm = () => {
 
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
-      }
-
-      // Login successful - data should have structure: { role: "salesman", data: { id, name, email } }
+      }      // Login successful - data should have structure: { role: "salesman", data: { id, name, email } }
       console.log("Login successful", data);
       
       const userData = {
         id: data.data.id,
         name: data.data.name,
         email: data.data.email,
-        role: data.role as "admin" | "student" | "school" | "salesman"
+        role: data.role as "admin" | "student" | "school" | "salesman" | "user"
       };
 
       // Store user data based on remember me preference
@@ -55,14 +53,13 @@ const LoginForm = () => {
       }
 
       // Update auth context
-      login(userData);
-
-      // Redirect based on role
+      login(userData);      // Redirect based on role
       switch (data.role) {
         case "admin":
           navigate("/admin-dashboard");
           break;
         case "student":
+        case "user":
           navigate("/student-dashboard");
           break;
         case "school":
@@ -72,9 +69,9 @@ const LoginForm = () => {
           navigate("/sales-dashboard");
           break;
         default:
-          navigate("/dashboard");
+          navigate("/student-dashboard");
           break;
-      }    } catch (err: unknown) {
+      }} catch (err: unknown) {
       console.error("Login error:", err);
       const errorMessage = err instanceof Error ? err.message : "Login failed. Please try again.";
       setError(errorMessage);

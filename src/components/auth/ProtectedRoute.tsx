@@ -29,7 +29,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
   // If user is authenticated but doesn't have required role
   if (requireAuth && isAuthenticated && allowedRoles.length > 0 && user) {
     if (!allowedRoles.includes(user.role)) {
@@ -37,11 +36,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       const dashboardRoutes = {
         admin: '/admin-dashboard',
         student: '/student-dashboard',
+        user: '/student-dashboard',
         school: '/school-dashboard',
         salesman: '/sales-dashboard'
       };
       
-      const redirectPath = dashboardRoutes[user.role as keyof typeof dashboardRoutes] || '/dashboard';
+      const redirectPath = dashboardRoutes[user.role as keyof typeof dashboardRoutes] || '/student-dashboard';
       return <Navigate to={redirectPath} replace />;
     }
   }

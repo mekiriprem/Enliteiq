@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MenuIcon, X, User, LogIn, LogOut } from "lucide-react";
@@ -29,21 +28,21 @@ const Navbar = () => {
     // Close mobile menu if open
     setIsMenuOpen(false);
   };
-
   const getDashboardRoute = () => {
-    if (!user) return "/dashboard";
+    if (!user) return "/student-dashboard";
     
     switch (user.role) {
       case "admin":
         return "/admin-dashboard";
       case "student":
+      case "user":
         return "/student-dashboard";
       case "school":
         return "/school-dashboard";
       case "salesman":
         return "/sales-dashboard";
       default:
-        return "/dashboard";
+        return "/student-dashboard";
     }
   };
 

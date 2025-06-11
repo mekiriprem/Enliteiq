@@ -62,23 +62,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
     logout();
     setShowUserDropdown(false);
   };
-
   const getDashboardRoute = () => {
-    if (!user) return "/dashboard";
+    if (!user) return "/student-dashboard";
     
     switch (user.role) {
       case "admin":
         return "/admin-dashboard";
       case "student":
+      case "user":
         return "/student-dashboard";
       case "school":
         return "/school-dashboard";
       case "salesman":
         return "/sales-dashboard";
       default:
-        return "/dashboard";
+        return "/student-dashboard";
     }
-  };  return (
+  };return (
     <div className="dashboard-header bg-white py-2 md:py-4 px-3 md:px-6 flex items-center justify-between border-b sticky top-0 z-40 shadow-sm">
       {/* Left section */}
       <div className="flex items-center gap-2 md:gap-3 overflow-hidden">
