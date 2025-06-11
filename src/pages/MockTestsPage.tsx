@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,6 @@ import {
   BookOpen, 
   Users, 
   Star, 
-  Filter,
   Search,
   Play,
   Trophy,
@@ -31,91 +31,75 @@ interface MockTest {
   image?: string;
   date?: string;
   time?: string;
+  difficulty: string;
 }
+
+// Function to get difficulty color
+const getDifficultyColor = (difficulty: string) => {
+  switch (difficulty.toLowerCase()) {
+    case "easy":
+      return "bg-green-100 text-green-800 border-green-300";
+    case "medium":
+      return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    case "hard":
+      return "bg-red-100 text-red-800 border-red-300";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-300";
+  }
+};
 
 const MockTestsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [mockTests, setMockTests] = useState<MockTest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Track which test cards have expanded topics
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
+
+  // Define difficulties array
+  const difficulties = ["All", "Easy", "Medium", "Hard"];
 
   // Fetch mock tests from API
   useEffect(() => {
     const fetchMockTests = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/exams');
+        const response = await fetch('http://localhost:8081/api/matchsets/1/details');
         if (!response.ok) {
-          throw new Error('Failed to fetch mock tests');
+          throw new Error(
+            response.status === 404
+              ? 'Mock test data not found on the server.'
+              : `Failed to fetch mock tests: ${response.status} ${response.statusText}`
+          );
         }
         const data = await response.json();
-          // Transform API data to match MockTest interface
-        const transformedTests: MockTest[] = data.map((exam: any) => ({
-          id: exam.id,
-          title: exam.title,
-          subject: exam.subject,
-          duration: 90, // Default duration - you might want to add this to your API
-          totalQuestions: 25, // Default - you might want to add this to your API
-          rating: 4.5, // Default rating - you might want to add this to your API
-          participants: Math.floor(Math.random() * 2000) + 500, // Random participants for now
-          description: exam.description || "Practice test to improve your skills and knowledge.",
-          topics: ["General", exam.subject], // Default topics - you might want to expand this
-          isPopular: Math.random() > 0.7, // Random popular flag
-          isFree: Math.random() > 0.5, // Random free flag
-          image: exam.image,
-          date: exam.date,
-          time: exam.time
-        }));
+        // Transform API data to match MockTest interface
+        const transformedTests: MockTest[] = [{
+          id: data.id.toString(),
+          title: data.title,
+          subject: data.subject,
+          duration: 60, // Default duration
+          totalQuestions: data.questions.length,
+          rating: 4.5, // Default rating
+          participants: Math.floor(Math.random() * 2000) + 500, // Random participants
+          description: `Practice test for ${data.subject} to enhance your knowledge and skills.`,
+          topics: [data.subject, "General Knowledge"],
+          isPopular: Math.random() > 0.7,
+          isFree: Math.random() > 0.5,
+          image: undefined, // No image provided
+          date: data.date,
+          time: undefined, // No time provided
+          difficulty: "Medium", // Default difficulty
+        }];
         
         setMockTests(transformedTests);
       } catch (error) {
         console.error('Error fetching mock tests:', error);
-        setError('Failed to load mock tests. Please try again later.');
-          // Fallback to static data if API fails
-        setMockTests([
-          {
-            id: "math-olympiad-1",
-            title: "Mathematics Olympiad Practice Test 1",
-            subject: "Mathematics",
-            duration: 90,
-            totalQuestions: 25,
-            rating: 4.7,
-            participants: 1250,
-            description: "Comprehensive practice test covering algebra, geometry, and number theory concepts commonly found in mathematics olympiads.",
-            topics: ["Algebra", "Geometry", "Number Theory", "Combinatorics"],
-            isPopular: true,
-            isFree: true,
-            image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-          },
-          {
-            id: "physics-olympiad-1",
-            title: "Physics Olympiad Mechanics",
-            subject: "Physics",
-            duration: 120,
-            totalQuestions: 30,
-            rating: 4.5,
-            participants: 890,
-            description: "Advanced mechanics problems designed to test your understanding of classical physics principles.",
-            topics: ["Classical Mechanics", "Thermodynamics", "Waves", "Electromagnetism", "Quantum Physics", "Relativity"],
-            isPopular: true,
-            isFree: false
-          },
-          {
-            id: "chemistry-basic",
-            title: "Chemistry Fundamentals",
-            subject: "Chemistry",
-            duration: 60,
-            totalQuestions: 20,
-            rating: 4.3,
-            participants: 2100,
-            description: "Perfect for beginners to test their knowledge of basic chemistry concepts and reactions.",
-            topics: ["Atomic Structure", "Chemical Bonding", "Stoichiometry", "Acids & Bases"],
-            isFree: true
-          }
-        ]);
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('Failed to load mock tests. Please try again later.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -131,6 +115,7 @@ const MockTestsPage = () => {
       [testId]: !prev[testId]
     }));
   };
+
   // Get unique subjects from the loaded tests
   const subjects = ["All", ...Array.from(new Set(mockTests.map(test => test.subject)))];
 
@@ -140,8 +125,9 @@ const MockTestsPage = () => {
                          test.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.topics.some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === "All" || test.subject === selectedSubject;
+    const matchesDifficulty = selectedDifficulty === "All" || test.difficulty === selectedDifficulty;
     
-    return matchesSearch && matchesSubject;
+    return matchesSearch && matchesSubject && matchesDifficulty;
   });
 
   // Component to render topics with expand/collapse functionality
@@ -170,7 +156,7 @@ const MockTestsPage = () => {
         {isExpanded && shouldShowMoreBadge && (
           <Badge 
             variant="outline" 
-            className="text-xs cursor-pointer hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition-colors"
+            className="text-xs cursor-pointer hover:bg-gray-50 hover:text-gray-700 transition-colors"
             onClick={() => toggleTopicsExpansion(test.id)}
           >
             Show less
@@ -307,7 +293,6 @@ const MockTestsPage = () => {
                     alt={test.title}
                     className="w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                     onError={(e) => {
-                      // Fallback to gradient background if image fails to load
                       e.currentTarget.style.display = 'none';
                     }}
                   />
@@ -353,7 +338,7 @@ const MockTestsPage = () => {
                   {test.description}
                 </p>
 
-                {/* Topics - Using the TopicsSection component */}
+                {/* Topics */}
                 <TopicsSection test={test} />
 
                 {/* Stats */}

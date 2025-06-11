@@ -463,13 +463,13 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                           <PenLine size={16} />
                         </button>
                       )}
-                      <button
+                      {/* <button
                         onClick={() => navigate(`/school/${school.schoolRegistrationId}`)}
                         className="text-blue-500 hover:text-blue-700"
                         title="View Details"
                       >
                         <School size={16} />
-                      </button>
+                      </button> */}
                       {(userType === 'admin' || userType === 'sales') && (
                         <button
                           onClick={() => handleToggleStatus(school)}
@@ -479,7 +479,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                           {school.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                         </button>
                       )}
-                      {userType === 'admin' && (
+                      {/* {userType === 'admin' && (
                         <button
                           onClick={() => handleDeleteSchool(school.schoolRegistrationId)}
                           className="text-red-500 hover:text-red-700"
@@ -487,7 +487,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                         >
                           <Trash2 size={16} />
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </td>
                 </tr>
