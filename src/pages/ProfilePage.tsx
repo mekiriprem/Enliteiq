@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../components/auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { 
   User, 
   Mail, 
@@ -19,6 +20,7 @@ import DashboardHeader from "../components/dashboard/DashboardHeader";
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -337,55 +339,21 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          {/* Account Settings */}
+            {/* Quick Actions */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold mb-4">Account Settings</h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-gray-600">Receive exam updates via email</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">SMS Notifications</p>
-                    <p className="text-sm text-gray-600">Receive important updates via SMS</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                
-                <div className="pt-4 border-t border-gray-200">
-                  <button className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
-                    Change Password
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
               <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-              
-              <div className="space-y-3">
+                <div className="space-y-3">
                 <button className="w-full text-left p-3 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors">
                   Download Profile Data
                 </button>
                 <button className="w-full text-left p-3 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors">
                   Export Certificates
                 </button>
-                <button className="w-full text-left p-3 bg-yellow-50 text-yellow-700 rounded-md hover:bg-yellow-100 transition-colors">
+                <button 
+                  onClick={() => navigate('/settings')}
+                  className="w-full text-left p-3 bg-yellow-50 text-yellow-700 rounded-md hover:bg-yellow-100 transition-colors"
+                >
                   Privacy Settings
                 </button>
               </div>

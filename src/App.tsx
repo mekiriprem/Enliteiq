@@ -50,6 +50,7 @@ import TaskDetail from "./components/Dashbordspages/TaskDetail";
 
 import SchoolDetail from './pages/SchoolDetails';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 
 const queryClient = new QueryClient();
@@ -57,7 +58,7 @@ const queryClient = new QueryClient();
 // Create a layout component that conditionally shows navbar and footer
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const hideNavbarAndFooter = location.pathname === '/profile';
+  const hideNavbarAndFooter = location.pathname === '/profile' || location.pathname === '/settings';
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -219,6 +220,13 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
+              {/* Settings Page - Protected Route */}
+              <Route path="/settings" element={
+                <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'school', 'salesman']}>
+                  <SettingsPage />
+                </ProtectedRoute>
+              } />
+
               {/* Protected Dashboard Routes */}
               <Route path="/student-dashboard" element={
                   <ProtectedRoute allowedRoles={["student", "user"]}>
@@ -361,7 +369,9 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['admin']}>
                   <TaskDetail />
                 </ProtectedRoute>
-              } />              {/* Catch-all Route */}
+              } />
+              
+              {/* Catch-all Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
