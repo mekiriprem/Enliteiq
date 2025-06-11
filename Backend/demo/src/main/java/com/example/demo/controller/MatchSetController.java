@@ -46,25 +46,50 @@ public class MatchSetController {
         MatchSet matchSet = matchSetService.createMatchSet(dto);
         return ResponseEntity.ok(matchSet);
     }
-    
-    @PostMapping("/submit")
+      @PostMapping("/submit")
     public ResponseEntity<ResultDto> evaluate(@RequestBody StudentAnswerDto submission) {
+        System.out.println("=== EVALUATION DEBUG ===");
+        System.out.println("MatchSet ID: " + submission.getMatchSetId());
+        System.out.println("Student ID: " + submission.getStudentId());
+        System.out.println("Total Answers Submitted: " + submission.getAnswers().size());
+        
         Optional<MatchSet> optionalMatchSet = matchSetRepo.findById(submission.getMatchSetId());
 
         if (optionalMatchSet.isEmpty()) {
+            System.out.println("ERROR: MatchSet not found!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         MatchSet matchSet = optionalMatchSet.get();
+        System.out.println("MatchSet found: " + matchSet.getTitle());
+        System.out.println("Total Questions in MatchSet: " + matchSet.getQuestions().size());
+        
         Map<Long, String> correctAnswers = matchSet.getQuestions().stream()
             .collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));
+
+        System.out.println("=== CORRECT ANSWERS MAP ===");
+        correctAnswers.forEach((qId, correctAns) -> 
+            System.out.println("Question ID " + qId + " -> Correct Answer: '" + correctAns + "'"));
 
         int total = submission.getAnswers().size();
         int correct = 0;
 
+        System.out.println("=== ANSWER COMPARISON ===");
         for (AnswerDto ans : submission.getAnswers()) {
-            if (correctAnswers.containsKey(ans.getQuestionId()) &&
-                correctAnswers.get(ans.getQuestionId()).equalsIgnoreCase(ans.getSelectedAnswer())) {
+            String correctAnswer = correctAnswers.get(ans.getQuestionId());
+            String submittedAnswer = ans.getSelectedAnswer();
+            
+            System.out.println("Question ID: " + ans.getQuestionId());
+            System.out.println("  Submitted: '" + submittedAnswer + "' (length: " + (submittedAnswer != null ? submittedAnswer.length() : "null") + ")");
+            System.out.println("  Correct:   '" + correctAnswer + "' (length: " + (correctAnswer != null ? correctAnswer.length() : "null") + ")");
+            
+            boolean isCorrect = correctAnswers.containsKey(ans.getQuestionId()) &&
+                correctAnswer != null && submittedAnswer != null &&
+                correctAnswer.trim().equalsIgnoreCase(submittedAnswer.trim());
+            
+            System.out.println("  Match: " + isCorrect);
+            
+            if (isCorrect) {
                 correct++;
             }
         }
@@ -72,6 +97,11 @@ public class MatchSetController {
         int incorrect = total - correct;
         double percentage = (correct * 100.0) / total;
         String resultStatus = percentage >= 50 ? "Pass" : "Fail";
+
+        System.out.println("=== FINAL RESULTS ===");
+        System.out.println("Total: " + total + ", Correct: " + correct + ", Incorrect: " + incorrect);
+        System.out.println("Percentage: " + percentage + "%, Status: " + resultStatus);
+        System.out.println("========================");
 
         ResultDto result = new ResultDto();
         result.setTotalQuestions(total);
@@ -94,8 +124,7 @@ public class MatchSetController {
         matchSetService.bulkDeleteQuestions(matchSetId, questionIds);
         return ResponseEntity.ok("Questions deleted successfully");
     }
-    
-    @GetMapping
+      @GetMapping
     public ResponseEntity<List<MatchSetSummaryDto>> getAllMatchSets() {
         List<MatchSet> matchSets = matchSetRepository.findAll();
         List<MatchSetSummaryDto> summaries = matchSets.stream().map(ms -> {
@@ -104,7 +133,7 @@ public class MatchSetController {
             dto.setTitle(ms.getTitle());
             dto.setSubject(ms.getSubject());
             dto.setDate(ms.getDate());
-            dto.getDurationMinutes();
+            dto.setDurationMinutes(ms.getDurationMinutes());
             return dto;
         }).collect(Collectors.toList());
 
@@ -114,14 +143,12 @@ public class MatchSetController {
     @GetMapping("/{matchSetId}/questions")
     public ResponseEntity<List<QuestionDto>> getQuestionsByMatchSet(@PathVariable Long matchSetId) {
         MatchSet matchSet = matchSetRepository.findById(matchSetId)
-            .orElseThrow(() -> new RuntimeException("MatchSet not found"));
-
-        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
+            .orElseThrow(() -> new RuntimeException("MatchSet not found"));        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
             QuestionDto dto = new QuestionDto();
             dto.setId(q.getId());
             dto.setQuestionText(q.getQuestionText());
             dto.setOptions(q.getOptions());
-            dto.getDurationMinutes();
+            dto.setCorrectAnswer(q.getCorrectAnswer()); // ✅ Add the missing correctAnswer field
             
             return dto;
         }).toList();
@@ -139,13 +166,12 @@ public class MatchSetController {
         dto.setTitle(matchSet.getTitle());
         dto.setSubject(matchSet.getSubject());
         dto.setDate(matchSet.getDate());
-        dto.setDurationMinutes(matchSet.getDurationMinutes());
-
-        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
+        dto.setDurationMinutes(matchSet.getDurationMinutes());        List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
             QuestionDto qDto = new QuestionDto();
             qDto.setId(q.getId());
             qDto.setQuestionText(q.getQuestionText());
             qDto.setOptions(q.getOptions());
+            qDto.setCorrectAnswer(q.getCorrectAnswer()); // ✅ Add the missing correctAnswer field
             return qDto;
         }).toList();
 
@@ -154,6 +180,19 @@ public class MatchSetController {
         return ResponseEntity.ok(dto);
     }
 
+    @DeleteMapping("/{matchSetId}")
+    public ResponseEntity<String> deleteMatchSet(@PathVariable Long matchSetId) {
+        try {
+            if (matchSetRepository.existsById(matchSetId)) {
+                matchSetRepository.deleteById(matchSetId);
+                return ResponseEntity.ok("MatchSet deleted successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("MatchSet not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting MatchSet: " + e.getMessage());
+        }
+    }
 
 }
 

@@ -52,7 +52,9 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
         return [
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/school-dashboard' },
           { icon: <Users size={20} />, label: 'Students', path: '/school-students' },
+          { icon: <Users size={20} />, label: 'Users', path: '/school-users' },
           { icon: <FileText size={20} />, label: 'Tests', path: '/school-upcoming-exams' },
+          { icon: <FileText size={20} />, label: 'Mock Tests', path: '/school-mock-tests' },
           { icon: <BarChart size={20} />, label: 'Exam Results', path: '/school-exam-results' },
         ];
       case 'sales':
@@ -65,7 +67,9 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
         return [
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin-dashboard' },
           { icon: <Users size={20} />, label: 'Schools', path: '/admin-schools' },
+          { icon: <Users size={20} />, label: 'Users', path: '/admin-users' },
           { icon: <FileText size={20} />, label: 'Exam Results', path: '/admin-upcoming-exams'},
+          { icon: <FileText size={20} />, label: 'Mock Tests', path: '/admin-mock-tests' },
           { icon: <Check size={20} />, label: 'Sales Tasks', path: '/admin-tasks' },
           { icon: <Users size={20} />, label: 'Sales Team', path: '/admin-sales-team' },
         ];
@@ -148,7 +152,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
             </ul>
           </nav>
           
-          <div className="px-4 pb-6 md:pb-8 mt-auto border-t border-blue-600 pt-4 mt-4">
+          <div className="px-4 pb-6 md:pb-8 mt-auto border-t border-blue-600 pt-4">
             <Link to="/settings" className="flex items-center px-4 md:px-6 py-3 text-sm font-medium rounded-md hover:bg-blue-600 transition-colors mx-2">
               <Settings size={20} className="mr-3" />
               <span className="truncate">Settings</span>

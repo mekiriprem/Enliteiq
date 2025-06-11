@@ -40,6 +40,8 @@ import SalesTeam from "./components/Dashbordspages/Salesteam";
 import Schools from "./components/Dashbordspages/Schools";
 import Tasks from "./components/Dashbordspages/Tasks";
 import UpcomingExams from "./components/Dashbordspages/Upcomingexams";
+import Users from "./components/Dashbordspages/Users";
+import MockTests from "./components/Dashbordspages/MockTests";
 
  
 
@@ -298,12 +300,29 @@ const App = () => (
                     </div>
                   </DashboardLayout>
                 </ProtectedRoute>
-              } />
-              <Route path="/admin-sales-team" element={
+              } />              <Route path="/admin-sales-team" element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <DashboardLayout userType="admin" title="Sales Team Management" userName="Admin">
                     <div className="p-3 sm:p-4 md:p-6">
                       <SalesTeam />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-users" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Users Management" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Users userType="admin" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-mock-tests" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout userType="admin" title="Mock Tests Management" userName="Admin">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <MockTests userType="admin" />
                     </div>
                   </DashboardLayout>
                 </ProtectedRoute>
@@ -323,12 +342,29 @@ const App = () => (
                     </div>
                   </DashboardLayout>
                 </ProtectedRoute>
-              } />
-              <Route path="/school-upcoming-exams" element={
+              } />              <Route path="/school-upcoming-exams" element={
                 <ProtectedRoute allowedRoles={['school']}>
                   <DashboardLayout userType="school" title="Upcoming Exams" userName="Delhi Public School">
                     <div className="p-3 sm:p-4 md:p-6">
                       <UpcomingExams userType="school" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/school-users" element={
+                <ProtectedRoute allowedRoles={['school']}>
+                  <DashboardLayout userType="school" title="Users Management" userName="Delhi Public School">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <Users userType="school" />
+                    </div>
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/school-mock-tests" element={
+                <ProtectedRoute allowedRoles={['school']}>
+                  <DashboardLayout userType="school" title="Mock Tests Management" userName="Delhi Public School">
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <MockTests userType="school" />
                     </div>
                   </DashboardLayout>
                 </ProtectedRoute>
