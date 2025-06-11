@@ -10,5 +10,7 @@ public class QuestionDto {
     private String questionText;
     private List<String> options;
     private String correctAnswer;
+    // ✅ Duration of the exam in minutes
+    private Integer durationMinutes;
 }
 
