@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ExamResults from "../components/Dashbordspages/examresults";
 import UpcomingExams from "../components/Dashbordspages/Upcomingexams";
+import DashboardHeader from "../components/dashboard/DashboardHeader";
 import { useLocation } from "react-router-dom";
 import { 
   BarChart3, 
@@ -59,7 +60,7 @@ const getMockUserData = () => ({
 });
 
 const StudentDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'profile' | 'results' | 'upcoming' | 'performance' | 'resources' | 'achievements'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'results' | 'upcoming' | 'performance' | 'resources' | 'achievements'>('dashboard');
   const [userData] = useState(getMockUserData());
   const location = useLocation();
 
@@ -100,8 +101,6 @@ const StudentDashboard: React.FC = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardOverview userData={userData} />;
-      case 'profile':
-        return <ProfileSection userData={userData} />;
       case 'results':
         return <ExamResults userType="student" />;
       case 'upcoming':
@@ -118,40 +117,44 @@ const StudentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200 overflow-x-auto">
-          {[
-            { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-            { id: 'profile', label: 'Profile', icon: User },
-            { id: 'results', label: 'Exam Results', icon: Trophy },
-            { id: 'upcoming', label: 'Upcoming Exams', icon: Calendar },
-            { id: 'performance', label: 'Performance', icon: TrendingUp },
-            { id: 'resources', label: 'Study Resources', icon: BookOpen },
-            { id: 'achievements', label: 'Achievements', icon: Award }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                className={`flex items-center px-4 py-3 text-sm font-medium whitespace-nowrap ${
-                  activeTab === tab.id 
-                    ? 'text-education-blue border-b-2 border-education-blue bg-blue-50' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveTab(tab.id as any)}
-              >
-                <Icon size={16} className="mr-2" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-        
-        {/* Tab Content */}
-        <div className="overflow-hidden">
-          {renderTabContent()}
+    <div className="min-h-screen bg-gray-50">
+      {/* Dashboard Header/Navbar */}
+      <DashboardHeader title="Student Dashboard" userName={userData.name} />
+      
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          {/* Navigation Tabs */}
+          <div className="flex border-b border-gray-200 overflow-x-auto">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+              { id: 'results', label: 'Exam Results', icon: Trophy },
+              { id: 'upcoming', label: 'Upcoming Exams', icon: Calendar },
+              { id: 'performance', label: 'Performance', icon: TrendingUp },
+              { id: 'resources', label: 'Study Resources', icon: BookOpen },
+              { id: 'achievements', label: 'Achievements', icon: Award }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  className={`flex items-center px-4 py-3 text-sm font-medium whitespace-nowrap ${
+                    activeTab === tab.id 
+                      ? 'text-education-blue border-b-2 border-education-blue bg-blue-50' 
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setActiveTab(tab.id as any)}
+                >
+                  <Icon size={16} className="mr-2" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* Tab Content */}
+          <div className="overflow-hidden">
+            {renderTabContent()}
+          </div>
         </div>
       </div>
     </div>
@@ -273,47 +276,6 @@ const DashboardOverview: React.FC<{ userData: any }> = ({ userData }) => {
               <Progress value={subject.score} className="h-2 mt-2" />
             </div>
           ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Profile Section Component
-const ProfileSection: React.FC<{ userData: any }> = ({ userData }) => {
-  return (
-    <div className="p-6 space-y-6">
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-xl font-semibold mb-6">Student Profile</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Full Name</label>
-              <p className="text-lg font-medium">{userData.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Email</label>
-              <p className="text-lg">{userData.email}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">School</label>
-              <p className="text-lg">{userData.school}</p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Class</label>
-              <p className="text-lg">{userData.class}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Joined</label>
-              <p className="text-lg">{userData.joinDate}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Study Hours</label>
-              <p className="text-lg">{userData.totalStudyHours} hours</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ type User = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "student" | "school" | "salesman";
+  role: "admin" | "student" | "school" | "salesman" | "user";
 };
 
 type AuthContextType = {

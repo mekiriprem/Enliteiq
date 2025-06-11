@@ -51,9 +51,7 @@ const LoginForm: React.FC = () => {
 
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
-      }
-
-      // Log the raw response for debugging
+      }      // Log the raw response for debugging
       console.log("Login successful, raw response:", data);
 
       // Normalize role to handle inconsistencies (trim and lowercase)

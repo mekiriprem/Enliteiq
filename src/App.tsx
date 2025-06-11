@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useContext } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AuthRedirect from "./components/auth/AuthRedirect";
@@ -49,9 +49,26 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import TaskDetail from "./components/Dashbordspages/TaskDetail";
 
 import SchoolDetail from './pages/SchoolDetails';
+import ProfilePage from './pages/ProfilePage';
 
 
 const queryClient = new QueryClient();
+
+// Create a layout component that conditionally shows navbar and footer
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const hideNavbarAndFooter = location.pathname === '/profile';
+  
+  return (
+    <div className="flex flex-col min-h-screen">
+      {!hideNavbarAndFooter && <Navbar />}
+      <main className="flex-grow">
+        {children}
+      </main>
+      {!hideNavbarAndFooter && <Footer />}
+    </div>
+  );
+};
 
 // Define interface for layout components
 interface WithLayoutProps {
@@ -174,10 +191,9 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <HashRouter>
-          <ScrollToTop /> {/* Add this component */}
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow">            <Routes>
+          <ScrollToTop />
+          <AppLayout>
+            <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<Login />} />
@@ -194,14 +210,22 @@ const App = () => (
               <Route path="/forgotpassword" element={<Forgotpassword />} />
 
               {/* Auth Redirect - determines dashboard based on role */}
-              <Route path="/dashboard" element={<AuthRedirect />} />
-
-              {/* Protected Dashboard Routes */}
-              <Route path="/student-dashboard" element={
-                <ProtectedRoute allowedRoles={['student']}>
-                  <StudentDashboardWithLayout />
+              <Route path="/dashboard" element={<Navigate to="/student-dashboard" replace />} />
+              
+              {/* Profile Page - Protected Route */}
+              <Route path="/profile" element={
+                <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'school', 'salesman']}>
+                  <ProfilePage />
                 </ProtectedRoute>
               } />
+              
+              {/* Protected Dashboard Routes */}
+              <Route path="/student-dashboard" element={
+                  <ProtectedRoute allowedRoles={["student", "user"]}>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/school-dashboard" element={
                 <ProtectedRoute allowedRoles={['school']}>
                   <SchoolDashboardWithLayout />
@@ -337,14 +361,10 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['admin']}>
                   <TaskDetail />
                 </ProtectedRoute>
-              } />
-
-              {/* Catch-all Route */}
+              } />              {/* Catch-all Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </main>
-            <Footer />
-          </div>
+          </AppLayout>
         </HashRouter>
       </AuthProvider>
     </TooltipProvider>
