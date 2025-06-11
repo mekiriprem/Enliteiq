@@ -8,7 +8,6 @@ import {
   Clock, 
   BookOpen, 
   Users, 
-  Star, 
   Search,
   Play,
   Trophy,
@@ -22,7 +21,6 @@ interface MockTest {
   subject: string;
   duration: number; // in minutes
   totalQuestions: number;
-  rating: number;
   participants: number;
   description: string;
   topics: string[];
@@ -31,34 +29,15 @@ interface MockTest {
   image?: string;
   date?: string;
   time?: string;
-  difficulty: string;
 }
-
-// Function to get difficulty color
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty.toLowerCase()) {
-    case "easy":
-      return "bg-green-100 text-green-800 border-green-300";
-    case "medium":
-      return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    case "hard":
-      return "bg-red-100 text-red-800 border-red-300";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-300";
-  }
-};
 
 const MockTestsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [mockTests, setMockTests] = useState<MockTest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
-
-  // Define difficulties array
-  const difficulties = ["All", "Easy", "Medium", "Hard"];
 
   // Fetch mock tests from API
   useEffect(() => {
@@ -72,15 +51,13 @@ const MockTestsPage = () => {
               : `Failed to fetch mock tests: ${response.status} ${response.statusText}`
           );
         }
-        const data = await response.json();
-        // Transform API data to match MockTest interface
+        const data = await response.json();        // Transform API data to match MockTest interface
         const transformedTests: MockTest[] = [{
           id: data.id.toString(),
           title: data.title,
           subject: data.subject,
           duration: 60, // Default duration
           totalQuestions: data.questions.length,
-          rating: 4.5, // Default rating
           participants: Math.floor(Math.random() * 2000) + 500, // Random participants
           description: `Practice test for ${data.subject} to enhance your knowledge and skills.`,
           topics: [data.subject, "General Knowledge"],
@@ -89,7 +66,6 @@ const MockTestsPage = () => {
           image: undefined, // No image provided
           date: data.date,
           time: undefined, // No time provided
-          difficulty: "Medium", // Default difficulty
         }];
         
         setMockTests(transformedTests);
@@ -118,16 +94,15 @@ const MockTestsPage = () => {
 
   // Get unique subjects from the loaded tests
   const subjects = ["All", ...Array.from(new Set(mockTests.map(test => test.subject)))];
-
   // Filter tests based on search and filters
   const filteredTests = mockTests.filter(test => {
     const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.topics.some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === "All" || test.subject === selectedSubject;
-    const matchesDifficulty = selectedDifficulty === "All" || test.difficulty === selectedDifficulty;
+    // Note: Difficulty filtering removed as MockTest interface doesn't have difficulty property
     
-    return matchesSearch && matchesSubject && matchesDifficulty;
+    return matchesSearch && matchesSubject;
   });
 
   // Component to render topics with expand/collapse functionality
@@ -227,10 +202,9 @@ const MockTestsPage = () => {
         </div>
       </div>
 
-      <div className="education-container py-12">
-        {/* Search and Filters */}
+      <div className="education-container py-12">        {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="md:col-span-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -255,29 +229,13 @@ const MockTestsPage = () => {
                 ))}
               </select>
             </div>
-
-            {/* Difficulty Filter */}
-            <div>
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {difficulties.map(difficulty => (
-                  <option key={difficulty} value={difficulty}>{difficulty}</option>
-                ))}
-              </select>
-            </div>
           </div>
-        </div>
-
-        {/* Results Count */}
+        </div>{/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-600">
             Showing <span className="font-semibold">{filteredTests.length}</span> mock tests
             {searchTerm && ` for "${searchTerm}"`}
             {selectedSubject !== "All" && ` in ${selectedSubject}`}
-            {selectedDifficulty !== "All" && ` (${selectedDifficulty} difficulty)`}
           </p>
         </div>
 
@@ -301,27 +259,13 @@ const MockTestsPage = () => {
                     <BookOpen className="h-16 w-16 text-white/80" />
                   </div>
                 )}
-                
-                {/* Badges */}
+                  {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
                   {test.isPopular && (
                     <Badge className="bg-orange-500 text-white border-none">
-                      <Star className="h-3 w-3 mr-1" />
                       Popular
                     </Badge>
                   )}
-                  {test.isFree && (
-                    <Badge className="bg-green-500 text-white border-none">
-                      Free
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Difficulty Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <Badge className={getDifficultyColor(test.difficulty)}>
-                    {test.difficulty}
-                  </Badge>
                 </div>
               </div>
 
@@ -339,9 +283,7 @@ const MockTestsPage = () => {
                 </p>
 
                 {/* Topics */}
-                <TopicsSection test={test} />
-
-                {/* Stats */}
+                <TopicsSection test={test} />                {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -355,17 +297,6 @@ const MockTestsPage = () => {
                     <Users className="h-4 w-4" />
                     <span>{test.participants}</span>
                   </div>
-                </div>
-
-                {/* Rating */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium ml-1">{test.rating}</span>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    ({test.participants} participants)
-                  </span>
                 </div>
 
                 {/* Action Button */}
@@ -387,12 +318,10 @@ const MockTestsPage = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No mock tests found</h3>
             <p className="text-gray-600 mb-4">
               Try adjusting your search terms or filters to find what you're looking for.
-            </p>
-            <Button 
+            </p>            <Button 
               onClick={() => {
                 setSearchTerm("");
                 setSelectedSubject("All");
-                setSelectedDifficulty("All");
               }}
               variant="outline"
             >

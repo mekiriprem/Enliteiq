@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { mockExamData, mockQuestions } from "./data";
-import { Question, MockTestState } from "./types";
+import { Question, MockTestState, ExamData } from "./types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // Components
@@ -16,24 +15,194 @@ const MockTestPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Use mock data but override ID if provided
-  const examData = {
-    ...mockExamData,
-    id: id || mockExamData.id
-  };
-  
-  // State variables
+  // State for exam data and questions
+  const [examData, setExamData] = useState<ExamData | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+    // State variables
   const [state, setState] = useState<MockTestState>({
     currentQuestion: 0,
-    selectedAnswers: Array(mockQuestions.length).fill(null),
-    markedForReview: Array(mockQuestions.length).fill(false),
-    timeLeft: examData.duration * 60, // in seconds
+    selectedAnswers: [],
+    markedForReview: [],
+    timeLeft: 0, // Will be set when data loads
     testSubmitted: false
   });
 
   const [showInstructions, setShowInstructions] = useState(true);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fetch exam data from API
+  useEffect(() => {
+    const fetchExamData = async () => {
+      if (!id) {
+        setError("No exam ID provided");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8081/api/matchsets/${id}/details`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch exam data: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Transform API data to match our ExamData interface
+        const transformedExamData: ExamData = {
+          id: data.id.toString(),
+          title: data.title,
+          subject: data.subject,
+          date: data.date,
+          duration: data.durationMinutes || 60, // Default to 60 minutes if null
+          totalQuestions: data.questions.length,
+          instructions: [
+            "Read each question carefully before selecting your answer.",
+            "You can navigate between questions using the question palette.",
+            "Mark questions for review if you want to revisit them later.",
+            "Submit your test before the time runs out.",
+            "Once submitted, you cannot change your answers."
+          ]
+        };        // Transform questions data
+        const transformedQuestions: Question[] = data.questions.map((q: {
+          id: number;
+          questionText: string;
+          options: string[];
+          correctAnswer: number | null;
+          durationMinutes: number | null;
+        }) => ({
+          id: q.id,
+          questionText: q.questionText,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          difficulty: 'medium' // Default difficulty since API doesn't provide it
+        }));
+
+        setExamData(transformedExamData);
+        setQuestions(transformedQuestions);
+        
+        // Initialize state arrays with correct length
+        setState(prev => ({
+          ...prev,
+          selectedAnswers: Array(transformedQuestions.length).fill(null),
+          markedForReview: Array(transformedQuestions.length).fill(false),
+          timeLeft: transformedExamData.duration * 60 // Convert minutes to seconds
+        }));
+        
+      } catch (error) {
+        console.error('Error fetching exam data:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load exam data');
+      } finally {
+        setIsLoading(false);
+      }
+    };    fetchExamData();
+  }, [id]);
+  // Handle actual submit test
+  const handleSubmitTest = useCallback(async () => {
+    if (!examData || !id) return;
+    
+    setState(prev => ({ ...prev, testSubmitted: true }));
+    setShowSubmitDialog(false);
+      // Prepare submission data - convert index to option letter (A, B, C, D)
+    const selectedAnswersData = state.selectedAnswers.map((answer, index) => {
+      if (answer === null) return null;
+      
+      const question = questions[index];
+      if (!question) return null;
+      
+      // Convert answer index to the actual option text
+      const selectedOptionText = question.options[answer];
+      
+      return {
+        questionId: question.id,
+        selectedAnswer: selectedOptionText // Send the actual option text
+      };    }).filter(item => item !== null);
+    
+    // Get actual user ID from localStorage
+    const getLoggedInUser = () => {
+      const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          return user;
+        } catch (err) {
+          console.error("Error parsing user data:", err);
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const loggedInUser = getLoggedInUser();
+    const studentId = loggedInUser?.id || loggedInUser?.userId || 1; // Fallback to 1 if no user
+
+    const submissionData = {
+      matchSetId: parseInt(id), // Use matchSetId instead of examId
+      studentId: studentId,
+      answers: selectedAnswersData
+    };
+
+    console.log('Submitting data:', submissionData);
+
+    try {
+      // Submit to API
+      const response = await fetch('http://localhost:8081/api/matchsets/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to submit test: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Submission result:', result);
+
+      // Clear saved progress
+      localStorage.removeItem(`mocktest_${id}_answers`);
+      localStorage.removeItem(`mocktest_${id}_marked`);
+      localStorage.removeItem(`mocktest_${id}_current`);
+
+      // Exit fullscreen
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
+      }
+      
+      toast({
+        title: "Mock Test Submitted Successfully! 🎉",
+        description: "Your answers have been saved. Redirecting to results...",
+      });
+      
+      // Navigate to results page with answers data and results
+      setTimeout(() => {
+        navigate(`/exam-results/${id}`, { 
+          state: { 
+            answers: state.selectedAnswers,
+            questions: questions,
+            examTitle: examData?.title,
+            timeSpent: (examData?.duration || 60) * 60 - state.timeLeft,
+            result: result // Include the result from backend
+          } 
+        });
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error submitting test:', error);
+      toast({
+        title: "Submission Failed",
+        description: `There was an error submitting your test: ${error.message}`,
+        variant: "destructive"
+      });
+      // Revert submission state
+      setState(prev => ({ ...prev, testSubmitted: false }));
+    }
+  }, [examData, id, state.selectedAnswers, state.timeLeft, questions, navigate, toast]);
   
   // Timer effect
   useEffect(() => {
@@ -45,7 +214,7 @@ const MockTestPage = () => {
     } else if (state.timeLeft === 0 && !state.testSubmitted) {
       handleSubmitTest();
     }
-  }, [state.timeLeft, state.testSubmitted, showInstructions]);
+  }, [state.timeLeft, state.testSubmitted, showInstructions, handleSubmitTest]);
 
   // Auto-save answers to localStorage
   useEffect(() => {
@@ -94,10 +263,9 @@ const MockTestPage = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.testSubmitted, showInstructions]);
-  
-  // Calculate progress
+    // Calculate progress
   const answeredQuestions = state.selectedAnswers.filter(answer => answer !== null).length;
-  const progress = (answeredQuestions / mockQuestions.length) * 100;
+  const progress = questions.length > 0 ? (answeredQuestions / questions.length) * 100 : 0;
   const reviewedQuestions = state.markedForReview.filter(marked => marked).length;
   
   // Handle question navigation
@@ -122,10 +290,9 @@ const MockTestPage = () => {
       return { ...prev, markedForReview: newMarked };
     });
   };
-  
-  // Handle save and next
+    // Handle save and next
   const handleSaveAndNext = () => {
-    if (state.currentQuestion < mockQuestions.length - 1) {
+    if (state.currentQuestion < questions.length - 1) {
       setState(prev => ({ ...prev, currentQuestion: prev.currentQuestion + 1 }));
     }
   };
@@ -145,44 +312,45 @@ const MockTestPage = () => {
       document.documentElement.requestFullscreen().catch(console.error);
     }
   };
-  
-  // Handle submit test confirmation
+    // Handle submit test confirmation
   const confirmSubmitTest = () => {
     setShowSubmitDialog(true);
   };
 
-  // Handle actual submit test
-  const handleSubmitTest = () => {
-    setState(prev => ({ ...prev, testSubmitted: true }));
-    setShowSubmitDialog(false);
-    
-    // Clear saved progress
-    localStorage.removeItem(`mocktest_${id}_answers`);
-    localStorage.removeItem(`mocktest_${id}_marked`);
-    localStorage.removeItem(`mocktest_${id}_current`);
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading exam data...</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Exit fullscreen
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(console.error);
-    }
-    
-    toast({
-      title: "Mock Test Submitted Successfully! 🎉",
-      description: "Your answers have been saved. Redirecting to results...",
-    });
-    
-    // Navigate to results page with answers data
-    setTimeout(() => {
-      navigate(`/exam-results/${id}`, { 
-        state: { 
-          answers: state.selectedAnswers,
-          questions: mockQuestions,
-          examTitle: examData.title,
-          timeSpent: examData.duration * 60 - state.timeLeft
-        } 
-      });
-    }, 2000);
-  };
+  // Show error state
+  if (error || !examData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Exam</h3>
+          <p className="text-gray-600 mb-4">{error || "Exam data not found"}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Show instructions modal
   if (showInstructions) {
@@ -199,10 +367,9 @@ const MockTestPage = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="education-container py-3">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between">            <div>
               <h1 className="text-lg font-semibold text-gray-900">{examData.title}</h1>
-              <p className="text-sm text-gray-600">Question {state.currentQuestion + 1} of {mockQuestions.length}</p>
+              <p className="text-sm text-gray-600">Question {state.currentQuestion + 1} of {questions.length}</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-sm text-gray-600">
@@ -240,11 +407,10 @@ const MockTestPage = () => {
         {/* Main test area */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Question and options */}
-          <div className="lg:col-span-3">
-            <QuestionContent
-              question={mockQuestions[state.currentQuestion]}
+          <div className="lg:col-span-3">            <QuestionContent
+              question={questions[state.currentQuestion]}
               currentQuestion={state.currentQuestion}
-              totalQuestions={mockQuestions.length}
+              totalQuestions={questions.length}
               selectedAnswer={state.selectedAnswers[state.currentQuestion]}
               testSubmitted={state.testSubmitted}
               handleSelectAnswer={handleSelectAnswer}
@@ -256,16 +422,15 @@ const MockTestPage = () => {
           </div>
           
           {/* Sidebar with timer and palette */}
-          <div className="lg:col-span-1 space-y-6">
-            <TimerProgress 
+          <div className="lg:col-span-1 space-y-6">            <TimerProgress 
               timeLeft={state.timeLeft}
               progress={progress}
               answeredQuestions={answeredQuestions}
-              totalQuestions={mockQuestions.length}
+              totalQuestions={questions.length}
             />
             
             <QuestionPalette
-              totalQuestions={mockQuestions.length}
+              totalQuestions={questions.length}
               currentQuestion={state.currentQuestion}
               selectedAnswers={state.selectedAnswers}
               markedForReview={state.markedForReview}
@@ -279,15 +444,14 @@ const MockTestPage = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Questions:</span>
-                  <span className="font-medium">{mockQuestions.length}</span>
+                  <span className="font-medium">{questions.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Answered:</span>
                   <span className="font-medium text-green-600">{answeredQuestions}</span>
-                </div>
-                <div className="flex justify-between">
+                </div>                <div className="flex justify-between">
                   <span className="text-gray-600">Not Answered:</span>
-                  <span className="font-medium text-red-600">{mockQuestions.length - answeredQuestions}</span>
+                  <span className="font-medium text-red-600">{questions.length - answeredQuestions}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Marked for Review:</span>
@@ -309,7 +473,7 @@ const MockTestPage = () => {
               <div className="bg-gray-50 p-3 rounded-md text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <div>Answered: <span className="font-medium text-green-600">{answeredQuestions}</span></div>
-                  <div>Not Answered: <span className="font-medium text-red-600">{mockQuestions.length - answeredQuestions}</span></div>
+                  <div>Not Answered: <span className="font-medium text-red-600">{questions.length - answeredQuestions}</span></div>
                   <div>Marked for Review: <span className="font-medium text-orange-600">{reviewedQuestions}</span></div>
                   <div>Time Left: <span className="font-medium text-blue-600">{Math.floor(state.timeLeft / 60)}:{(state.timeLeft % 60).toString().padStart(2, '0')}</span></div>
                 </div>

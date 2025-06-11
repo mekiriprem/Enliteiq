@@ -14,7 +14,7 @@ interface PerformanceChartsProps {
 
 const PerformanceCharts = ({ summaryData, difficultyData }: PerformanceChartsProps) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div className={`grid grid-cols-1 ${difficultyData.length > 0 ? 'lg:grid-cols-2' : ''} gap-6 mb-8`}>
       <Card>
         <CardHeader>
           <CardTitle className="text-xl flex items-center">
@@ -51,32 +51,34 @@ const PerformanceCharts = ({ summaryData, difficultyData }: PerformanceChartsPro
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center">
-            <BarChart2 className="mr-2 h-5 w-5 text-education-blue" />
-            Difficulty-wise Performance
-          </CardTitle>
-          <CardDescription>
-            How you performed across difficulty levels
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={difficultyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="correct" name="Correct" fill="#22C55E" />
-                <Bar dataKey="incorrect" name="Incorrect" fill="#EF4444" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {difficultyData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center">
+              <BarChart2 className="mr-2 h-5 w-5 text-education-blue" />
+              Difficulty-wise Performance
+            </CardTitle>
+            <CardDescription>
+              How you performed across difficulty levels
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={difficultyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="correct" name="Correct" fill="#22C55E" />
+                  <Bar dataKey="incorrect" name="Incorrect" fill="#EF4444" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

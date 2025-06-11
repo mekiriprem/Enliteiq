@@ -48,26 +48,27 @@ const QuestionContent = ({
 
   return (
     <Card className="h-full">
-      <CardHeader className="border-b">
-        <div className="flex justify-between items-center mb-2">
+      <CardHeader className="border-b">        <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-gray-500">
             Question {currentQuestion + 1} of {totalQuestions}
           </span>
-          <span 
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" 
-            style={{ 
-              borderColor: question.difficulty === 'easy' ? '#86EFAC' : 
-                         question.difficulty === 'medium' ? '#FDE68A' : '#FCA5A5',
-              backgroundColor: question.difficulty === 'easy' ? '#DCFCE7' : 
-                             question.difficulty === 'medium' ? '#FEF9C3' : '#FEE2E2',
-              color: question.difficulty === 'easy' ? '#166534' : 
-                   question.difficulty === 'medium' ? '#854D0E' : '#991B1B'
-            }}
-          >
-            {question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1)}
-          </span>
+          {question.difficulty && (
+            <span 
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" 
+              style={{ 
+                borderColor: question.difficulty === 'easy' ? '#86EFAC' : 
+                           question.difficulty === 'medium' ? '#FDE68A' : '#FCA5A5',
+                backgroundColor: question.difficulty === 'easy' ? '#DCFCE7' : 
+                               question.difficulty === 'medium' ? '#FEF9C3' : '#FEE2E2',
+                color: question.difficulty === 'easy' ? '#166534' : 
+                     question.difficulty === 'medium' ? '#854D0E' : '#991B1B'
+              }}
+            >
+              {question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1)}
+            </span>
+          )}
         </div>
-        <CardTitle>{question.text}</CardTitle>
+        <CardTitle>{question.questionText}</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
         <RadioGroup 

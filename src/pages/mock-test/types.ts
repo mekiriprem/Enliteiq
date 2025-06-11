@@ -15,3 +15,11 @@ export interface Question {
   correctAnswer: number | null; // Changed to allow null
   difficulty?: string; // Optional, to maintain compatibility
 }
+
+export interface MockTestState {
+  currentQuestion: number;
+  selectedAnswers: (number | null)[];
+  markedForReview: boolean[];
+  timeLeft: number; // in seconds
+  testSubmitted: boolean;
+}

@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ExamHeader from "./exams/components/ExamHeader";
 import ExamQuickInfo from "./exams/components/ExamQuickInfo";
@@ -26,6 +27,7 @@ const getLoggedInUser = () => {
 
 const ExamDetailPage = () => {
   const { id } = useParams(); // Extracts exam id, e.g., "67741591-336d-4d95-bf3b-0262a500e670"
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,17 @@ const ExamDetailPage = () => {
     }
   };
 
+  // Handle starting mock test
+  const handleStartMockTest = () => {
+    if (!user) {
+      setRegistrationError("Please login to start the mock test");
+      return;
+    }
+    
+    // Navigate to mock test page
+    navigate(`/mock-test/${id}`);
+  };
+
   // Display loading state for exam fetch
   if (loading) {
     return (
@@ -143,12 +156,10 @@ const ExamDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="education-container">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Exam Header */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">          {/* Exam Header */}
           <ExamHeader 
             title={exam.title || "Untitled Exam"}
             subject={exam.subject || "Unknown Subject"}
-            difficulty={exam.difficulty || "Unknown"}
             image={exam.image || "https://images.unsplash.com/photo-1509228623518-827b9141b9d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"}
           />
           
@@ -196,9 +207,9 @@ const ExamDetailPage = () => {
           
           {/* Action Buttons - Start Mock Test Disabled if Not Logged In */}
           <div className="p-6 border-t border-gray-200">
-            <h3 className="text-xl font-semibold text-education-dark mb-4">Exam Actions</h3>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-xl font-semibold text-education-dark mb-4">Exam Actions</h3>            <div className="bg-gray-50 p-4 rounded-lg">
               <button
+                onClick={handleStartMockTest}
                 disabled={!user}
                 className={`w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 ${
                   !user ? "opacity-50 cursor-not-allowed" : ""
