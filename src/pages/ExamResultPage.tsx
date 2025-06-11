@@ -117,7 +117,7 @@ const ExamResultPage = () => {
       if (id && (!stateData?.questions || stateData.questions.length === 0)) {
         setLoading(true);
         try {
-          const response = await fetch(`http://localhost:8081/api/matchsets/${id}/details`);
+          const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/matchsets/${id}/details`);
           if (response.ok) {
             const details: ExamDetails = await response.json();
             setExamDetails(details);

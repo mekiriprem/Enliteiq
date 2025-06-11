@@ -43,7 +43,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsLoading(true);
 
   try {
-    const response = await fetch("http://localhost:8081/api/signup", {
+    const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

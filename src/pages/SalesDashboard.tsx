@@ -11,7 +11,7 @@ const SalesDashboard: React.FC = () => {
   useEffect(() => {
     const fetchSchoolsCount = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/schools', {
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

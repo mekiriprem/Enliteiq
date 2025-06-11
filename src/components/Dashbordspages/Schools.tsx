@@ -40,7 +40,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/schools', {
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       return;
     }
     try {
-      const response = await fetch('http://localhost:8081/api/schools/register', {
+      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       if (editingSchool.password) {
         requestBody.password = editingSchool.password;
       }
-      const response = await fetch(`http://localhost:8081/api/schools/${editingSchool.schoolRegistrationId}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/${editingSchool.schoolRegistrationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
         ...school,
         status: newStatus,
       };
-      const response = await fetch(`http://localhost:8081/api/schools/${school.schoolRegistrationId}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/${school.schoolRegistrationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8081/api/schools/${id}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

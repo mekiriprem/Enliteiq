@@ -36,9 +36,9 @@ interface Template {
 }
 
 const CERTIFICATE_TEMPLATES: Template[] = [
-  { name: 'template1', title: 'Classic', previewUrl: 'http://localhost:8081/api/templates/preview/template1' },
-  { name: 'template2', title: 'Gold', previewUrl: 'http://localhost:8081/api/templates/preview/template2' },
-  { name: 'template3', title: 'Blue', previewUrl: 'http://localhost:8081/api/templates/preview/template3' }
+  { name: 'template1', title: 'Classic', previewUrl: 'https://olympiad-zynlogic.hardikgarg.me/api/templates/preview/template1' },
+  { name: 'template2', title: 'Gold', previewUrl: 'https://olympiad-zynlogic.hardikgarg.me/api/templates/preview/template2' },
+  { name: 'template3', title: 'Blue', previewUrl: 'https://olympiad-zynlogic.hardikgarg.me/api/templates/preview/template3' }
 ];
 
 const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
@@ -80,7 +80,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/exams');
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/exams');
         if (!response.ok) {
           throw new Error(`Failed to fetch exams: ${response.status}`);
         }
@@ -131,7 +131,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       }
 
       // Fetch exam results from API
-      const response = await fetch(`http://localhost:8081/api/exam/${examId}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exam/${examId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       
       if (recommend) {
         // Use the recommend API for recommending an exam
-        const response = await fetch(`http://localhost:8081/api/recommend?examId=${id}`, {
+        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/recommend?examId=${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -174,7 +174,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         console.log('API Response:', result);
       } else {
         // Use the exam update API to set status to null since there's no unrecommend API
-        const response = await fetch(`http://localhost:8081/api/exams/${id}`, {
+        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: null }),
@@ -304,7 +304,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const response = await fetch('http://localhost:8081/api/upload/image', {
+      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/upload/image', {
         method: 'POST',
         body: formData,
       });
@@ -344,7 +344,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           status: newExam.status
         };
         if (isEditing && editingExamId) {
-          const response = await fetch(`http://localhost:8081/api/exams/${editingExamId}`, {
+          const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${editingExamId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
@@ -357,7 +357,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             exam.id === editingExamId ? updatedExam : exam
           ));
         } else {
-          const response = await fetch('http://localhost:8081/api/exams', {
+          const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/exams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
@@ -455,7 +455,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       templateName: selectedTemplate
     }));
     try {
-      const response = await fetch('http://localhost:8081/api/templates/generate', {
+      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/templates/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

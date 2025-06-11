@@ -135,7 +135,7 @@ const HomePage = () => {
         password: formData.password
       };
 
-      const response = await fetch('http://localhost:8081/api/schools/register', {
+      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ const HomePage = () => {
     const fetchRecommendedExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8081/api/recommended');
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/recommended');
         
         if (!response.ok) {
           throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);
