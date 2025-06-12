@@ -35,7 +35,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ExamResultsPage from "./components/Dashbordspages/examresults";
 import Login from "./pages/Login";
 import SkillDevelopmentSection from "./pages/SkillDevelopment";
-import Aipage from "./pages/AIpage";
+import Aipage from "./pages/AIPage.tsx";
 import Forgotpassword from "./pages/ForgotPassword";
 import SalesTeam from "./components/Dashbordspages/Salesteam";
 import Schools from "./components/Dashbordspages/Schools";
