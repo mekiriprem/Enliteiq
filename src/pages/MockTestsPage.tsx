@@ -172,19 +172,19 @@ const MockTestsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
+      <div className="bg-gradient-to-b text-black">
         <div className="education-container py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Mock Tests & Practice Exams
             </h1>
-            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-blue-500 mb-8 max-w-3xl mx-auto">
               Sharpen your skills with our comprehensive collection of mock tests. 
               Practice with real exam-like conditions and track your progress.
             </p>
-            <div className="flex flex-wrap justify-center gap-8 text-blue-100">
+            <div className="flex flex-wrap justify-center gap-8 text-blue-800">
               <div className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
                 <span>Realistic Exam Experience</span>

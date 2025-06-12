@@ -1,6 +1,5 @@
-
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Award, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Award, Users, Brain } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Exam {
@@ -13,40 +12,6 @@ interface Exam {
   image?: string;
   status?: string | null;
 }
-
-const ExamCard = ({ exam }: { exam: {
-  id: string;
-  title: string;
-  subject: string;
-  date: string;
-  duration: string;
-  image: string;
-}}) => {
-  return (
-    <Link to={`/exam/${exam.id}`} className="lg:w-5/12 lg:pl-8">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-        <img 
-          src={exam.image} 
-          alt={exam.title} 
-          className="w-full h-64 object-cover object-center"
-        />
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <span className="bg-blue-100 text-education-blue text-xs font-semibold px-3 py-1 rounded-full">
-              {exam.subject}
-            </span>
-            <span className="text-sm text-gray-500">Starts {exam.date}</span>
-          </div>
-          <h3 className="text-xl font-semibold mb-2">{exam.title}</h3>
-          <p className="text-gray-600 mb-4">Prepare for this {exam.subject.toLowerCase()} exam with our comprehensive mock tests and study materials.</p>
-          <div className="text-education-blue font-medium hover:underline flex items-center">
-            Learn More <ArrowRight size={16} className="ml-1" />
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-};
 
 const Hero = () => {
   const [currentExamIndex, setCurrentExamIndex] = useState(0);
@@ -102,15 +67,6 @@ const Hero = () => {
 
     fetchRecommendedExams();
   }, []);
-  // Helper function to map backend exam data to ExamCard format
-  const mapExamToCardFormat = (exam: Exam) => ({
-    id: exam.id,
-    title: exam.title,
-    subject: exam.subject,
-    date: exam.date,
-    duration: "2 hours", // Default duration since it's not in backend model
-    image: exam.image || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-  });
 
   useEffect(() => {
     if (exams.length > 0) {
@@ -123,11 +79,35 @@ const Hero = () => {
   }, [exams.length]);
   
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-20">
-      <div className="education-container">
+    <div className="relative ">
+      {/* Background Watermarks */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="watermark watermark-1">π</div>
+        <div className="watermark watermark-2">Σ</div>
+        <div className="watermark watermark-3">H₂O</div>
+        <div className="watermark watermark-4">√</div>
+      </div>
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="particle particle-1">∫</div>
+        <div className="particle particle-2">∞</div>
+        <div className="particle particle-3">Δ</div>
+        <div className="particle particle-4">Ω</div>
+      </div>
+
+      <div className="education-container relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between">
+          <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '400px' }}>
+            <img
+              src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
+              alt="Banner"
+              className="w-full h-full object-cover rounded-lg shadow"
+            />
+          </div>
+
           <div className="lg:w-1/2 mb-10 lg:mb-0 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-education-dark mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
               Elevate Your <span className="text-education-blue">Academic</span> Journey
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl">
@@ -141,43 +121,51 @@ const Hero = () => {
                 Explore Exams <ArrowRight size={18} className="ml-2" />
               </Link>
             </div>
-          </div>          <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '520px' }}>
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-education-blue"></div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <p className="text-red-600 mb-2">Failed to load exams</p>
-                  <button 
-                    onClick={() => window.location.reload()} 
-                    className="text-education-blue hover:text-blue-700 font-medium"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
-            ) : exams.length > 0 ? (
-              exams.slice(0, 6).map((exam, index) => (
-                <div
-                  key={exam.id}
-                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                    index === currentExamIndex
-                      ? 'transform translate-x-0 opacity-100' 
-                      : 'transform translate-x-full opacity-0'
-                  }`}
-                >
-                  <ExamCard exam={mapExamToCardFormat(exam)} />
-                </div>
-              ))
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600">No exams available</p>
-              </div>
-            )}
-          </div>
+          </div>   
         </div>
+    <section className="relative py-16 overflow-hidden ">
+      {/* Background Decorations */}
+      {/* <div className="absolute inset-0 z-0 pointer-events-none">
+        <img
+          src="https://img.icons8.com/?size=100&id=11803&format=png"
+          alt="Math Symbol"
+          className="absolute top-10 left-20 opacity-20 w-16 h-16 animate-pulse"
+        />
+        <img
+          src="https://img.icons8.com/?size=100&id=12456&format=png"
+          alt="Science Symbol"
+          className="absolute bottom-20 right-20 opacity-20 w-16 h-16 animate-pulse delay-1000"
+        />
+        <img
+          src="https://img.icons8.com/?size=100&id=11804&format=png"
+          alt="Geometry Symbol"
+          className="absolute top-1/2 left-10 opacity-20 w-16 h-16 animate-pulse delay-500"
+        />
+        <div className="absolute top-10 left-10 w-64 h-64 bg-blue-500 rounded-full opacity-10 blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-500 rounded-full opacity-10 blur-3xl animate-pulse delay-1000"></div>
+      </div> */}
+
+      {/* Main Content */}
+  <div className="container mx-auto px-6 text-center">
+    <h2 className="text-4xl md:text-5xl font-extrabold text-blue mb-6 animate-fade-in">
+      Who We Are
+    </h2>
+    <p className="text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed">
+      <span className="block font-bold text-black">
+        AT ENLIGHTIQ, WE ARE COMMITTED TO TRANSFORMING THE EDUCATIONAL LANDSCAPE
+      </span>
+      THROUGH TAILORED LEARNING SOLUTIONS THAT BRIDGE ACADEMIC KNOWLEDGE WITH PRACTICAL SKILLS.
+      <br />
+      <br />
+      <span className="block font-bold text-blue-500">
+        OUR MISSION IS TO EMPOWER MINDS AND UNLOCK POTENTIAL AT EVERY STAGE OF LEARNING.
+      </span>
+    </p>
+  </div>
+
+
+     
+    </section>
         
         {/* Stats Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -206,6 +194,46 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      <style>
+        {`
+          .watermark {
+            position: absolute;
+            font-size: 4rem;
+            color: rgba(59, 130, 246, 0.1);
+            font-weight: bold;
+            pointer-events: none;
+            animation: fadeInOut 8s infinite;
+          }
+
+          .watermark-1 { top: 10%; left: 5%; }
+          .watermark-2 { top: 30%; right: 10%; }
+          .watermark-3 { bottom: 20%; left: 15%; }
+          .watermark-4 { bottom: 10%; right: 20%; }
+
+          .particle {
+            position: absolute;
+            font-size: 1.5rem;
+            color: rgba(59, 130, 246, 0.3);
+            animation: float 15s infinite linear;
+          }
+
+          .particle-1 { top: 20%; left: 10%; animation-delay: 0s; }
+          .particle-2 { top: 50%; right: 15%; animation-delay: 3s; }
+          .particle-3 { bottom: 25%; left: 25%; animation-delay: 6s; }
+          .particle-4 { bottom: 15%; right: 30%; animation-delay: 9s; }
+
+          @keyframes fadeInOut {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.2; }
+          }
+
+          @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100vh); }
+          }
+        `}
+      </style>
     </div>
   );
 };

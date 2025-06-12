@@ -114,7 +114,7 @@ const ExamDetailPage = () => {
   // Display loading state for exam fetch
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen ">
         <div className="education-container">
           <div className="text-center py-16">
             <h3 className="text-xl font-medium text-education-dark mb-2">Loading exam details...</h3>
@@ -206,7 +206,7 @@ const ExamDetailPage = () => {
           </div>
           
           {/* Action Buttons - Start Mock Test Disabled if Not Logged In */}
-          <div className="p-6 border-t border-gray-200">
+          {/* <div className="p-6 border-t border-gray-200">
             <h3 className="text-xl font-semibold text-education-dark mb-4">Exam Actions</h3>            <div className="bg-gray-50 p-4 rounded-lg">
               <button
                 onClick={handleStartMockTest}
@@ -222,8 +222,8 @@ const ExamDetailPage = () => {
                   Please login to start the mock test.
                 </div>
               )}
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
           
           {/* Tabs */}
           <div className="p-6">

@@ -17,6 +17,145 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
+/* Watermark background pattern */
+body::before {
+  content: "SCIENCE ∑ π ∞   ⚛️   🔬   MATHS";
+  position: fixed;
+  top: 30%;
+  left: -20%;
+  font-size: 8rem;
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(-30deg);
+  animation: float 60s linear infinite;
+  z-index: 0;
+}
+
+/* Optional second watermark */
+body::after {
+  content: "Olympiad Prep • Science • Maths • ∞";
+  position: fixed;
+  bottom: 10%;
+  right: -40%;
+  font-size: 5rem;
+  font-family: 'Courier New', Courier, monospace;
+  color: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(20deg);
+  animation: floatReverse 80s linear infinite;
+  z-index: 0;
+}
+/* Global body styles */
+body {
+  position: relative;
+  background: radial-gradient(circle at top left, #0f172a, #1e293b 60%, #0f172a 100%);
+  background-attachment: fixed;
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Watermark 1 - Big symbols floating diagonally */
+body::before {
+  content: "∑ π ∞ ⚛️ 🔬 MATH SCIENCE";
+  position: fixed;
+  top: 20%;
+  left: -30%;
+  font-size: 10rem;
+  font-weight: 900;
+  font-family: 'Courier New', Courier, monospace;
+  color: rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(-30deg);
+  animation: floatDiagonal 90s linear infinite;
+  z-index: 0;
+}
+
+/* Watermark 2 - Reversed */
+body::after {
+  content: "OLYMPIAD ∞ 🚀 🧠 𝛑 SCIENCE MATH";
+  position: fixed;
+  bottom: 15%;
+  right: -40%;
+  font-size: 6rem;
+  font-weight: 800;
+  font-family: 'Courier New', Courier, monospace;
+  color: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(20deg);
+  animation: floatReverse 120s linear infinite;
+  z-index: 0;
+}
+
+/* Float animations */
+@keyframes floatDiagonal {
+  0% { transform: translateX(0) rotate(-30deg); }
+  100% { transform: translateX(100vw) rotate(-30deg); }
+}
+@keyframes floatReverse {
+  0% { transform: translateX(0) rotate(20deg); }
+  100% { transform: translateX(-100vw) rotate(20deg); }
+}
+
+/* Additional fade-in effect */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
+}
+
+/* Slow spin */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 30s infinite linear;
+}
+
+
+/* Float animation */
+@keyframes float {
+  0% {
+    transform: translateX(0) rotate(-30deg);
+  }
+  100% {
+    transform: translateX(100vw) rotate(-30deg);
+  }
+}
+
+@keyframes floatReverse {
+  0% {
+    transform: translateX(0) rotate(20deg);
+  }
+  100% {
+    transform: translateX(-100vw) rotate(20deg);
+  }
+}
+
+ @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 20s infinite linear;
+        }
 
 @keyframes logo-spin {
   from {

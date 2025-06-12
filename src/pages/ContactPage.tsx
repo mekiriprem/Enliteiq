@@ -79,7 +79,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen ">
       <div className="education-container">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Contact Us</h1>
@@ -106,8 +106,8 @@ const ContactPage = () => {
                   <Mail className="h-5 w-5 mr-3 text-education-blue mt-0.5" />
                   <div>
                     <p className="font-medium">Email</p>
-                    <a href="mailto:info@myolympiad.com" className="text-education-blue hover:underline">
-                      info@myolympiad.com
+                    <a href="mailto:collaborations@enlightiq.in" className="text-education-blue hover:underline">
+                      collaborations@enlightiq.in
                     </a>
                   </div>
                 </div>
@@ -125,9 +125,10 @@ const ContactPage = () => {
                   <div>
                     <p className="font-medium">Address</p>
                     <p className="text-gray-600">
-                      123 Education Street<br />
-                      Learning City, ED 54321<br />
-                      United States
+                      Aishwarya Towers <br/>
+                      Ayyapa Society<br />
+                      Madhapur, Hyderabad<br />
+                      500081
                     </p>
                   </div>
                 </div>
@@ -296,7 +297,7 @@ const ContactPage = () => {
                 <CardContent className="p-0">
                   <div className="aspect-video w-full">
                     <iframe 
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.3059353029!2d-74.25986548248684!3d40.697149413874705!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sca!4v1619794407976!5m2!1sen!2sca" 
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.1228547098517!2d78.38736047493626!3d17.453832983444805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb91d79d2c328b%3A0x34bc93ee48e4f196!2sAishwarya%20Tower!5e0!3m2!1sen!2sin!4v1749725698581!5m2!1sen!2sin"
                       width="100%" 
                       height="100%" 
                       style={{ border: 0 }} 

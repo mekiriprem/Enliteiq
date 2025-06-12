@@ -45,7 +45,7 @@ const ExamsPage = () => {
   const subjects = [...new Set(exams.map(exam => exam.subject).filter(subject => subject))];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen">
       <div className="education-container">
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Available Exams</h1>

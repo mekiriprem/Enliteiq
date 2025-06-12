@@ -7,9 +7,9 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="education-container">
         <div className="max-w-md mx-auto text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-education-blue">My Olympiad</Link>
+          <Link to="/" className="text-2xl font-bold text-education-blue">Enlightiq</Link>
           <h1 className="mt-6 text-3xl font-bold text-education-dark">Create Your Account</h1>
-          <p className="mt-2 text-gray-600">Join My Olympiad to start your learning journey</p>
+          <p className="mt-2 text-gray-600">Join Enlightiq to start your learning journey</p>
         </div>
         
         <RegisterForm />

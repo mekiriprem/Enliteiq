@@ -140,10 +140,10 @@ const BlogPage = () => {
   const featuredPosts = blogPosts.filter(post => post.featured);
   
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-scre py-12">
       <div className="education-container">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">My Olympiad Blog</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Enlightiq Blog</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Stay updated with the latest news, tips, and insights for academic olympiads and competitions.
           </p>
@@ -344,7 +344,7 @@ const BlogPage = () => {
         </div>
         
         {/* Newsletter Signup */}
-        <div className="bg-education-blue/10 rounded-lg p-8 text-center">
+        {/* <div className="bg-education-blue/10 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold mb-2 text-education-dark">Stay Updated</h2>
           <p className="text-gray-600 mb-6 max-w-xl mx-auto">
             Subscribe to our newsletter to receive the latest articles, olympiad tips, and exclusive resources directly in your inbox.
@@ -359,7 +359,7 @@ const BlogPage = () => {
               Subscribe <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -1,15 +1,19 @@
-
 import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
 import TestimonialCard from "../components/home/TestimonialCard";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
-  ArrowRight, School,
+  ArrowRight,
+  School,
   Users,
   BarChart3,
+  Award,
+  BookOpen,
+  Brain,
 } from "lucide-react";
 import ExamCard from "../components/exams/ExamCard";
+
 
 interface Exam {
   id: string;
@@ -24,7 +28,6 @@ interface Exam {
 
 const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // State for school registration form
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
@@ -33,7 +36,6 @@ const HomePage = () => {
     password: "",
     confirmPassword: "",
   });
-  // Handler for input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -41,104 +43,87 @@ const HomePage = () => {
       [name]: value,
     }));
 
-    // Real-time validation
-    if (name === 'schoolEmail') {
-      if (value.trim() === '') {
+    if (name === "schoolEmail") {
+      if (value.trim() === "") {
         setEmailError(null);
       } else if (!isValidEmail(value)) {
-        setEmailError('Please enter a valid email address');
+        setEmailError("Please enter a valid email address");
       } else {
         setEmailError(null);
       }
     }
 
-    if (name === 'confirmPassword' || name === 'password') {
-      const currentPassword = name === 'password' ? value : formData.password;
-      const currentConfirmPassword = name === 'confirmPassword' ? value : formData.confirmPassword;
+    if (name === "confirmPassword" || name === "password") {
+      const currentPassword = name === "password" ? value : formData.password;
+      const currentConfirmPassword = name === "confirmPassword" ? value : formData.confirmPassword;
       
-      if (currentConfirmPassword.trim() === '') {
+      if (currentConfirmPassword.trim() === "") {
         setPasswordError(null);
       } else if (currentPassword !== currentConfirmPassword) {
-        setPasswordError('Passwords do not match');
+        setPasswordError("Passwords do not match");
       } else {
         setPasswordError(null);
       }
     }
-  };// State for form submission
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  // Real-time validation states
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Email validation function
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-  // Validation function
+
   const validateForm = () => {
     const errors: string[] = [];
-
-    // Check all required fields
     if (!formData.schoolName.trim()) errors.push("School name is required");
     if (!formData.schoolAddress.trim()) errors.push("School address is required");
     if (!formData.schoolEmail.trim()) errors.push("School email is required");
     if (!formData.schoolAdminName.trim()) errors.push("School admin name is required");
     if (!formData.password.trim()) errors.push("Password is required");
     if (!formData.confirmPassword.trim()) errors.push("Confirm password is required");
-
-    // Email validation
     if (formData.schoolEmail && !isValidEmail(formData.schoolEmail)) {
       errors.push("Please enter a valid email address");
     }
-
-    // Password confirmation
     if (formData.password !== formData.confirmPassword) {
       errors.push("Passwords do not match");
     }
-
-    // Password strength (optional)
     if (formData.password && formData.password.length < 6) {
       errors.push("Password must be at least 6 characters long");
     }
-
     return errors;
   };
-  // Handler for form submission
+
   const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (e) e.preventDefault();
-    
-    // Reset previous errors/success
     setSubmitError(null);
     setSubmitSuccess(false);
     setEmailError(null);
     setPasswordError(null);
 
-    // Validate form
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
-      setSubmitError(validationErrors.join('. '));
+      setSubmitError(validationErrors.join(". "));
       return;
     }
 
     setIsSubmitting(true);
-
-    try {      // Prepare data for API (exclude confirmPassword)
+    try {
       const apiData = {
         schoolName: formData.schoolName.trim(),
         schoolAddress: formData.schoolAddress.trim(),
         schoolEmail: formData.schoolEmail.trim(),
         schoolAdminName: formData.schoolAdminName.trim(),
-        password: formData.password
+        password: formData.password,
       };
 
-      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools/register', {
-        method: 'POST',
+      const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/schools/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiData),
       });
@@ -149,10 +134,8 @@ const HomePage = () => {
       }
 
       const result = await response.json();
-      console.log('School registration successful:', result);
-      
-      // Show success message
-      setSubmitSuccess(true);      // Reset form
+      console.log("School registration successful:", result);
+      setSubmitSuccess(true);
       setFormData({
         schoolName: "",
         schoolAddress: "",
@@ -161,66 +144,54 @@ const HomePage = () => {
         password: "",
         confirmPassword: "",
       });
-
-      // Clear real-time validation errors
       setEmailError(null);
       setPasswordError(null);
-
-      // Close modal after a short delay to show success message
       setTimeout(() => {
         setIsModalOpen(false);
         setSubmitSuccess(false);
       }, 2000);
-
     } catch (error) {
-      console.error('Error registering school:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
+      console.error("Error registering school:", error);
+      setSubmitError(error instanceof Error ? error.message : "Registration failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-   const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
+  const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch recommended exams from the API
   useEffect(() => {
     const fetchRecommendedExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/recommended');
-        
+        const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/recommended");
         if (!response.ok) {
           throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);
         }
-        
         const exams = await response.json();
-        console.log('Fetched recommended exams:', exams);
-        
-        // Take first 3 exams for featured section
+        console.log("Fetched recommended exams:", exams);
         setFeaturedExams(exams.slice(0, 3));
       } catch (error) {
-        console.error('Error fetching recommended exams:', error);
-        setError(error instanceof Error ? error.message : 'Failed to fetch exams');
+        console.error("Error fetching recommended exams:", error);
+        setError(error instanceof Error ? error.message : "Failed to fetch exams");
       } finally {
         setLoading(false);
       }
     };
-
     fetchRecommendedExams();
   }, []);
-  // Helper function to map backend exam data to ExamCard format
+
   const mapExamToCardFormat = (exam: Exam) => ({
     id: exam.id,
     title: exam.title,
     subject: exam.subject,
     date: exam.date,
-    duration: "2 hours", // Default duration since it's not in backend model
-    image: exam.image || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+    duration: "2 hours",
+    image: exam.image || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
   });
 
-  // Sample data for testimonials
   const testimonials = [
     {
       name: "Sarah Johnson",
@@ -244,14 +215,21 @@ const HomePage = () => {
       rating: 5,
     },
   ];
+
   return (
     <div>
       <Hero />
-      <Features />
+
+
+      
+      {/* <Features /> */}
 
       {/* Featured Exams Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="education-container">
+      <section className="py-16 science-math-bg relative overflow-hidden">
+        <div className="watermark watermark-pi"></div>
+        <div className="watermark watermark-atom"></div>
+        <div className="watermark watermark-graph"></div>
+        <div className="education-container relative z-10">
           <div className="flex justify-between items-center mb-10">
             <Link to="/exams">
               <h2 className="text-3xl font-bold text-education-dark">Featured Exams</h2>
@@ -293,9 +271,14 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Skill Development Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="education-container">
+      {/* Why Choose Enlighthiq Section */}
+      
+
+      {/* Skill Development Section
+      <section className="py-16 science-math-bg relative overflow-hidden">
+        <div className="watermark watermark-equation"></div>
+        <div className="watermark watermark-geometry"></div>
+        <div className="education-container relative z-10">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-education-dark">Skill Development</h2>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
@@ -303,7 +286,7 @@ const HomePage = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col">
               <div className="flex items-center mb-4 text-education-blue text-2xl">
                 <span className="mr-3 text-3xl">📚</span>
                 <h3 className="text-xl font-semibold">Academic Skills</h3>
@@ -316,7 +299,7 @@ const HomePage = () => {
                 <li>Digital literacy</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col">
               <div className="flex items-center mb-4 text-education-blue text-2xl">
                 <span className="mr-3 text-3xl">🧠</span>
                 <h3 className="text-xl font-semibold">Cognitive & Thinking Skills</h3>
@@ -330,7 +313,7 @@ const HomePage = () => {
                 <li>Memory strategies</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col">
               <div className="flex items-center mb-4 text-education-blue text-2xl">
                 <span className="mr-3 text-3xl">🗣</span>
                 <h3 className="text-xl font-semibold">Communication Skills</h3>
@@ -344,7 +327,7 @@ const HomePage = () => {
                 <li>Digital communication (email, chat, etc.)</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col">
               <div className="flex items-center mb-4 text-education-blue text-2xl">
                 <span className="mr-3 text-3xl">💡</span>
                 <h3 className="text-xl font-semibold">Personal & Life Skills</h3>
@@ -358,7 +341,7 @@ const HomePage = () => {
                 <li>Basic financial literacy (9&10)</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col">
               <div className="flex items-center mb-4 text-education-blue text-2xl">
                 <span className="mr-3 text-3xl">🌍</span>
                 <h3 className="text-xl font-semibold">Social & Emotional Skills</h3>
@@ -374,11 +357,13 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* For Schools Section */}
-      <section className="py-16 bg-white">
-        <div className="education-container">
+      <section className="py-16 science-math-bg relative overflow-hidden">
+        <div className="watermark watermark-circuit"></div>
+        <div className="watermark watermark-formula"></div>
+        <div className="education-container relative z-10">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-education-dark">For Schools</h2>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
@@ -386,7 +371,7 @@ const HomePage = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md transition hover:shadow-lg">
               <div className="flex items-center mb-4 text-education-blue">
                 <School size={32} className="mr-3" />
                 <h3 className="text-xl font-semibold">School Registration</h3>
@@ -394,11 +379,8 @@ const HomePage = () => {
               <p className="text-gray-700 mb-4">
                 Register your school as a partner and gain access to our comprehensive exam preparation platform.
               </p>
-              <Link to="/school-registration" className="text-blue-600 hover:text-blue-800 flex items-center font-semibold">
-                Learn More <ArrowRight size={18} className="ml-2" />
-              </Link>
             </div>
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md transition hover:shadow-lg">
               <div className="flex items-center mb-4 text-blue-400">
                 <Users size={32} className="mr-3" />
                 <h3 className="text-xl font-semibold">Bulk Registration</h3>
@@ -406,11 +388,8 @@ const HomePage = () => {
               <p className="text-gray-700 mb-4">
                 Register multiple students at once and manage their accounts from a central dashboard.
               </p>
-              <Link to="/bulk-registration" className="text-blue-600 hover:text-blue-800 flex items-center font-semibold">
-                Learn More <ArrowRight size={18} className="ml-2" />
-              </Link>
             </div>
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md transition hover:shadow-lg">
               <div className="flex items-center mb-4 text-blue-600">
                 <BarChart3 size={32} className="mr-3" />
                 <h3 className="text-xl font-semibold">Performance Tracking</h3>
@@ -418,9 +397,6 @@ const HomePage = () => {
               <p className="text-gray-700 mb-4">
                 Monitor your students' progress and performance with detailed analytics and reports.
               </p>
-              <Link to="/performance-tracking" className="text-blue-600 hover:text-blue-800 flex items-center font-semibold">
-                Learn More <ArrowRight size={18} className="ml-2" />
-              </Link>
             </div>
           </div>
           <div className="text-center mt-12">
@@ -443,9 +419,8 @@ const HomePage = () => {
           <div
             className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
             onClick={(e) => e.stopPropagation()}
-          >            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">School Registration</h2>
-            
-            {/* Success Message */}
+          >
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">School Registration</h2>
             {submitSuccess && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
                 <p className="text-green-800 text-sm text-center">
@@ -453,16 +428,11 @@ const HomePage = () => {
                 </p>
               </div>
             )}
-
-            {/* Error Message */}
             {submitError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-800 text-sm">
-                  {submitError}
-                </p>
+              <div className="mb-4 p-3 bg-red-50 border border-green-200 rounded-md">
+                <p className="text-red-800 text-sm">{submitError}</p>
               </div>
             )}
-
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolName">
@@ -491,7 +461,8 @@ const HomePage = () => {
                   placeholder="Enter school address"
                   required
                 />
-              </div>              <div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolEmail">
                   School Email
                 </label>
@@ -502,8 +473,8 @@ const HomePage = () => {
                   onChange={handleInputChange}
                   className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
                     emailError 
-                      ? 'border-red-300 focus:ring-red-500' 
-                      : 'border-gray-300 focus:ring-blue-500'
+                      ? "border-red-300 focus:ring-red-500" 
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                   placeholder="Enter school email"
                   required
@@ -539,7 +510,8 @@ const HomePage = () => {
                   placeholder="Enter password"
                   required
                 />
-              </div>              <div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
@@ -550,8 +522,8 @@ const HomePage = () => {
                   onChange={handleInputChange}
                   className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
                     passwordError 
-                      ? 'border-red-300 focus:ring-red-500' 
-                      : 'border-gray-300 focus:ring-blue-500'
+                      ? "border-red-300 focus:ring-red-500" 
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                   placeholder="Confirm password"
                   required
@@ -560,7 +532,8 @@ const HomePage = () => {
                   <p className="mt-1 text-sm text-red-600">{passwordError}</p>
                 )}
               </div>
-            </div>            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            </div>
+            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
               <button
                 onClick={() => setIsModalOpen(false)}
                 disabled={isSubmitting}
@@ -573,7 +546,7 @@ const HomePage = () => {
                 disabled={isSubmitting}
                 className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold transition-all duration-300"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </div>
@@ -581,30 +554,38 @@ const HomePage = () => {
       )}
 
       {/* Olympiad Coordinator Section */}
-      <section className="py-16 bg-white">
-        <div className="education-container text-center bg-blue-600 text-white rounded-xl border border-blue-200 py-12 px-6">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Become an Olympiad Coordinator</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Join our team of dedicated educators and help students excel in competitive exams. As a coordinator, you'll organize exams, provide guidance, and connect schools with our platform.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-y-4 sm:gap-x-4">
-            <Link
-              to="/coordinator-application"
-              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-md transition-all duration-shadow-sm"
-            >
-              Apply Now
-            </Link>
-            <Link
-              to="/contact"
-              className="border border-white text-white hover:bg-blue-700 font-semibold py-3 px-8 rounded-md transition-all duration-300"
-            >
-              Contact Us
-            </Link>
+      <section className="py-16 science-math-bg relative overflow-hidden">
+        <div className="watermark watermark-pi"></div>
+        <div className="watermark watermark-atom"></div>
+        <div className="education-container relative z-10">
+          <div className="text-center  text-black rounded-xl py-12 px-6">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Become an Olympiad Coordinator</h2>
+            <p className="text-lg mb-8 max-w-2xl mx-auto">
+              Join our team of dedicated educators and help students excel in competitive exams. As a coordinator, you'll organize exams, provide guidance, and connect schools with our platform.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-y-4 sm:gap-x-4">
+              <Link
+                to="/coordinator-application"
+                className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-md transition-all duration-300 shadow-sm"
+              >
+                Apply Now
+              </Link>
+              <Link
+                to="/contact"
+                className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-md transition-all duration-300 shadow-sm"
+              >
+                Contact Us
+              </Link>
+            </div>
           </div>
         </div>
-      </section>      {/* Testimonials Section */}
-      <section className="py-16 bg-white">
-        <div className="education-container">
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 science-math-bg relative overflow-hidden">
+        <div className="watermark watermark-equation"></div>
+        <div className="watermark watermark-geometry"></div>
+        <div className="education-container relative z-10">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-blue-800 mb-4">What Our Users Say</h2>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
@@ -618,7 +599,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };

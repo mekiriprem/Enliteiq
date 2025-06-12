@@ -24,6 +24,8 @@ public class MatchSet {
     private LocalDate date;
     // ✅ Duration of the exam in minutes
     private Integer durationMinutes;
+    
+    private String image;
 
     @OneToMany(mappedBy = "matchSet", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();

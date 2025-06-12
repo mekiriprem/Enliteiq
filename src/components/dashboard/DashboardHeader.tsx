@@ -98,7 +98,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
         {/* Brand and navigation */}
         <div className="flex items-center gap-4 overflow-hidden">
           <Link to="/" className="text-xl md:text-2xl font-bold text-education-blue whitespace-nowrap">
-            My Olympiad
+            Enlightiq
           </Link>
           
           {/* Desktop Navigation */}
@@ -114,6 +114,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
             </Link>
             <Link to="/blog" className="text-education-dark hover:text-education-blue px-2 py-1 font-medium text-sm">
               Blog
+            </Link>
+            <Link to="/about" className="text-education-dark hover:text-education-blue px-2 py-1 font-medium text-sm">
+              AboutUs
             </Link>
             <Link to="/contact" className="text-education-dark hover:text-education-blue px-2 py-1 font-medium text-sm">
               Contact
@@ -206,6 +209,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
               onClick={() => setShowMobileMenu(false)}
             >
               Blog
+            </Link>
+             <Link 
+              to="/about" 
+              className="block px-3 py-2 text-base font-medium text-education-dark hover:bg-blue-50 rounded-md"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              AboutUs
             </Link>
             <Link 
               to="/contact" 

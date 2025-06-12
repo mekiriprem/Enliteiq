@@ -149,7 +149,7 @@ const AboutPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-scree py-12">
       <div className="education-container">
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">About MyOlympiad</h1>
@@ -250,6 +250,32 @@ const AboutPage = () => {
                 </CardContent>
               </Card>
             </div>
+
+            <section className="py-16 px-4">
+  <div className="flex flex-col lg:flex-row items-center gap-10">
+     <div className="lg:w-1/3 flex flex-col items-center">
+      <img
+        src="/path/to/founder.jpg"
+        alt="Founder"
+        className="w-50 h-50 rounded-full object-cover shadow-lg mb-4"
+      />
+      <p className="text-xl font-semibold text-gray-800">XXXXXXX</p>
+      <p className="text-gray-500 text-sm">Founder & Visionary</p>
+    </div>
+    {/* Message on Left */}
+    <div className="lg:w-2/3 text-center lg:text-left">
+      <h2 className="text-3xl sm:text-4xl font-semibold text-gray-800 mb-4">Founder’s Message</h2>
+      <p className="text-lg sm:text-xl text-gray-700 leading-relaxed">
+        “At the heart of our Olympiad initiative is a simple vision — to inspire young minds to think critically, solve creatively, and grow beyond limits. 
+        This platform is not just a competition; it’s a journey of discovery, passion, and learning for every student.”
+      </p>
+    </div>
+
+    {/* Founder Info on Right */}
+   
+  </div>
+</section>
+
 
             <div className="mb-12">
               <h2 className="text-2xl font-semibold mb-6 text-education-dark">Our Story</h2>
