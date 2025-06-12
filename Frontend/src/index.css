@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 169 59% 40%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 169 79% 40%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 169 59% 40%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 169 79% 40%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+}
+
+/* Animated Background Gradient */
+.background-layout {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.background-layout::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(to bottom right, #FFFFFF, #E6F7FA, #B3E5FC); /* White to light blue gradient */
+}
+
+/* Animated Circles */
+.background-circles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.background-circles .circle-1 {
+  position: absolute;
+  top: 2.5rem;
+  left: 2.5rem;
+  width: 16rem;
+  height: 16rem;
+  background-color: rgba(179, 229, 252, 0.3);
+  border-radius: 50%;
+  filter: blur(6rem);
+  animation: pulse 4s infinite;
+}
+
+.background-circles .circle-2 {
+  position: absolute;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 20rem;
+  height: 20rem;
+  background-color: rgba(135, 206, 235, 0.2);
+  border-radius: 50%;
+  filter: blur(6rem);
+  animation: pulse 4s infinite 1s;
+}
+
+.background-circles .circle-3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24rem;
+  height: 24rem;
+  background-color: rgba(224, 242, 241, 0.25);
+  border-radius: 50%;
+  filter: blur(6rem);
+  animation: spin-slow 20s infinite linear;
+}
+
+.background-circles .circle-4 {
+  position: absolute;
+  top: 5rem;
+  right: 5rem;
+  width: 8rem;
+  height: 8rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  filter: blur(4rem);
+  animation: pulse 4s infinite 0.5s;
+}
+
+/* Watermark Icons */
+.watermarks {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.watermarks .math-symbol,
+.watermarks .science-symbol,
+.watermarks .geometry-symbol {
+  position: absolute;
+  width: 4rem;
+  height: 4rem;
+  opacity: 0.2;
+  animation: pulse 3s infinite;
+}
+
+.math-symbol {
+  top: 2.5rem;
+  left: 5rem;
+}
+
+.science-symbol {
+  bottom: 5rem;
+  right: 5rem;
+  animation-delay: 1s;
+}
+
+.geometry-symbol {
+  top: 50%;
+  left: 2.5rem;
+  animation-delay: 0.5s;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.1); opacity: 0.2; }
+  100% { transform: scale(1); opacity: 0.1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
+}
+
+/* Utility Wrapper for Content */
+.content-wrapper {
+  position: relative;
+  z-index: 10;
+  flex-grow: 1; /* Ensure the content wrapper takes up available space */
+  display: flex;
+  flex-direction: column;
+  padding-top: 2rem;
+   padding-bottom: 2rem;
+}
+
+/* Ensure footer stays at the bottom */
+footer {
+  flex-shrink: 0; /* Prevent the footer from shrinking */
+  width: 100%;
+  z-index: 10; /* Ensure footer is above the background */
+}
+
+@layer components {
+  .education-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-lg;
+  }
+
+  .btn-outline {
+    @apply border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-50 font-semibold py-2 px-4 rounded-md transition-all;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+}
