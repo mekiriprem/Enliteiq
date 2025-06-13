@@ -7,7 +7,7 @@ interface Comment {
   id: string;
   text: string;
   author: string;
-  timestamp: string;
+  timestamp: string; // Format: "YYYY-MM-DD HH:MM AM/PM"
 }
 
 interface SalesMan {
@@ -20,11 +20,11 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  assignedBy: string;
-  assignedTo: SalesMan;
+  assignedBy: string; // Derived from assignedTo.name
+  assignedTo: SalesMan; // Backend field
   assignedDate: string;
   dueDate: string;
-  priority: 'high' | 'medium' | 'low' | null; // Allow null for robustness
+  priority: 'high' | 'medium' | 'low';
   status: 'completed' | 'in-progress' | 'pending';
   comments: Comment[];
   schoolId?: string;
@@ -58,6 +58,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch tasks and salesmen
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -66,12 +67,8 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
-        if (!taskResponse.ok) {
-          const errorText = await taskResponse.text();
-          throw new Error(`Failed to fetch tasks: ${errorText}`);
-        }
+        if (!taskResponse.ok) throw new Error('Failed to fetch tasks');
         const taskData: Task[] = await taskResponse.json();
-        console.log('Fetched tasks:', taskData); // Debug log
         setTasks(taskData);
 
         // Fetch salesmen
@@ -79,17 +76,11 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
-        if (!salesmanResponse.ok) {
-          const errorText = await salesmanResponse.text();
-          throw new Error(`Failed to fetch salesmen: ${errorText}`);
-        }
+        if (!salesmanResponse.ok) throw new Error('Failed to fetch salesmen');
         const salesmanData: SalesMan[] = await salesmanResponse.json();
-        console.log('Fetched salesmen:', salesmanData); // Debug log
         setSalesmen(salesmanData);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        console.error('Fetch error:', errorMessage); // Debug log
-        setError(`Error fetching data: ${errorMessage}`);
+        setError(`Error fetching data: ${err instanceof Error ? err.message : 'Unknown error'}`);
       } finally {
         setLoading(false);
       }
@@ -99,7 +90,10 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewTask((prev) => ({ ...prev, [name]: value }));
+    setNewTask((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleAddTask = async (e: React.FormEvent) => {
@@ -125,18 +119,13 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
         schoolId: newTask.schoolId,
         schoolName: newTask.schoolName,
       };
-      console.log('Adding task payload:', payload); // Debug log
       const response = await fetch(`http://localhost:8081/api/tasks/assign/${newTask.salesManId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to assign task');
-      }
+      if (!response.ok) throw new Error((await response.json()).message || 'Failed to assign task');
       const savedTask: Task = await response.json();
-      console.log('Saved task:', savedTask); // Debug log
       setTasks([...tasks, savedTask]);
       setShowAddForm(false);
       setNewTask({
@@ -151,9 +140,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
         salesManId: '',
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Add task error:', errorMessage); // Debug log
-      setError(`Error assigning task: ${errorMessage}`);
+      setError(`Error assigning task: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -195,7 +182,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
           return {
             ...task,
             status: (taskStatusUpdates[taskId] as 'completed' | 'in-progress' | 'pending') || task.status,
-            priority: (priorityUpdates[taskId] as 'high' | 'medium' | 'low' | null) || task.priority,
+            priority: (priorityUpdates[taskId] as 'high' | 'medium' | 'low') || task.priority,
             comments: updatedComments,
           };
         }
@@ -203,18 +190,14 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       })
     );
 
-    setTaskStatusUpdates((prev) => {
-      const { [taskId]: _, ...rest } = prev;
-      return rest;
-    });
-    setPriorityUpdates((prev) => {
-      const { [taskId]: _, ...rest } = prev;
-      return rest;
-    });
-    setNewComments((prev) => {
-      const { [taskId]: _, ...rest } = prev;
-      return rest;
-    });
+    const { [taskId]: removedStatus, ...remainingStatusUpdates } = taskStatusUpdates;
+    setTaskStatusUpdates(remainingStatusUpdates);
+
+    const { [taskId]: removedPriority, ...remainingPriorityUpdates } = priorityUpdates;
+    setPriorityUpdates(remainingPriorityUpdates);
+
+    const { [taskId]: removedComment, ...remainingNewComments } = newComments;
+    setNewComments(remainingNewComments);
   };
 
   const handleTaskClick = (taskId: string, schoolId?: string) => {
@@ -228,13 +211,8 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
   const filteredTasks = tasks.filter((task) => filter === 'all' || task.status === filter);
 
   const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    } catch {
-      return 'Invalid Date';
-    }
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   const getStatusClass = (status: string) => {
@@ -250,7 +228,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
     }
   };
 
-  const getPriorityClass = (priority: string | null) => {
+  const getPriorityClass = (priority: string) => {
     switch (priority) {
       case 'high':
         return 'bg-red-100 text-red-800';
@@ -268,12 +246,10 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       {error && (
         <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-md">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 text-sm underline">
-            Dismiss
-          </button>
+          <button onClick={() => setError(null)} className="ml-2 text-sm underline">Dismiss</button>
         </div>
       )}
-      {loading && <div className="text-center py-4">Loading tasks and salesmen...</div>}
+      {loading && <div className="text-center py-4">Loading...</div>}
       {!loading && (
         <>
           <div className="flex justify-between items-center mb-6">
@@ -327,17 +303,11 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                       required
                     >
                       <option value="">Select Salesman</option>
-                      {salesmen.length > 0 ? (
-                        salesmen.map((salesman) => (
-                          <option key={salesman.id} value={salesman.id}>
-                            {salesman.name || 'Unknown Salesman'}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>
-                          No salesmen available
+                      {salesmen.map((salesman) => (
+                        <option key={salesman.id} value={salesman.id}>
+                          {salesman.name}
                         </option>
-                      )}
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -402,12 +372,6 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
             </div>
 
             <div className="space-y-4">
-              {filteredTasks.length === 0 && !loading && (
-                <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No tasks found.</p>
-                </div>
-              )}
               {filteredTasks.map((task) => (
                 <div
                   key={task.id}
@@ -416,7 +380,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
-                      <h3 className="font-medium text-lg">{task.title || 'Untitled Task'}</h3>
+                      <h3 className="font-medium text-lg">{task.title}</h3>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${getStatusClass(task.status)}`}>
                           {task.status === 'in-progress'
@@ -424,9 +388,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                             : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                         </span>
                         <span className={`px-2 py-1 rounded-full text-xs ${getPriorityClass(task.priority)}`}>
-                          {task.priority
-                            ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) + ' Priority'
-                            : 'No Priority'}
+                          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
                         </span>
                         {task.schoolName ? (
                           <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
@@ -454,8 +416,8 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                       )}
                       {userType === 'admin' && (
                         <select
-                          value={priorityUpdates[task.id] || task.priority || 'medium'}
-                          onChange={(e) => handleTaskStatusChange(task.id, e)}
+                          value={priorityUpdates[task.id] || task.priority}
+                          onChange={(e) => handlePriorityChange(task.id, e)}
                           onClick={(e) => e.stopPropagation()}
                           className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                         >
@@ -467,13 +429,13 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                     </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm mb-4">{task.description || 'No description provided'}</p>
+                  <p className="text-gray-600 text-sm mb-4">{task.description}</p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                     <div className="flex items-center space-x-2">
                       <User className="h-4 w-4 text-gray-400" />
                       <span className="text-gray-500">Assigned by:</span>
-                      <span>{task.assignedBy || 'Unknown'}</span>
+                      <span>{task.assignedBy}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Calendar className="h-4 w-4 text-gray-400" />
@@ -498,7 +460,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                   {(userType === 'sales' || userType === 'admin') && (
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
-                      {task.comments?.length > 0 ? (
+                      {task.comments.length > 0 ? (
                         <ul className="space-y-2 mb-3">
                           {task.comments.map((comment) => (
                             <li key={comment.id} className="p-2 bg-gray-100 rounded-md">
@@ -506,10 +468,9 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                                 <MessageSquare className="h-4 w-4 text-gray-400 mt-0.5" />
                                 <div>
                                   <p className="text-sm text-gray-600">
-                                    <span className="font-medium">{comment.author || 'Unknown'}</span> •{' '}
-                                    {comment.timestamp || 'No timestamp'}
+                                    <span className="font-medium">{comment.author}</span> • {comment.timestamp}
                                   </p>
-                                  <p className="text-sm">{comment.text || 'No comment text'}</p>
+                                  <p className="text-sm">{comment.text}</p>
                                 </div>
                               </div>
                             </li>
@@ -551,6 +512,13 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
                 </div>
               ))}
             </div>
+
+            {filteredTasks.length === 0 && (
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No tasks found.</p>
+              </div>
+            )}
           </div>
         </>
       )}

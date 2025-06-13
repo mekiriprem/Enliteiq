@@ -18,7 +18,9 @@ public class Task {
 
     private LocalDate dueDate;
 
-    private String priority; // e.g. Low, Medium, High
+    private String priority;
+    @Column(length = 1000)
+    private String remarks;// e.g. Low, Medium, High
 
     @ManyToOne
     @JoinColumn(name = "salesman_id")
