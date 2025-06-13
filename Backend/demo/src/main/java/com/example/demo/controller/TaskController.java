@@ -1,23 +1,30 @@
 package com.example.demo.controller;
 
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.Repository.TaskRepository;
 import com.example.demo.Service.TaskService;
 import com.example.demo.dto.RemarkUpdateDto;
 import com.example.demo.dto.TaskDto;
 import com.example.demo.model.Task;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api/tasks")
-
+@CrossOrigin(origins = "*")
 public class TaskController {
 
     @Autowired
@@ -61,8 +68,8 @@ public class TaskController {
 
         return ResponseEntity.ok(dtos);
     }
-    
-    @PatchMapping("/{taskId}/remark")
+      @PatchMapping("/{taskId}/remark")
+    @CrossOrigin(origins = "*")
     public ResponseEntity<String> updateRemark(
             @PathVariable Long taskId,
             @RequestBody RemarkUpdateDto dto

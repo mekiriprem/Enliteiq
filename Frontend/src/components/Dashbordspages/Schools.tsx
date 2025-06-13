@@ -59,8 +59,8 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
     const fetchSchools = async () => {
       try {
         const url = filterStatus === 'active' 
-          ? 'http://localhost:8081/api/schools/active'
-          : 'http://localhost:8081/api/schools';
+          ? 'https://olympiad-zynlogic.hardikgarg.me/api/schools/active'
+          : 'https://olympiad-zynlogic.hardikgarg.me/api/schools';
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -116,7 +116,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       console.log('Adding school payload:', payload);
 
       // Try application/json
-      let response = await fetch('http://localhost:8081/api/schools/register', {
+      let response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
             formDataPayload.append(key, value as string);
           });
 
-          response = await fetch('http://localhost:8081/api/schools/register', {
+          response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools/register', {
             method: 'POST',
             body: formDataPayload,
           });
@@ -207,7 +207,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
 
       console.log('Updating school payload:', payload);
 
-      const response = await fetch(`http://localhost:8081/api/schools/${editingSchool.schoolRegistrationId}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/${editingSchool.schoolRegistrationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8081/api/schools/toggle-status/${school.schoolRegistrationId}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/toggle-status/${school.schoolRegistrationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -269,7 +269,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8081/api/schools/${id}`, {
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/schools/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

@@ -35,7 +35,7 @@ const RegisterForm = () => {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const response = await fetch("http://localhost:8081/api/schools/active");
+        const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/schools/active");
         if (!response.ok) {
           throw new Error(`Failed to fetch schools: ${response.statusText}`);
         }
@@ -144,7 +144,7 @@ const RegisterForm = () => {
       console.log("Sending payload:", payload);
 
       // Try application/json
-      let response = await fetch(" http://localhost:8081/api/signup", {
+      let response = await fetch(" https://olympiad-zynlogic.hardikgarg.me/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,7 +164,7 @@ const RegisterForm = () => {
             formDataPayload.append(key, value);
           });
 
-          response = await fetch(" http://localhost:8081/api/signup", {
+          response = await fetch(" https://olympiad-zynlogic.hardikgarg.me/api/signup", {
             method: "POST",
             body: formDataPayload, // No Content-Type header for FormData
           });

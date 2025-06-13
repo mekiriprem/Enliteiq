@@ -448,7 +448,7 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("http://localhost:8081/api/schools/register", {
+    const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/schools/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -512,7 +512,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("http://localhost:8081/api/coordinators/register", {
+    const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/coordinators/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
