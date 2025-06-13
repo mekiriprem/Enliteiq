@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { School, MapPin, Mail, User, Phone, Plus, Trash2, PenLine, Building, Lock, Eye, EyeOff } from 'lucide-react';
+import { School, MapPin, Mail, User, Phone, Plus, Trash2, PenLine, Building, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SchoolData {
@@ -34,15 +34,13 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
   const navigate = useNavigate();
   const [schools, setSchools] = useState<SchoolData[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingSchool, setEditingSchool] = useState<FormSchoolData | null>(null);
-  const [newSchool, setNewSchool] = useState<Omit<FormSchoolData, 'schoolRegistrationId'>>({
+  const [editingSchool, setEditingSchool] = useState<FormSchoolData | null>(null);  const [newSchool, setNewSchool] = useState<Omit<FormSchoolData, 'schoolRegistrationId'>>({
     schoolName: '',
     schoolAddress: '',
     schoolEmail: '',
     yourName: '',
     schoolPhone: '',
     status: 'active',
-    password: '',
     areYou: 'Principal',
     yourEmail: '',
     yourMobile: '',
@@ -53,10 +51,8 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
     principalName: '',
     principalContact: '',
   });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');  const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [showPassword, setShowPassword] = useState(false);
 
   // Fetch schools based on filter
   useEffect(() => {
@@ -98,12 +94,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
     e.preventDefault();
     if (userType !== 'admin' && userType !== 'sales') {
       setError('Only admin or sales users can add schools');
-      return;
-    }
-    if (!newSchool.password) {
-      setError('Password is required for new schools');
-      return;
-    }
+      return;    }
     try {
       const payload = {
         schoolName: newSchool.schoolName,
@@ -111,7 +102,6 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
         schoolEmail: newSchool.schoolEmail,
         yourName: newSchool.yourName,
         schoolPhone: newSchool.schoolPhone,
-        status: newSchool.status,
         areYou: newSchool.areYou,
         yourEmail: newSchool.yourEmail,
         yourMobile: newSchool.yourMobile,
@@ -141,11 +131,9 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       if (!response.ok) {
         if (response.status === 415) {
           console.warn('Retrying with multipart/form-data');
-          const formDataPayload = new FormData();
-          Object.entries(payload).forEach(([key, value]) => {
+          const formDataPayload = new FormData();          Object.entries(payload).forEach(([key, value]) => {
             formDataPayload.append(key, value as string);
           });
-          formDataPayload.append('password', newSchool.password as string);
 
           response = await fetch('http://localhost:8081/api/schools/register', {
             method: 'POST',
@@ -165,15 +153,13 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
 
       const savedSchool: SchoolData = data;
       setSchools([...schools, savedSchool]);
-      setShowAddForm(false);
-      setNewSchool({
+      setShowAddForm(false);      setNewSchool({
         schoolName: '',
         schoolAddress: '',
         schoolEmail: '',
         yourName: '',
         schoolPhone: '',
         status: 'active',
-        password: '',
         areYou: 'Principal',
         yourEmail: '',
         yourMobile: '',
@@ -195,21 +181,19 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       setError('Only admin or sales users can edit schools');
       return;
     }
-    setEditingSchool({ ...school, password: '' });
+    setEditingSchool({ ...school });
   };
 
   const handleUpdateSchool = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingSchool) return;
-    try {
-      const payload: Partial<FormSchoolData> = {
+    try {      const payload: Partial<FormSchoolData> = {
         schoolRegistrationId: editingSchool.schoolRegistrationId,
         schoolName: editingSchool.schoolName,
         schoolAddress: editingSchool.schoolAddress,
         schoolEmail: editingSchool.schoolEmail,
         yourName: editingSchool.yourName,
         schoolPhone: editingSchool.schoolPhone,
-        status: editingSchool.status,
         areYou: editingSchool.areYou,
         yourEmail: editingSchool.yourEmail,
         yourMobile: editingSchool.yourMobile,
@@ -220,9 +204,6 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
         principalName: editingSchool.principalName,
         principalContact: editingSchool.principalContact,
       };
-      if (editingSchool.password) {
-        payload.password = editingSchool.password;
-      }
 
       console.log('Updating school payload:', payload);
 
@@ -248,8 +229,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error updating school: ${errorMessage}`);
-    }
-  };
+    }  };
 
   const handleToggleStatus = async (school: SchoolData) => {
     if (userType !== 'admin' && userType !== 'sales') {
@@ -308,9 +288,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error deleting school: ${errorMessage}`);
     }
-  };
-
-  const filteredSchools = schools.filter(
+  };  const filteredSchools = schools.filter(
     (school) =>
       school.schoolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       school.schoolAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -585,47 +563,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                     <option value="Principal">Principal</option>
                     <option value="Admin">Admin</option>
                     <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {editingSchool ? 'New Password (optional)' : 'Password'}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={editingSchool ? editingSchool.password || '' : newSchool.password}
-                      onChange={handleInputChange}
-                      placeholder={editingSchool ? 'Enter new password (optional)' : 'Enter password'}
-                      className="w-full pl-10 pr-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required={!editingSchool}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    name="status"
-                    value={editingSchool ? editingSchool.status : newSchool.status}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    required
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
+                  </select>                </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <button
@@ -652,8 +590,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
           <CardTitle>Schools List</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className="hidden md:block overflow-x-auto">            <table className="w-full table-auto">
               <thead>
                 <tr className="text-left border-b border-gray-200">
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">School Name</th>
@@ -664,22 +601,29 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">Status</th>
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
                 </tr>
-              </thead>
-              <tbody>
+              </thead>              <tbody>
                 {filteredSchools.map((school) => (
                   <tr key={school.schoolRegistrationId} className="border-b border-gray-100">
                     <td className="px-4 py-3 text-sm">{school.schoolName}</td>
                     <td className="px-4 py-3 text-sm">{school.schoolAddress}</td>
                     <td className="px-4 py-3 text-sm">{school.schoolEmail}</td>
                     <td className="px-4 py-3 text-sm">{school.yourName}</td>
-                    <td className="px-4 py-3 text-sm">{school.schoolPhone}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(school.status)}`}>
-                        {school.status.charAt(0).toUpperCase() + school.status.slice(1)}
-                      </span>
+                    <td className="px-4 py-3 text-sm">{school.schoolPhone}</td>                    <td className="px-4 py-3 text-sm">
+                      {(userType === 'admin' || userType === 'sales') ? (
+                        <button
+                          onClick={() => handleToggleStatus(school)}
+                          className={`px-2 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80 ${getStatusBadgeClass(school.status)}`}
+                          title={`Click to toggle to ${school.status === 'active' ? 'inactive' : 'active'}`}
+                        >
+                          {school.status}
+                        </button>
+                      ) : (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(school.status)}`}>
+                          {school.status}
+                        </span>
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-4 py-3 text-sm">                      <div className="flex items-center space-x-2">
                         {(userType === 'admin' || userType === 'sales') && (
                           <button
                             onClick={() => handleEditSchool(school)}
@@ -687,15 +631,6 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                             title="Edit School"
                           >
                             <PenLine size={16} />
-                          </button>
-                        )}
-                        {(userType === 'admin' || userType === 'sales') && (
-                          <button
-                            onClick={() => handleToggleStatus(school)}
-                            className="text-purple-600 hover:text-purple-700"
-                            title={school.status === 'active' ? 'Deactivate School' : 'Activate School'}
-                          >
-                            {school.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                           </button>
                         )}
                         {userType === 'admin' && (
@@ -713,19 +648,27 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div className="md:hidden space-y-4">
+          </div>          <div className="md:hidden space-y-4">
             {filteredSchools.map((school) => (
-              <div key={school.schoolRegistrationId} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-start">
+              <div key={school.schoolRegistrationId} className="border border-gray-100 rounded-lg p-4 bg-gray-50">                <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2">
                     <Building className="h-5 w-5 text-blue-600" />
                     <h3 className="font-medium">{school.schoolName}</h3>
+                  </div>                  <div className="flex items-center space-x-2">
+                    {(userType === 'admin' || userType === 'sales') ? (
+                      <button
+                        onClick={() => handleToggleStatus(school)}
+                        className={`px-2 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80 ${getStatusBadgeClass(school.status)}`}
+                        title={`Click to toggle to ${school.status === 'active' ? 'inactive' : 'active'}`}
+                      >
+                        {school.status}
+                      </button>
+                    ) : (
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(school.status)}`}>
+                        {school.status}
+                      </span>
+                    )}
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(school.status)}`}>
-                    {school.status.charAt(0).toUpperCase() + school.status.slice(1)}
-                  </span>
                 </div>
                 <div className="mt-3 space-y-2">
                   <div className="flex items-start space-x-2">
@@ -744,8 +687,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                     <Phone className="h-4 w-4 text-gray-400 mt-0.5" />
                     <span className="text-sm">{school.schoolPhone}</span>
                   </div>
-                </div>
-                <div className="mt-4 flex justify-end space-x-2">
+                </div>                <div className="mt-4 flex justify-end space-x-2">
                   {(userType === 'admin' || userType === 'sales') && (
                     <button
                       onClick={() => handleEditSchool(school)}
@@ -753,15 +695,6 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                       title="Edit School"
                     >
                       <PenLine size={16} />
-                    </button>
-                  )}
-                  {(userType === 'admin' || userType === 'sales') && (
-                    <button
-                      onClick={() => handleToggleStatus(school)}
-                      className="p-2 bg-gray-100 text-purple-600 rounded-md"
-                      title={school.status === 'active' ? 'Deactivate School' : 'Activate School'}
-                    >
-                      {school.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                   )}
                   {userType === 'admin' && (
