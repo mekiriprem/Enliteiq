@@ -27,14 +27,14 @@ const Navbar = () => {
     location.pathname.includes("/school-") ||
     location.pathname.includes("/sales-");
 
-  if (isAuthenticated && isDashboardRoute) {
-    return null; // Don't render navbar on dashboard pages
-  }
-
   // Close mobile menu when the route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+  
+  if (isAuthenticated && isDashboardRoute) {
+    return null; // Don't render navbar on dashboard pages
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);

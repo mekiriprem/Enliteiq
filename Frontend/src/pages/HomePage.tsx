@@ -56,7 +56,7 @@ interface CoordinatorFormData {
   howHeardAbout: string;
 }
 
-const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
+const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: () => void; isLoggedIn?: boolean }) => {
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
@@ -659,9 +659,13 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
               </Link>
             </div>
           )}
-        </div>
-      </section>      {/* Become a Partner School Section */}
-      <section className="py-16 relative">
+        </div>      </section>
+
+      {/* Become a Partner School and Olympiad Coordinator Sections - Hidden when user is logged in */}
+      {!isLoggedIn && (
+        <>
+          {/* Become a Partner School Section */}
+          <section className="py-16 relative">
         <div className="container relative z-10">
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
@@ -1421,11 +1425,12 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </div>        </div>
       )}
 
       {/* Modal for School Registration Form */}
+        </>
+      )}
     
       {/* Testimonials Section */}
       <section className="py-16 relative">
