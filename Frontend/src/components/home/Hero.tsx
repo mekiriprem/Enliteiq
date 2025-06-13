@@ -96,7 +96,7 @@ const Hero = () => {
         <div className="particle particle-4">Ω</div>
       </div>
 
-      <div className="education-container relative z-10">
+      <div className="container relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '400px' }}>
             <img

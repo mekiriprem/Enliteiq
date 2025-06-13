@@ -39,23 +39,13 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
     // Clean up
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
-  
-  const getNavItems = () => {
+    const getNavItems = () => {
     switch (userType) {
       case 'student':
         return [
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/student-dashboard' },
           { icon: <BookOpen size={20} />, label: 'Exam Results', path: '/student-exam-results' },
           { icon: <FileText size={20} />, label: 'Tests', path: '/student-upcoming-exams' },
-        ];
-      case 'school':
-        return [
-          { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/school-dashboard' },
-          { icon: <Users size={20} />, label: 'Students', path: '/school-students' },
-          { icon: <Users size={20} />, label: 'Users', path: '/school-users' },
-          { icon: <FileText size={20} />, label: 'Tests', path: '/school-upcoming-exams' },
-          { icon: <FileText size={20} />, label: 'Mock Tests', path: '/school-mock-tests' },
-          { icon: <BarChart size={20} />, label: 'Exam Results', path: '/school-exam-results' },
         ];
       case 'sales':
         return [

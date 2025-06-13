@@ -61,8 +61,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
   const handleLogout = () => {
     logout();
     setShowUserDropdown(false);
-  };
-  const getDashboardRoute = () => {
+  };  const getDashboardRoute = () => {
     if (!user) return "/student-dashboard";
     
     switch (user.role) {
@@ -71,8 +70,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, userName = 'Ra
       case "student":
       case "user":
         return "/student-dashboard";
-      case "school":
-        return "/school-dashboard";
       case "salesman":
         return "/sales-dashboard";
       default:
