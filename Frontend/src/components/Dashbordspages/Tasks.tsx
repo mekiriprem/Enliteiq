@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Clock, Calendar, User, Tag, MessageSquare } from 'lucide-react';
@@ -14,10 +13,12 @@ interface SalesMan {
   id: number;
   name: string;
   email?: string;
+  password?: string;
+  status?: string;
 }
 
 interface Task {
-  id: string;
+  id: number;
   title: string;
   description: string;
   assignedBy: string; // Derived from assignedTo.name
@@ -39,20 +40,12 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [salesmen, setSalesmen] = useState<SalesMan[]>([]);
-  const [taskStatusUpdates, setTaskStatusUpdates] = useState<{ [key: string]: string }>({});
-  const [priorityUpdates, setPriorityUpdates] = useState<{ [key: string]: string }>({});
-  const [newComments, setNewComments] = useState<{ [key: string]: string }>({});
-  const [filter, setFilter] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTask, setNewTask] = useState<Omit<Task, 'id' | 'assignedTo'> & { salesManId: number | '' }>({
     title: '',
     description: '',
-    assignedBy: userType === 'admin' ? 'Admin' : '',
-    assignedDate: new Date().toISOString().split('T')[0],
     dueDate: '',
-    priority: 'medium',
-    status: 'pending',
-    comments: [],
+    priority: 'Medium',
     salesManId: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +92,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (userType !== 'admin') {
-      setError('Only admin users can assign tasks');
+      setError('Only admin users can add tasks');
       return;
     }
     if (!newTask.salesManId) {
@@ -110,14 +103,8 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       const payload = {
         title: newTask.title,
         description: newTask.description,
-        assignedBy: newTask.assignedBy,
-        assignedDate: newTask.assignedDate,
         dueDate: newTask.dueDate,
         priority: newTask.priority,
-        status: newTask.status,
-        comments: newTask.comments,
-        schoolId: newTask.schoolId,
-        schoolName: newTask.schoolName,
       };
       const response = await fetch(`http://localhost:8081/api/tasks/assign/${newTask.salesManId}`, {
         method: 'POST',
@@ -131,12 +118,8 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       setNewTask({
         title: '',
         description: '',
-        assignedBy: userType === 'admin' ? 'Admin' : '',
-        assignedDate: new Date().toISOString().split('T')[0],
         dueDate: '',
-        priority: 'medium',
-        status: 'pending',
-        comments: [],
+        priority: 'Medium',
         salesManId: '',
       });
     } catch (err) {
@@ -231,21 +214,34 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
   const getPriorityClass = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-100 text-red-800';
+        return 'text-red-600 bg-red-100';
       case 'medium':
-        return 'bg-orange-100 text-orange-800';
+        return 'text-yellow-600 bg-yellow-100';
       case 'low':
-        return 'bg-green-100 text-green-800';
+        return 'text-green-600 bg-green-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'text-gray-600 bg-gray-100';
     }
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
       {error && (
         <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-md">
           {error}
+          <button onClick={() => setError(null)} className="ml-2 text-sm underline">Dismiss</button>
           <button onClick={() => setError(null)} className="ml-2 text-sm underline">Dismiss</button>
         </div>
       )}
@@ -354,21 +350,14 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
             </div>
           )}
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <h2 className="text-lg font-semibold">Task List</h2>
-              <div className="flex space-x-2">
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as 'all' | 'pending' | 'in-progress' | 'completed')}
-                  className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                  <option value="all">All Tasks</option>
-                  <option value="pending">Pending</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tasks.map((task) => (
+          <div key={task.id} className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="text-lg font-semibold">{task.title}</h3>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                {task.priority || 'Medium'}
+              </span>
             </div>
 
             <div className="space-y-4">
@@ -520,7 +509,14 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
               </div>
             )}
           </div>
-        </>
+        ))}
+      </div>
+
+      {tasks.length === 0 && !loading && (
+        <div className="text-center py-8">
+          <CheckCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">No tasks found.</p>
+        </div>
       )}
     </div>
   );
