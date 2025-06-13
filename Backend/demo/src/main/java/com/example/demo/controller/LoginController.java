@@ -55,13 +55,13 @@ public class LoginController {
         }
 
         // 3. Check School
-        School school = schoolRepository.findByschoolEmail(email);
-        if (school != null && passwordEncoder.matches(password, school.getPassword())) {
-            LoginResponse res = new LoginResponse();
-            res.setRole("school");
-            res.setData(school);
-            return ResponseEntity.ok(res);
-        }
+//        School school = schoolRepository.findByschoolEmail(email);
+//        if (school != null && passwordEncoder.matches(password, school.getPassword())) {
+//            LoginResponse res = new LoginResponse();
+//            res.setRole("school");
+//            res.setData(school);
+//            return ResponseEntity.ok(res);
+//        }
 
         // 4. Check User
         User user = userRepository.findByEmail(email);

@@ -14,10 +14,24 @@ public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long schoolRegistrationId;
+
+    private String areYou;
+    private String yourName;
+    private String yourEmail;
+    private String yourMobile;
+
     private String schoolName;
     private String schoolAddress;
+    private String schoolCity;
+    private String schoolState;
+    private String schoolCountry;
+    private String schoolPincode;
     private String schoolEmail;
-    private String schoolAdminName;
-    private String password;
-    private String status = "active";
+    private String schoolPhone;
+
+    private String principalName;
+    private String principalContact;
+
+//    private String password;
+    private String status = "inactive";
 }

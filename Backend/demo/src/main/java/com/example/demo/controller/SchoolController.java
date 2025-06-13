@@ -31,17 +31,17 @@ public class SchoolController {
         List<School> schools = schoolService.getAllSchools();
         return ResponseEntity.ok(schools);
     }
-    @PutMapping("/{schoolRegistrationId}")
-    public ResponseEntity<?> updateSchool(
-            @PathVariable Long schoolRegistrationId,
-            @RequestBody School school) {
-        try {
-            School updatedSchool = schoolService.updateSchool(schoolRegistrationId, school);
-            return ResponseEntity.ok(updatedSchool);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PutMapping("/{schoolRegistrationId}")
+//    public ResponseEntity<?> updateSchool(
+//            @PathVariable Long schoolRegistrationId,
+//            @RequestBody School school) {
+//        try {
+//            School updatedSchool = schoolService.updateSchool(schoolRegistrationId, school);
+//            return ResponseEntity.ok(updatedSchool);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @DeleteMapping("/{schoolRegistrationId}")
     public ResponseEntity<?> deleteSchool(@PathVariable Long schoolRegistrationId) {

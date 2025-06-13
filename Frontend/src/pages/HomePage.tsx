@@ -302,159 +302,198 @@ const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
     return errors;
   };
 
-  const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (e) e.preventDefault();
-    setSubmitError(null);
-    setSubmitSuccess(false);
-    setEmailError(null);
-    setPasswordError(null);
+  // const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  //   if (e) e.preventDefault();
+  //   setSubmitError(null);
+  //   setSubmitSuccess(false);
+  //   setEmailError(null);
+  //   setPasswordError(null);
 
-    const validationErrors = validateForm();
-    if (validationErrors.length > 0) {
-      setSubmitError(validationErrors.join(". "));
-      return;
+  //   const validationErrors = validateForm();
+  //   if (validationErrors.length > 0) {
+  //     setSubmitError(validationErrors.join(". "));
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  //   try {
+  //     const apiData = {
+  //       schoolName: formData.schoolName.trim(),
+  //       schoolAddress: formData.schoolAddress.trim(),
+  //       schoolEmail: formData.schoolEmail.trim(),
+  //       schoolAdminName: formData.schoolAdminName.trim(),
+  //       password: formData.password,
+  //     };
+
+  //     const response = await fetch("http://localhost:8080/api/schools/register", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(apiData),
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.text();
+  //       throw new Error(`Registration failed: ${response.status} - ${errorData}`);
+  //     }
+
+  //     const result = await response.json();
+  //     console.log("School registration successful:", result);
+  //     setSubmitSuccess(true);
+  //     setFormData({
+  //       schoolName: "",
+  //       schoolAddress: "",
+  //       schoolEmail: "",
+  //       schoolAdminName: "",
+  //       password: "",
+  //       confirmPassword: "",
+  //     });
+  //     setEmailError(null);
+  //     setPasswordError(null);
+  //     setTimeout(() => {
+  //       setIsModalOpen(false);
+  //       setSubmitSuccess(false);
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error("Error registering school:", error);
+  //     setSubmitError(error instanceof Error ? error.message : "Registration failed. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+ const handleSchoolSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setSchoolSubmitError(null);
+  setSchoolSubmitSuccess(false);
+  setSchoolEmailError(null);
+
+  const validationErrors = validateSchoolForm();
+  if (validationErrors.length > 0) {
+    setSchoolSubmitError(validationErrors.join(". "));
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch("http://localhost:8081/api/schools/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(schoolFormData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Registration failed");
     }
 
-    setIsSubmitting(true);
-    try {
-      const apiData = {
-        schoolName: formData.schoolName.trim(),
-        schoolAddress: formData.schoolAddress.trim(),
-        schoolEmail: formData.schoolEmail.trim(),
-        schoolAdminName: formData.schoolAdminName.trim(),
-        password: formData.password,
-      };
+    const data = await response.json();
+    console.log("School registered successfully:", data);
+    setSchoolSubmitSuccess(true);
 
-      const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/schools/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(apiData),
-      });
+    // Reset the form
+    setSchoolFormData({
+      areYou: "",
+      yourName: "",
+      yourEmail: "",
+      yourMobile: "",
+      schoolName: "",
+      schoolAddress: "",
+      schoolCity: "",
+      schoolState: "",
+      schoolCountry: "",
+      schoolPincode: "",
+      schoolEmail: "",
+      schoolPhone: "",
+      principalName: "",
+      principalContact: "",
+    });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Registration failed: ${response.status} - ${errorData}`);
-      }
+    // Close modal after 2s
+    setTimeout(() => {
+      setIsPartnerSchoolModalOpen(false);
+      setSchoolSubmitSuccess(false);
+    }, 2000);
+  } catch (error) {
+    console.error("Error submitting school partner form:", error);
+    setSchoolSubmitError(error instanceof Error ? error.message : "Submission failed. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
-      const result = await response.json();
-      console.log("School registration successful:", result);
-      setSubmitSuccess(true);
-      setFormData({
-        schoolName: "",
-        schoolAddress: "",
-        schoolEmail: "",
-        schoolAdminName: "",
-        password: "",
-        confirmPassword: "",
-      });
-      setEmailError(null);
-      setPasswordError(null);
-      setTimeout(() => {
-        setIsModalOpen(false);
-        setSubmitSuccess(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Error registering school:", error);
-      setSubmitError(error instanceof Error ? error.message : "Registration failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleSchoolSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSchoolSubmitError(null);
-    setSchoolSubmitSuccess(false);
-    setSchoolEmailError(null);
+const handleCoordinatorSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setCoordinatorSubmitError(null);
+  setCoordinatorSubmitSuccess(false);
+  setCoordinatorEmailError(null);
 
-    const validationErrors = validateSchoolForm();
-    if (validationErrors.length > 0) {
-      setSchoolSubmitError(validationErrors.join(". "));
-      return;
-    }
+  const validationErrors = validateCoordinatorForm();
+  if (validationErrors.length > 0) {
+    setCoordinatorSubmitError(validationErrors.join(". "));
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      console.log("School Partner Form Data:", schoolFormData);
-      setSchoolSubmitSuccess(true);
-      setSchoolFormData({
-        areYou: "",
-        yourName: "",
-        yourEmail: "",
-        yourMobile: "",
-        schoolName: "",
-        schoolAddress: "",
-        schoolCity: "",
-        schoolState: "",
-        schoolCountry: "",
-        schoolPincode: "",
-        schoolEmail: "",
-        schoolPhone: "",
-        principalName: "",
-        principalContact: "",
-      });
-      setTimeout(() => {
-        setIsPartnerSchoolModalOpen(false);
-        setSchoolSubmitSuccess(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Error submitting school partner form:", error);
-      setSchoolSubmitError(error instanceof Error ? error.message : "Submission failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  setIsSubmitting(true);
 
-  const handleCoordinatorSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCoordinatorSubmitError(null);
-    setCoordinatorSubmitSuccess(false);
-    setCoordinatorEmailError(null);
+  try {
+    const response = await fetch("http://localhost:8081/api/coordinators/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(coordinatorFormData),
+    });
 
-    const validationErrors = validateCoordinatorForm();
-    if (validationErrors.length > 0) {
-      setCoordinatorSubmitError(validationErrors.join(". "));
-      return;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Registration failed");
     }
 
-    setIsSubmitting(true);
-    try {
-      console.log("Coordinator Form Data:", coordinatorFormData);
-      setCoordinatorSubmitSuccess(true);
-      setCoordinatorFormData({
-        fullName: "",
-        email: "",
-        mobile: "",
-        address: "",
-        city: "",
-        district: "",
-        state: "",
-        pinCode: "",
-        age: "",
-        educationalQualifications: "",
-        otherQualifications: "",
-        profession: "",
-        experienceWithSchools: "No",
-        reasonToWork: "",
-        yearsOfExperience: "",
-        principalsKnown: "",
-        knowAnyoneInEnlighthiq: "No",
-        additionalInfo: "",
-        howHeardAbout: "",
-      });
-      setTimeout(() => {
-        setIsCoordinatorModalOpen(false);
-        setCoordinatorSubmitSuccess(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Error submitting coordinator form:", error);
-      setCoordinatorSubmitError(error instanceof Error ? error.message : "Submission failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const result = await response.json();
+    console.log("Coordinator registered:", result);
+    setCoordinatorSubmitSuccess(true);
+
+    setCoordinatorFormData({
+      fullName: "",
+      email: "",
+      mobile: "",
+      address: "",
+      city: "",
+      district: "",
+      state: "",
+      pinCode: "",
+      age: "",
+      educationalQualifications: "",
+      otherQualifications: "",
+      profession: "",
+      experienceWithSchools: "No",
+      reasonToWork: "",
+      yearsOfExperience: "",
+      principalsKnown: "",
+      knowAnyoneInEnlighthiq: "No",
+      additionalInfo: "",
+      howHeardAbout: "",
+    });
+
+    setTimeout(() => {
+      setIsCoordinatorModalOpen(false);
+      setCoordinatorSubmitSuccess(false);
+    }, 2000);
+  } catch (error) {
+    console.error("Error submitting coordinator form:", error);
+    setCoordinatorSubmitError(
+      error instanceof Error ? error.message : "Submission failed. Please try again."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1263,148 +1302,7 @@ const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
       )}
 
       {/* Modal for School Registration Form */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 transition-all duration-500"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">School Registration</h2>
-            {submitSuccess && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-green-800 text-sm text-center">
-                  Registration successful! Welcome to Enlighthiq.
-                </p>
-              </div>
-            )}
-            {submitError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-800 text-sm">{submitError}</p>
-              </div>
-            )}
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolName">
-                  School Name
-                </label>
-                <input
-                  type="text"
-                  name="schoolName"
-                  value={formData.schoolName}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter school name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolAddress">
-                  School Address
-                </label>
-                <input
-                  type="text"
-                  name="schoolAddress"
-                  value={formData.schoolAddress}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter school address"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolEmail">
-                  School Email
-                </label>
-                <input
-                  type="email"
-                  name="schoolEmail"
-                  value={formData.schoolEmail}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
-                    emailError 
-                      ? "border-red-300 focus:ring-red-500" 
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
-                  placeholder="Enter school email"
-                  required
-                />
-                {emailError && (
-                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolAdminName">
-                  School Admin Name
-                </label>
-                <input
-                  type="text"
-                  name="schoolAdminName"
-                  value={formData.schoolAdminName}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter admin name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter password"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
-                    passwordError 
-                      ? "border-red-300 focus:ring-red-500" 
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
-                  placeholder="Confirm password"
-                  required
-                />
-                {passwordError && (
-                  <p className="mt-1 text-sm text-red-600">{passwordError}</p>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                disabled={isSubmitting}
-                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transition-all duration-300"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold transition-all duration-300"
-              >
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+    
       {/* Testimonials Section */}
       <section className="py-16 relative">
         <div className="education-container relative z-10">

@@ -47,57 +47,60 @@ public class SchoolService {
 
         // Check if email already exists in any repository
         boolean emailExists = 
-                schoolRepository.existsBySchoolEmail(email) ||
-                userRepository.existsByEmail(email) ||
-                salesManRepository.existsByEmail(email) || 
-                adminRepository.findByEmail(email) != null;
+            schoolRepository.existsBySchoolEmail(email) ||
+            userRepository.existsByEmail(email) ||
+            salesManRepository.existsByEmail(email) || 
+            adminRepository.findByEmail(email) != null;
 
         if (emailExists) {
             throw new Exception("School email already registered");
         }
 
-        // Encrypt password
-        school.setPassword(passwordEncoder.encode(school.getPassword()));
+        // Encrypt password only if not null
+      
 
-        // Save to Supabase via Spring Data JPA
-        School savedSchool = schoolRepository.save(school);
+        // Set status default if not set
+        if (school.getStatus() == null) {
+            school.setStatus("inactive");
+        }
 
-        return savedSchool;
+        // Save to database
+        return schoolRepository.save(school);
     }
 
     public List<School> getAllSchools() {
         return schoolRepository.findAll();
     }
 
-    public School updateSchool(Long schoolRegistrationId, School school) throws Exception {
-        Optional<School> existingSchoolOpt = schoolRepository.findById(schoolRegistrationId);
-        if (!existingSchoolOpt.isPresent()) {
-            throw new Exception("School not found with ID: " + schoolRegistrationId);
-        }
-
-        School existingSchool = existingSchoolOpt.get();
-
-        // Check if the new email is already used by another school
-        if (!school.getSchoolEmail().equals(existingSchool.getSchoolEmail()) &&
-            schoolRepository.existsBySchoolEmail(school.getSchoolEmail())) {
-            throw new Exception("School email already registered");
-        }
-
-        // Update fields
-        existingSchool.setSchoolName(school.getSchoolName());
-        existingSchool.setSchoolAddress(school.getSchoolAddress());
-        existingSchool.setSchoolEmail(school.getSchoolEmail());
-        existingSchool.setSchoolAdminName(school.getSchoolAdminName());
-        existingSchool.setStatus(school.getStatus()); // Update status
-
-        // Update password only if provided
-        if (school.getPassword() != null && !school.getPassword().isEmpty()) {
-            existingSchool.setPassword(passwordEncoder.encode(school.getPassword()));
-        }
-
-        // Save updated school
-        return schoolRepository.save(existingSchool);
-    }
+//    public School updateSchool(Long schoolRegistrationId, School school) throws Exception {
+//        Optional<School> existingSchoolOpt = schoolRepository.findById(schoolRegistrationId);
+//        if (!existingSchoolOpt.isPresent()) {
+//            throw new Exception("School not found with ID: " + schoolRegistrationId);
+//        }
+//
+//        School existingSchool = existingSchoolOpt.get();
+//
+//        // Check if the new email is already used by another school
+//        if (!school.getSchoolEmail().equals(existingSchool.getSchoolEmail()) &&
+//            schoolRepository.existsBySchoolEmail(school.getSchoolEmail())) {
+//            throw new Exception("School email already registered");
+//        }
+//
+//        // Update fields
+//        existingSchool.setSchoolName(school.getSchoolName());
+//        existingSchool.setSchoolAddress(school.getSchoolAddress());
+//        existingSchool.setSchoolEmail(school.getSchoolEmail());
+//        existingSchool.setSchoolAdminName(school.getSchoolAdminName());
+//        existingSchool.setStatus(school.getStatus()); // Update status
+//
+////        // Update password only if provided
+////        if (school.getPassword() != null && !school.getPassword().isEmpty()) {
+////            existingSchool.setPassword(passwordEncoder.encode(school.getPassword()));
+////        }
+//
+//        // Save updated school
+//        return schoolRepository.save(existingSchool);
+//    }
 
     public void deleteSchool(Long schoolRegistrationId) throws Exception {
         if (!schoolRepository.existsById(schoolRegistrationId)) {
