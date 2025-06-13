@@ -28,8 +28,6 @@ import DashboardPage from "./pages/DashboardPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import SalesDashboard from "./pages/SalesDashboard";
-import SchoolDashboard from "./pages/SchoolDashboard";
-import SchoolDetails from "./pages/SchoolDetails";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ExamResultsPage from "./components/Dashbordspages/examresults";
@@ -45,7 +43,6 @@ import Users from "./components/Dashbordspages/Users";
 import MockTests from "./components/Dashbordspages/MockTests";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import TaskDetail from "./components/Dashbordspages/TaskDetail";
-import SchoolDetail from './pages/SchoolDetails';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 
@@ -69,19 +66,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 // Define interface for layout components
 interface WithLayoutProps {
-  userType: 'student' | 'admin' | 'school' | 'sales';
+  userType: 'student' | 'admin' | 'sales';
 }
 
 // Dashboard Routes with Layout
 const StudentDashboardWithLayout = () => (
   <DashboardLayout userType="student" title="Student Dashboard" userName="Rahul Gupta">
     <StudentDashboard />
-  </DashboardLayout>
-);
-
-const SchoolDashboardWithLayout = () => (
-  <DashboardLayout userType="school" title="School Dashboard" userName="Delhi Public School">
-    <SchoolDashboard />
   </DashboardLayout>
 );
 
@@ -137,9 +128,8 @@ const SalesTeamWithLayout = () => (
 // Schools component with proper type handling 
 const SchoolsWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
   const userName = userType === 'student' ? 'Rahul Gupta' : 
-                 userType === 'school' ? 'Delhi Public School' : 
                  userType === 'sales' ? 'Sales Team' : 'Admin';
-  const title = userType === 'school' ? 'Students' : 'Schools';
+  const title = 'Schools';
                  
   return (
     <DashboardLayout userType={userType} title={title} userName={userName}>
@@ -215,9 +205,8 @@ const App = () => (
                 />
               </div>
               <div className="content-wrapper">
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<HomePage />} />
+                <Routes>                  {/* Public Routes */}
+                  <Route path="/" element={<HomePage onRegisterClick={() => {}} />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/exams" element={<ExamsPage />} />
@@ -234,18 +223,16 @@ const App = () => (
                   <Route path="/forgotpassword" element={<Forgotpassword />} />
 
                   {/* Auth Redirect - determines dashboard based on role */}
-                  <Route path="/dashboard" element={<Navigate to="/student-dashboard" replace />} />
-
-                  {/* Profile Page - Protected Route */}
+                  <Route path="/dashboard" element={<Navigate to="/student-dashboard" replace />} />                  {/* Profile Page - Protected Route */}
                   <Route path="/profile" element={
-                    <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'school', 'salesman']}>
+                    <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'salesman']}>
                       <ProfilePage />
                     </ProtectedRoute>
                   } />
 
                   {/* Settings Page - Protected Route */}
                   <Route path="/settings" element={
-                    <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'school', 'salesman']}>
+                    <ProtectedRoute allowedRoles={['student', 'user', 'admin', 'salesman']}>
                       <SettingsPage />
                     </ProtectedRoute>
                   } />
@@ -254,11 +241,6 @@ const App = () => (
                   <Route path="/student-dashboard" element={
                     <ProtectedRoute allowedRoles={["student", "user"]}>
                       <StudentDashboardWithLayout />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/school-dashboard" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <SchoolDashboardWithLayout />
                     </ProtectedRoute>
                   } />
                   <Route path="/sales-dashboard" element={
@@ -331,44 +313,7 @@ const App = () => (
                         </div>
                       </DashboardLayout>
                     </ProtectedRoute>
-                  } />
-
-                  {/* Protected School Pages */}
-                  <Route path="/school-exam-results" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <SchoolExamResultsWithLayout />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/school-students" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <SchoolsWithLayout userType="school" />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/school-upcoming-exams" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <UpcomingExamsWithLayout userType="school" />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/school-users" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <DashboardLayout userType="school" title="Users Management" userName="Delhi Public School">
-                        <div className="p-3 sm:p-4 md:p-6">
-                          <Users userType="school" />
-                        </div>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/school-mock-tests" element={
-                    <ProtectedRoute allowedRoles={['school']}>
-                      <DashboardLayout userType="school" title="Mock Tests Management" userName="Delhi Public School">
-                        <div className="p-3 sm:p-4 md:p-6">
-                          <MockTests userType="school" />
-                        </div>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } />
-
-                  {/* Protected Sales Pages */}
+                  } />                  {/* Protected Sales Pages */}
                   <Route path="/sales-team" element={
                     <ProtectedRoute allowedRoles={['salesman']}>
                       <SalesTeamWithLayout />
@@ -383,14 +328,7 @@ const App = () => (
                     <ProtectedRoute allowedRoles={['salesman']}>
                       <TasksWithLayout userType="sales" />
                     </ProtectedRoute>
-                  } />
-
-                  {/* Protected Detail Pages */}
-                  <Route path="/school/:id" element={
-                    <ProtectedRoute allowedRoles={['admin', 'salesman']}>
-                      <SchoolDetail />
-                    </ProtectedRoute>
-                  } />
+                  } />                  {/* Protected Detail Pages */}
                   <Route path="/admin/task/:taskId" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <TaskDetail />

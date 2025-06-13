@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { Country, State, City } from "country-state-city";
 import Hero from "../components/home/Hero";
 import ExamCard from "../components/exams/ExamCard";
 import TestimonialCard from "../components/home/TestimonialCard";
@@ -55,7 +56,7 @@ interface CoordinatorFormData {
   howHeardAbout: string;
 }
 
-const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
+const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: () => void; isLoggedIn?: boolean }) => {
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
@@ -116,6 +117,17 @@ const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
   const [coordinatorSubmitError, setCoordinatorSubmitError] = useState<string | null>(null);
   const [coordinatorSubmitSuccess, setCoordinatorSubmitSuccess] = useState(false);
   const [coordinatorEmailError, setCoordinatorEmailError] = useState<string | null>(null);
+  // Country, State, City dropdown state
+  const [countries, setCountries] = useState<{ isoCode: string; name: string }[]>([]);
+  const [states, setStates] = useState<{ isoCode: string; name: string }[]>([]);
+  const [cities, setCities] = useState<{ name: string }[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("");
+
+  // Country codes for phone numbers
+  const [yourMobileCountryCode, setYourMobileCountryCode] = useState<string>("+91");
+  const [schoolPhoneCountryCode, setSchoolPhoneCountryCode] = useState<string>("+91");
+  const [principalContactCountryCode, setPrincipalContactCountryCode] = useState<string>("+91");
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -156,7 +168,6 @@ const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
       }
     }
   };
-
   const handleSchoolInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -165,6 +176,25 @@ const HomePage = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Handle country selection
+    if (name === "schoolCountry") {
+      setSelectedCountry(value);
+      setSchoolFormData((prev) => ({
+        ...prev,
+        schoolState: "",
+        schoolCity: "",
+      }));
+    }
+
+    // Handle state selection
+    if (name === "schoolState") {
+      setSelectedState(value);
+      setSchoolFormData((prev) => ({
+        ...prev,
+        schoolCity: "",
+      }));
+    }
 
     if (name === "yourEmail" || name === "schoolEmail") {
       if (value.trim() === "") {
@@ -520,6 +550,39 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     fetchRecommendedExams();
   }, []);
 
+  // Load countries on component mount
+  useEffect(() => {
+    const loadCountries = () => {
+      const countryList = Country.getAllCountries();
+      setCountries(countryList);
+    };
+    loadCountries();
+  }, []);
+
+  // Load states when country changes
+  useEffect(() => {
+    if (selectedCountry) {
+      const stateList = State.getStatesOfCountry(selectedCountry);
+      setStates(stateList);
+      setCities([]);
+      setSelectedState("");
+    } else {
+      setStates([]);
+      setCities([]);
+      setSelectedState("");
+    }
+  }, [selectedCountry]);
+
+  // Load cities when state changes
+  useEffect(() => {
+    if (selectedCountry && selectedState) {
+      const cityList = City.getCitiesOfState(selectedCountry, selectedState);
+      setCities(cityList);
+    } else {
+      setCities([]);
+    }
+  }, [selectedCountry, selectedState]);
+
   const mapExamToCardFormat = (exam: Exam) => ({
     id: exam.id,
     title: exam.title,
@@ -555,11 +618,9 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
 
   return (
     <div>
-      <Hero />
-
-      {/* Featured Exams Section */}
+      <Hero />      {/* Featured Exams Section */}
       <section className="py-16 relative">
-        <div className="education-container relative z-10">
+        <div className="container relative z-10">
           <div className="flex justify-between items-center mb-10">
             <Link to="/exams">
               <h2 className="text-3xl font-bold text-gray-800">Featured Exams</h2>
@@ -598,12 +659,14 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
               </Link>
             </div>
           )}
-        </div>
-      </section>
+        </div>      </section>
 
-      {/* Become a Partner School Section */}
-      <section className="py-16 relative">
-        <div className="education-container relative z-10">
+      {/* Become a Partner School and Olympiad Coordinator Sections - Hidden when user is logged in */}
+      {!isLoggedIn && (
+        <>
+          {/* Become a Partner School Section */}
+          <section className="py-16 relative">
+        <div className="container relative z-10">
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Become a Partner School
@@ -709,20 +772,36 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                 {schoolEmailError && (
                   <p className="mt-1 text-sm text-red-600">{schoolEmailError}</p>
                 )}
-              </div>
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="yourMobile">
                   Your Mobile No * (10 digits)
                 </label>
-                <input
-                  type="text"
-                  name="yourMobile"
-                  value={schoolFormData.yourMobile}
-                  onChange={handleSchoolInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter your mobile number"
-                  required
-                />
+                <div className="flex">                  <select
+                    value={yourMobileCountryCode}
+                    onChange={(e) => setYourMobileCountryCode(e.target.value)}
+                    className="w-20 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                  >
+                    <option value="+91">+91</option>
+                    <option value="+1">+1</option>
+                    <option value="+44">+44</option>
+                    <option value="+61">+61</option>
+                    <option value="+86">+86</option>
+                    <option value="+33">+33</option>
+                    <option value="+49">+49</option>
+                    <option value="+81">+81</option>
+                    <option value="+82">+82</option>
+                    <option value="+65">+65</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="yourMobile"
+                    value={schoolFormData.yourMobile}
+                    onChange={handleSchoolInputChange}
+                    className="flex-1 p-3 border border-l-0 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                    placeholder="Enter your mobile number"
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolName">
@@ -750,52 +829,67 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                   placeholder="Enter complete school address"
                   rows={3}
                   required
-                />
+                />              </div>              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCountry">
+                    School Country *
+                  </label>
+                  <select
+                    name="schoolCountry"
+                    value={schoolFormData.schoolCountry}
+                    onChange={handleSchoolInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                    required
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option key={country.isoCode} value={country.isoCode}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolState">
+                    School State *
+                  </label>
+                  <select
+                    name="schoolState"
+                    value={schoolFormData.schoolState}
+                    onChange={handleSchoolInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                    required
+                    disabled={states.length === 0}
+                  >
+                    <option value="">Select State</option>
+                    {states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCity">
                     School City *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="schoolCity"
                     value={schoolFormData.schoolCity}
                     onChange={handleSchoolInputChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                    placeholder="Enter school city"
                     required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolState">
-                    School State *
-                  </label>
-                  <input
-                    type="text"
-                    name="schoolState"
-                    value={schoolFormData.schoolState}
-                    onChange={handleSchoolInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                    placeholder="Enter school state"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCountry">
-                    School Country *
-                  </label>
-                  <input
-                    type="text"
-                    name="schoolCountry"
-                    value={schoolFormData.schoolCountry}
-                    onChange={handleSchoolInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                    placeholder="Enter school country"
-                    required
-                  />
+                    disabled={cities.length === 0}
+                  >
+                    <option value="">Select City</option>
+                    {cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolPincode">
@@ -832,20 +926,37 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                 {schoolEmailError && (
                   <p className="mt-1 text-sm text-red-600">{schoolEmailError}</p>
                 )}
-              </div>
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolPhone">
                   School Phone No * (10 digits)
                 </label>
-                <input
-                  type="text"
-                  name="schoolPhone"
-                  value={schoolFormData.schoolPhone}
-                  onChange={handleSchoolInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter school phone number"
-                  required
-                />
+                <div className="flex">
+                  <select
+                    value={schoolPhoneCountryCode}
+                    onChange={(e) => setSchoolPhoneCountryCode(e.target.value)}
+                    className="w-20 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                  >
+                    <option value="+91">+91</option>
+                    <option value="+1">+1</option>
+                    <option value="+44">+44</option>
+                    <option value="+61">+61</option>
+                    <option value="+86">+86</option>
+                    <option value="+33">+33</option>
+                    <option value="+49">+49</option>
+                    <option value="+81">+81</option>
+                    <option value="+82">+82</option>
+                    <option value="+65">+65</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="schoolPhone"
+                    value={schoolFormData.schoolPhone}
+                    onChange={handleSchoolInputChange}
+                    className="flex-1 p-3 border border-l-0 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                    placeholder="Enter school phone number"
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="principalName">
@@ -860,20 +971,37 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                   placeholder="Enter principal name"
                   required
                 />
-              </div>
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="principalContact">
                   Principal Contact No * (10 digits)
                 </label>
-                <input
-                  type="text"
-                  name="principalContact"
-                  value={schoolFormData.principalContact}
-                  onChange={handleSchoolInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                  placeholder="Enter principal contact number"
-                  required
-                />
+                <div className="flex">
+                  <select
+                    value={principalContactCountryCode}
+                    onChange={(e) => setPrincipalContactCountryCode(e.target.value)}
+                    className="w-20 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                  >
+                    <option value="+91">+91</option>
+                    <option value="+1">+1</option>
+                    <option value="+44">+44</option>
+                    <option value="+61">+61</option>
+                    <option value="+86">+86</option>
+                    <option value="+33">+33</option>
+                    <option value="+49">+49</option>
+                    <option value="+81">+81</option>
+                    <option value="+82">+82</option>
+                    <option value="+65">+65</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="principalContact"
+                    value={schoolFormData.principalContact}
+                    onChange={handleSchoolInputChange}
+                    className="flex-1 p-3 border border-l-0 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+                    placeholder="Enter principal contact number"
+                    required
+                  />
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
                 <button
@@ -898,7 +1026,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
 
       {/* Olympiad Coordinator Section */}
       <section className="py-16 relative">
-        <div className="education-container relative z-10">
+        <div className="container relative z-10">
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Become an Olympiad Coordinator
@@ -1297,15 +1425,16 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </div>        </div>
       )}
 
       {/* Modal for School Registration Form */}
+        </>
+      )}
     
       {/* Testimonials Section */}
       <section className="py-16 relative">
-        <div className="education-container relative z-10">
+        <div className="container relative z-10">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">What Our Users Say</h2>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">

@@ -80,18 +80,13 @@ const LoginForm: React.FC = () => {
       }
 
       // Update auth context
-      login(userData);
-
-      // Redirect based on role
+      login(userData);      // Redirect based on role
       switch (role) {
         case "admin":
           navigate("/admin-dashboard");
           break;
         case "user":
           navigate("/student-dashboard");
-          break;
-        case "school":
-          navigate("/school-dashboard");
           break;
         case "salesman":
           navigate("/sales-dashboard");

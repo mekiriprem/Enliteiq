@@ -27,14 +27,14 @@ const Navbar = () => {
     location.pathname.includes("/school-") ||
     location.pathname.includes("/sales-");
 
-  if (isAuthenticated && isDashboardRoute) {
-    return null; // Don't render navbar on dashboard pages
-  }
-
   // Close mobile menu when the route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+  
+  if (isAuthenticated && isDashboardRoute) {
+    return null; // Don't render navbar on dashboard pages
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
@@ -44,7 +44,6 @@ const Navbar = () => {
     logout();
     setIsMenuOpen(false);
   };
-
   const getDashboardRoute = () => {
     if (!user) return "/student-dashboard";
 
@@ -54,8 +53,6 @@ const Navbar = () => {
       case "student":
       case "user":
         return "/student-dashboard";
-      case "school":
-        return "/school-dashboard";
       case "salesman":
         return "/sales-dashboard";
       default:
@@ -65,7 +62,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="education-container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
