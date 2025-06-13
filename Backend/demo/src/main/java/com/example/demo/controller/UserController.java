@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Service.UserService;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.dto.UserExamResultDTO;
-import com.example.demo.model.Admin;
 import com.example.demo.model.User;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired

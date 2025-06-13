@@ -1,7 +1,5 @@
 package com.example.demo;
 
-import java.util.Arrays;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +18,10 @@ public class DemoApplication {
 	public CorsFilter corsFilter() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowCredentials(false);
-		configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.addAllowedOriginPattern("*");
+		configuration.addAllowedHeader("*");
+		configuration.addAllowedMethod("*");
+		configuration.setMaxAge(3600L);
 		
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
