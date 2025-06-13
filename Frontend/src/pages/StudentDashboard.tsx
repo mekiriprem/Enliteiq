@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ExamResults from "../components/Dashbordspages/examresults";
 import UpcomingExams from "../components/Dashbordspages/Upcomingexams";
-import DashboardHeader from "../components/dashboard/DashboardHeader";
 import { useLocation } from "react-router-dom";
 import { 
   BarChart3, 
@@ -368,12 +367,8 @@ const StudentDashboard: React.FC = () => {
         return <DashboardOverview userData={userData} />;
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Dashboard Header/Navbar */}
-      <DashboardHeader title="Student Dashboard" userName={userData?.name || "Student"} />
-      
       <div className="p-3 sm:p-4 md:p-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">          {/* Navigation Tabs */}
           <div className="flex border-b border-gray-200 overflow-x-auto">

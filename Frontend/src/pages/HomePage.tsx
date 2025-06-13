@@ -57,6 +57,46 @@ interface CoordinatorFormData {
 }
 
 const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: () => void; isLoggedIn?: boolean }) => {
+  // Check for authentication from localStorage/sessionStorage
+  const [userLoggedIn, setUserLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if anyone is logged in by looking for user data or tokens in storage
+    const checkLoginStatus = () => {
+      // Check for various types of stored authentication data
+      const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const accessToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      const userSession = localStorage.getItem("userSession") || sessionStorage.getItem("userSession");
+      const isAuthenticated = localStorage.getItem("isAuthenticated") || sessionStorage.getItem("isAuthenticated");
+      
+      // Check if any authentication data exists
+      if (userData || token || authToken || accessToken || userSession || isAuthenticated === "true") {
+        setUserLoggedIn(true);
+      } else {
+        setUserLoggedIn(false);
+      }
+    };
+
+    // Initial check
+    checkLoginStatus();
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = () => {
+      checkLoginStatus();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };  }, []);
+
+  // Use either the prop or the detected login status
+  const isAnyoneLoggedIn = isLoggedIn || userLoggedIn;
+  
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
@@ -659,10 +699,8 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
               </Link>
             </div>
           )}
-        </div>      </section>
-
-      {/* Become a Partner School and Olympiad Coordinator Sections - Hidden when user is logged in */}
-      {!isLoggedIn && (
+        </div>      </section>      {/* Become a Partner School and Olympiad Coordinator Sections - Hidden when user is logged in */}
+      {!isAnyoneLoggedIn && (
         <>
           {/* Become a Partner School Section */}
           <section className="py-16 relative">

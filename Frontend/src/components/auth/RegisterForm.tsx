@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import countries from "i18n-iso-countries";
-import enLocale from "i18n-iso-countries/langs/en.json";
-import { State } from "country-state-city";
-
-// Register English locale for country names
-countries.registerLocale(enLocale);
+import { Country, State, City } from "country-state-city";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -28,15 +23,13 @@ const RegisterForm = () => {
   const [manualSchoolName, setManualSchoolName] = useState("");
   const [manualSchoolAddress, setManualSchoolAddress] = useState("");
 
-  // Get all countries
-  const [countryList] = useState(
-    Object.entries(countries.getNames("en", { select: "official" })).map(
-      ([code, name]) => ({ code, name })
-    )
-  );
+  // Get all countries from country-state-city
+  const [countries] = useState(Country.getAllCountries());
   const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   // Fetch schools on mount
   useEffect(() => {
@@ -56,31 +49,42 @@ const RegisterForm = () => {
     };
     fetchSchools();
   }, []);
-
   // Update states when country changes
   useEffect(() => {
     if (selectedCountry) {
       const countryStates = State.getStatesOfCountry(selectedCountry);
-      setStates(
-        countryStates.map((state) => ({
-          code: state.isoCode,
-          name: state.name,
-        }))
-      );
+      setStates(countryStates);
       setSelectedState("");
+      setCities([]);
+      setSelectedCity("");
     } else {
       setStates([]);
       setSelectedState("");
+      setCities([]);
+      setSelectedCity("");
     }
   }, [selectedCountry]);
+
+  // Update cities when state changes
+  useEffect(() => {
+    if (selectedCountry && selectedState) {
+      const stateCities = City.getCitiesOfState(selectedCountry, selectedState);
+      setCities(stateCities);
+      setSelectedCity("");
+    } else {
+      setCities([]);
+      setSelectedCity("");
+    }
+  }, [selectedCountry, selectedState]);
 
   // Filter schools based on selected country and state
   useEffect(() => {
     if (selectedCountry && selectedState) {
-      const selectedStateName = states.find((s) => s.code === selectedState)?.name || selectedState;
+      const selectedCountryName = countries.find((c) => c.isoCode === selectedCountry)?.name;
+      const selectedStateName = states.find((s) => s.isoCode === selectedState)?.name;
       const filtered = schools.filter((school) => {
         const matchesCountry = school.schoolCountry === selectedCountry || 
-          school.schoolCountry === countryList.find((c) => c.code === selectedCountry)?.name;
+          school.schoolCountry === selectedCountryName;
         const matchesState = school.schoolState === selectedState || 
           school.schoolState === selectedStateName;
         return matchesCountry && matchesState;
@@ -91,7 +95,7 @@ const RegisterForm = () => {
       setFilteredSchools(schools);
       setSelectedSchoolId("");
     }
-  }, [selectedCountry, selectedState, schools, countryList, states]);
+  }, [selectedCountry, selectedState, schools, countries, states]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -246,9 +250,7 @@ const RegisterForm = () => {
               required
               className="w-full px-3 py-2 border rounded-md"
             />
-          </div>
-
-          {/* Country */}
+          </div>          {/* Country */}
           <div className="mb-6">
             <label className="block mb-1">Country</label>
             <select
@@ -258,10 +260,10 @@ const RegisterForm = () => {
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Select Country</option>
-              {countryList
+              {countries
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((country) => (
-                  <option key={country.code} value={country.code}>
+                  <option key={country.isoCode} value={country.isoCode}>
                     {country.name}
                   </option>
                 ))}
@@ -282,8 +284,29 @@ const RegisterForm = () => {
               {states
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((state) => (
-                  <option key={state.code} value={state.code}>
+                  <option key={state.isoCode} value={state.isoCode}>
                     {state.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* City */}
+          <div className="mb-6">
+            <label className="block mb-1">City</label>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              required
+              disabled={!selectedState || cities.length === 0}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select City</option>
+              {cities
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
                   </option>
                 ))}
             </select>
