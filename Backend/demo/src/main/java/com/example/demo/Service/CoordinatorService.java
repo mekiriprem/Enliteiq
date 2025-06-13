@@ -1,15 +1,14 @@
 package com.example.demo.Service;
 
-import com.example.demo.model.Coordinator;
-import com.example.demo.repository.CoordinatorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.model.Coordinator;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class CoordinatorService {
-
     @Autowired
     private com.example.demo.Repository.CoordinatorRepository coordinatorRepository;
 

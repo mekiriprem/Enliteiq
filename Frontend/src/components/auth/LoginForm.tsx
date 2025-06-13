@@ -36,7 +36,7 @@ const LoginForm: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/login", {
+      const response = await fetch(" http://localhost:8081/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

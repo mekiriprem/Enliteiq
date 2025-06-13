@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { supabase } from '../../supabaseClient'; // adjust path accordingly
-import bcrypt from 'bcryptjs'; // install with: npm install bcryptjs
+import { Eye, EyeOff } from "lucide-react";
+import countries from "i18n-iso-countries";
+import enLocale from "i18n-iso-countries/langs/en.json";
+import { State } from "country-state-city";
 
-
+// Register English locale for country names
+countries.registerLocale(enLocale);
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -12,227 +14,402 @@ const RegisterForm = () => {
     name: "",
     email: "",
     phone: "",
-    school: "",
-    class: "",
+    userClass: "",
     password: "",
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [schools, setSchools] = useState([]);
+  const [filteredSchools, setFilteredSchools] = useState([]);
+  const [selectedSchoolId, setSelectedSchoolId] = useState("");
+  const [manualSchoolName, setManualSchoolName] = useState("");
+  const [manualSchoolAddress, setManualSchoolAddress] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Get all countries
+  const [countryList] = useState(
+    Object.entries(countries.getNames("en", { select: "official" })).map(
+      ([code, name]) => ({ code, name })
+    )
+  );
+  const [states, setStates] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+
+  // Fetch schools on mount
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/api/schools/active");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch schools: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setSchools(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load schools:", err);
+        setError("Unable to load schools. Please try again later.");
+        setSchools([]);
+      }
+    };
+    fetchSchools();
+  }, []);
+
+  // Update states when country changes
+  useEffect(() => {
+    if (selectedCountry) {
+      const countryStates = State.getStatesOfCountry(selectedCountry);
+      setStates(
+        countryStates.map((state) => ({
+          code: state.isoCode,
+          name: state.name,
+        }))
+      );
+      setSelectedState("");
+    } else {
+      setStates([]);
+      setSelectedState("");
+    }
+  }, [selectedCountry]);
+
+  // Filter schools based on selected country and state
+  useEffect(() => {
+    if (selectedCountry && selectedState) {
+      const selectedStateName = states.find((s) => s.code === selectedState)?.name || selectedState;
+      const filtered = schools.filter((school) => {
+        const matchesCountry = school.schoolCountry === selectedCountry || 
+          school.schoolCountry === countryList.find((c) => c.code === selectedCountry)?.name;
+        const matchesState = school.schoolState === selectedState || 
+          school.schoolState === selectedStateName;
+        return matchesCountry && matchesState;
+      });
+      setFilteredSchools(filtered);
+      setSelectedSchoolId("");
+    } else {
+      setFilteredSchools(schools);
+      setSelectedSchoolId("");
+    }
+  }, [selectedCountry, selectedState, schools, countryList, states]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  if (formData.password !== formData.confirmPassword) {
-    alert("Passwords do not match");
-    return;
-  }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
-  // Basic password strength validation
-  if (formData.password.length < 8) {
-    alert("Password must be at least 8 characters long");
-    return;
-  }
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
 
-  setIsLoading(true);
+    if (!selectedSchoolId || (selectedSchoolId === "other" && (!manualSchoolName || !manualSchoolAddress))) {
+      setError("Please select a school or provide manual school details");
+      return;
+    }
 
-  try {
-    const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    setIsLoading(true);
+
+    try {
+      const selectedSchool = selectedSchoolId !== "other"
+        ? schools.find((school) => school.schoolRegistrationId.toString() === selectedSchoolId)
+        : null;
+
+      const payload = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        school: formData.school,
-        userClass: formData.class,
-        password: formData.password, // This will be hashed on the server
-      }),
-    });
+        userClass: formData.userClass,
+        password: formData.password,
+        school: selectedSchoolId === "other"
+          ? `${manualSchoolName.toUpperCase()}, ${manualSchoolAddress.toUpperCase()}`
+          : selectedSchool
+            ? `${selectedSchool.schoolName}, ${selectedSchool.schoolAddress}`
+            : "",
+      };
 
-    const data = await response.json();
+      console.log("Sending payload:", payload);
 
-    if (!response.ok) {
-      alert(data.message || "Registration failed");
-    } else {
+      // Try application/json
+      let response = await fetch(" http://localhost:8081/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      let data = await response.json();
+      console.log("JSON response:", { status: response.status, data });
+
+      if (!response.ok) {
+        if (response.status === 415) {
+          console.warn("Retrying with multipart/form-data");
+          const formDataPayload = new FormData();
+          Object.entries(payload).forEach(([key, value]) => {
+            formDataPayload.append(key, value);
+          });
+
+          response = await fetch(" http://localhost:8081/api/signup", {
+            method: "POST",
+            body: formDataPayload, // No Content-Type header for FormData
+          });
+
+          data = await response.json();
+          console.log("FormData response:", { status: response.status, data });
+
+          if (!response.ok) {
+            throw new Error(data.message || `Registration failed with status ${response.status}`);
+          }
+        } else {
+          throw new Error(data.message || `Registration failed with status ${response.status}`);
+        }
+      }
+
       console.log("User registered:", data.userId);
-      navigate("/registration-success");
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError(error.message || "An error occurred during registration. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error: any) {
-    console.error(error);
-    alert("An error occurred");
-  } finally {
-    setIsLoading(false);
+  };
+
+  if (error) {
+    return (
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <h2 className="text-2xl font-bold mb-6 text-red-600">Error</h2>
+          <p>{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
-};
-  
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-education-dark mb-6">
-          Create Your Account
-        </h2>
-        
+        <h2 className="text-2xl font-bold mb-6">Create Your Account</h2>
+
         <form onSubmit={handleSubmit}>
+          {/* Name */}
           <div className="mb-6">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
+            <label className="block mb-1">Full Name</label>
             <input
               type="text"
-              id="name"
               name="name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
               value={formData.name}
               onChange={handleChange}
               required
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          
+
+          {/* Email */}
           <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
+            <label className="block mb-1">Email Address</label>
             <input
               type="email"
-              id="email"
               name="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-              placeholder="your@email.com"
               value={formData.email}
               onChange={handleChange}
               required
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          
+
+          {/* Phone */}
           <div className="mb-6">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
+            <label className="block mb-1">Phone Number</label>
             <input
               type="tel"
-              id="phone"
               name="phone"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
               value={formData.phone}
               onChange={handleChange}
               required
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          
+
+          {/* Country */}
           <div className="mb-6">
-            <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1">
-              School
-            </label>
+            <label className="block mb-1">Country</label>
+            <select
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select Country</option>
+              {countryList
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* State */}
+          <div className="mb-6">
+            <label className="block mb-1">State</label>
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              required
+              disabled={!selectedCountry || states.length === 0}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select State</option>
+              {states
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((state) => (
+                  <option key={state.code} value={state.code}>
+                    {state.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Class */}
+          <div className="mb-6">
+            <label className="block mb-1">Class</label>
             <input
               type="text"
-              id="school"
-              name="school"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-              value={formData.school}
+              name="userClass"
+              value={formData.userClass}
               onChange={handleChange}
               required
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
-          
+
+          {/* School Dropdown */}
           <div className="mb-6">
-            <label htmlFor="class" className="block text-sm font-medium text-gray-700 mb-1">
-              Class
-            </label>
-            <input
-              type="text"
-              id="class"
-              name="class"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-              value={formData.class}
-              onChange={handleChange}
+            <label className="block mb-1">School</label>
+            <select
+              value={selectedSchoolId}
+              onChange={(e) => setSelectedSchoolId(e.target.value)}
               required
-            />
+              disabled={!selectedCountry || !selectedState}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Select School</option>
+              {filteredSchools.length > 0 ? (
+                filteredSchools.map((school) => (
+                  <option key={school.schoolRegistrationId} value={school.schoolRegistrationId}>
+                    {school.schoolName}, {school.schoolAddress}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No schools available
+                </option>
+              )}
+              <option value="other">Other (Manual Entry)</option>
+            </select>
           </div>
-          
+
+          {selectedSchoolId === "other" && (
+            <>
+              <div className="mb-6">
+                <label className="block mb-1">School Name</label>
+                <input
+                  type="text"
+                  value={manualSchoolName}
+                  onChange={(e) => setManualSchoolName(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block mb-1">School Address</label>
+                <input
+                  type="text"
+                  value={manualSchoolAddress}
+                  onChange={(e) => setManualSchoolAddress(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Password */}
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                id="password"
                 name="password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-                placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
                 required
                 minLength={8}
+                className="w-full px-3 py-2 border rounded-md"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-2.5"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            <p className="mt-1 text-xs text-gray-500">Password must be at least 8 characters long</p>
           </div>
-          
-          <div className="mb-8">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
+
+          {/* Confirm Password */}
+          <div className="mb-6">
+            <label className="block mb-1">Confirm Password</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
                 name="confirmPassword"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-                placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
+                className="w-full px-3 py-2 border rounded-md"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-2.5"
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
-          
+
           <button
             type="submit"
-            className="w-full btn-primary py-2.5 px-4 text-center"
+            className="w-full bg-blue-600 text-white py-2 rounded-md disabled:opacity-50"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating Account...
-              </span>
-            ) : (
-              "Create Account"
-            )}
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
-          
+
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm">
               Already have an account?{" "}
-              <Link to="/login" className="text-education-blue hover:text-blue-700 font-medium">
+              <Link to="/login" className="text-blue-600 hover:underline">
                 Log in
               </Link>
             </p>

@@ -20,7 +20,6 @@ import com.example.demo.dto.UserExamResultDTO;
 import com.example.demo.model.Admin;
 import com.example.demo.model.User;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -70,8 +69,8 @@ public class UserController {
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 //        }
 //    }
-    
-  
+//    
+//  
 
 
         @PostMapping("/user/{userId}/exam/{examId}")

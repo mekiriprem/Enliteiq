@@ -16,7 +16,7 @@ public class User {
     private Long id; // internal DB id
 
     @Column(unique = true)
-    private String userId; // user1, user2, etc.
+    private String userId; // e.g. user1, user2, etc.
 
     private String name;
 
@@ -24,21 +24,20 @@ public class User {
     private String email;
 
     private String phone;
-    
+
     private String school;
 
-
     @Column(name = "class")
-    private String userClass; // 'class' is reserved in Java, so we use userClass
+    private String userClass; // 'class' is reserved, so we use userClass
 
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference 
+    @JsonManagedReference("user-userExams") // use named reference
     private List<UserExam> userExams = new ArrayList<>();
 
     @ManyToMany
-    @JsonIgnore
+    @JsonIgnore // prevent circular reference
     @JoinTable(
         name = "user_registered_exams",
         joinColumns = @JoinColumn(name = "user_id"),
@@ -48,7 +47,7 @@ public class User {
 
     public User() {}
 
-    // Getters & setters
+    // Getters and Setters
 
     public Long getId() {
         return id;

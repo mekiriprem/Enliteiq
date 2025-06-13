@@ -1,8 +1,6 @@
 package com.example.demo.model;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,15 +13,13 @@ public class UserExam {
     private UserExamId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId") 
-    @JsonBackReference// maps userId attribute of embedded id
-    @JoinColumn(name = "user_id")
+    @MapsId("userId") // Maps to id.userId
+    @JsonBackReference("user-userExams")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("examId") 
-    @JsonBackReference// maps examId attribute of embedded id
-    @JoinColumn(name = "exam_id")
+    @MapsId("examId") // Maps to id.examId
+    @JsonBackReference
     private Exam exam;
 
     private Double percentage;
@@ -36,4 +32,3 @@ public class UserExam {
         this.id = new UserExamId(user.getId(), exam.getId());
     }
 }
-

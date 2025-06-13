@@ -72,17 +72,17 @@ public class UserService {
 
         return userRepository.save(user); // Save updated userId
     }
-
-    public User loginUser(String email, String password) {
-        User user = userRepository.findByEmail(email);
-                
-        
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid password");
-        }
-        return user;
-    }
+//
+//    public User loginUser(String email, String password) {
+//        User user = userRepository.findByEmail(email);
+//                
+//        
+//
+//        if (!passwordEncoder.matches(password, user.getPassword())) {
+//            throw new IllegalArgumentException("Invalid password");
+//        }
+//        return user;
+//    }
 
     @Transactional
     public void registerUserToExam(Long userId, UUID examId) {
