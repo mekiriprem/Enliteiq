@@ -44,27 +44,25 @@ const ExamsPage = () => {
   // Get unique subjects
   const subjects = [...new Set(exams.map(exam => exam.subject).filter(subject => subject))];
 
-  return (
-    <div className="min-h-screen">
+  return (    <div className="min-h-screen">
       <div className="education-container">
         <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Available Exams</h1>
-          <p className="text-lg text-gray-600 max-w-3xl">
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark dark:text-white mb-4">Available Exams</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Browse our collection of exams and mock tests to help you prepare for your upcoming academic challenges.
           </p>
         </div>
-          {/* Search and Filter Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-10">
+          {/* Search and Filter Section */}        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search bar */}
             <div className="relative mt-[21px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search exams..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -72,12 +70,12 @@ const ExamsPage = () => {
             
             {/* Subject filter */}
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Subject
               </label>
               <select
                 id="subject"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
               >
@@ -91,54 +89,50 @@ const ExamsPage = () => {
         </div>
         
         {/* Exam Categories */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold text-education-dark mb-6">Popular Categories</h2>
+        <div className="mb-10">          <h2 className="text-2xl font-semibold text-education-dark dark:text-white mb-6">Popular Categories</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
               <div className="bg-blue-100 p-2 rounded-full">
                 <BookOpen size={24} className="text-education-blue" />
               </div>
               <span className="font-medium">Mathematics</span>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
-              <div className="bg-green-100 p-2 rounded-full">
-                <BookOpen size={24} className="text-green-600" />
+            </div>            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                <BookOpen size={24} className="text-green-600 dark:text-green-400" />
               </div>
-              <span className="font-medium">Science</span>
+              <span className="font-medium dark:text-white">Science</span>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
-              <div className="bg-yellow-100 p-2 rounded-full">
-                <BookOpen size={24} className="text-yellow-600" />
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-full">
+                <BookOpen size={24} className="text-yellow-600 dark:text-yellow-400" />
               </div>
-              <span className="font-medium">English</span>
+              <span className="font-medium dark:text-white">English</span>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
-              <div className="bg-purple-100 p-2 rounded-full">
-                <BookOpen size={24} className="text-purple-600" />
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-3 hover:shadow-md transition-all cursor-pointer">
+              <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-full">
+                <BookOpen size={24} className="text-purple-600 dark:text-purple-400" />
               </div>
-              <span className="font-medium">History</span>
+              <span className="font-medium dark:text-white">History</span>
             </div>
           </div>
         </div>
         
         {/* Exams Grid */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-education-dark">All Exams</h2>
-            <div className="text-gray-500 text-sm">
+          <div className="flex justify-between items-center mb-6">            <h2 className="text-2xl font-semibold text-education-dark dark:text-white">All Exams</h2>
+            <div className="text-gray-500 dark:text-gray-400 text-sm">
               Showing {filteredExams.length} of {exams.length} exams
             </div>
           </div>
-          
-          {loading ? (
+            {loading ? (
             <div className="text-center py-16">
-              <h3 className="text-xl font-medium text-education-dark mb-2">Loading exams...</h3>
-              <p className="text-gray-600">Please wait while we fetch the exams.</p>
+              <h3 className="text-xl font-medium text-education-dark dark:text-white mb-2">Loading exams...</h3>
+              <p className="text-gray-600 dark:text-gray-300">Please wait while we fetch the exams.</p>
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <h3 className="text-xl font-medium text-education-dark mb-2">Error</h3>
-              <p className="text-gray-600">{error}</p>
+              <h3 className="text-xl font-medium text-education-dark dark:text-white mb-2">Error</h3>
+              <p className="text-gray-600 dark:text-gray-300">{error}</p>
             </div>
           ) : filteredExams.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -146,7 +140,7 @@ const ExamsPage = () => {
                 <Link
                   key={exam.id}
                   to={`/exam/${exam.id}`}
-                  className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all"
                 >
                   <div className="flex flex-col h-full">
                     <img

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu as MenuIcon, X, User, LogIn, LogOut } from "lucide-react";
+import { Menu as MenuIcon, X, User, LogIn, LogOut, Sun, Moon } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface User {
   name: string;
@@ -17,6 +18,7 @@ interface AuthContextType {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth() as AuthContextType;
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   // Hide navbar on dashboard routes when user is authenticated
@@ -59,9 +61,9 @@ const Navbar = () => {
         return "/student-dashboard";
     }
   };
-
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-800 sticky top-0 z-50 transition-colors"
+         style={{ borderBottom: '1px solid', borderColor: 'var(--border-color, #e5e7eb)' }}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -72,47 +74,53 @@ const Navbar = () => {
       alt="Enlightiq Logo"
       className="h-12 w-12 object-contain"
     />
-   <h1 className="text-3xl font-bold text-yellow-600">Enlightiq</h1>
+   <h1 className="text-3xl font-bold text-yellow-600 dark:text-yellow-500">Enlightiq</h1>
   </Link>
-</div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
-              <Link to="/" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+</div>            <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
+              <Link to="/" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 Home
               </Link>
-              <Link to="/ai" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/ai" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 Ai Learnings
               </Link>
-              <Link to="/exams" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/exams" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 Exams
               </Link>
-              <Link to="/mock-tests" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/mock-tests" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 MockTests
               </Link>
-              <Link to="/blog" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/blog" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 Blog
               </Link>
-              <Link to="/skill-development" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/skill-development" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 SkillDevelopment
               </Link>
-              <Link to="/about" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/about" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 AboutUs
               </Link>
-              <Link to="/contact" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
+              <Link to="/contact" className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-2 font-medium transition-colors">
                 Contact
               </Link>
             </div>
-          </div>
-          <div className="hidden sm:flex sm:items-center sm:ml-4 sm:space-x-3">
-            {isAuthenticated ? (
+          </div>          <div className="hidden sm:flex sm:items-center sm:ml-4 sm:space-x-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+              {isAuthenticated ? (
               <div className="flex items-center space-x-3">
-                <Link to={getDashboardRoute()} className="flex items-center text-blue-600 hover:text-blue-700">
+                <Link to={getDashboardRoute()} className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                   <User size={20} className="mr-1" />
                   <span>Dashboard</span>
                 </Link>
-                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, {user?.name}</span>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center text-red-600 hover:text-red-700"
+                  className="flex items-center text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                 >
                   <LogOut size={20} className="mr-1" />
                   <span>Logout</span>
@@ -120,20 +128,28 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link to="/login" className="flex items-center text-blue-600 hover:text-blue-700">
+                <Link to="/login" className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                   <LogIn size={20} className="mr-1" />
                   <span>Login</span>
                 </Link>
-                <Link to="/register" className="btn-primary">
+                <Link to="/register" className="btn-primary dark:bg-blue-600 dark:hover:bg-blue-700">
                   SignUp
                 </Link>
               </div>
             )}
-          </div>
-          <div className="flex items-center sm:hidden">
+          </div>          <div className="flex items-center sm:hidden">
+            {/* Mobile Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mr-2"
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+            
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:text-blue-600 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none transition-colors"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
@@ -141,43 +157,40 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Mobile menu */}
+      </div>      {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="sm:hidden bg-white border-t">
-          <div className="pt-2 pb-4 space-y-1">
-            <Link
+        <div className="sm:hidden bg-white dark:bg-gray-900 border-t dark:border-gray-700">
+          <div className="pt-2 pb-4 space-y-1">            <Link
               to="/"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
+              className="block px-2 py-1 text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/ai"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
+              className="block px-2 py-1 text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               AiLearnings
             </Link>
             <Link
               to="/exams"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
+              className="block px-2 py-1 text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Exams
             </Link>
             <Link
               to="/mock-tests"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
+              className="block px-2 py-1 text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Mock Tests
             </Link>
             <Link
               to="/blog"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
+              className="block px-2 py-1 text-base font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Blog

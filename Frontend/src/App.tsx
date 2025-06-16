@@ -3,6 +3,7 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AuthRedirect from "./components/auth/AuthRedirect";
 import ScrollToTop from "./components/ScrollToTop";
@@ -173,20 +174,21 @@ const UpcomingExamsWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <HashRouter>
-          <ScrollToTop />
-          <AppLayout>
-            {/* Apply background layout to all routes */}
-            <div className="background-layout">
-              <div className="background-circles">
-                <div className="circle-1"></div>
-                <div className="circle-2"></div>
-                <div className="circle-3"></div>
-                <div className="circle-4"></div>
-              </div>
+      <ThemeProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <HashRouter>
+            <ScrollToTop />
+            <AppLayout>
+              {/* Apply background layout to all routes */}
+              <div className="background-layout bg-white dark:bg-gray-900 transition-colors">
+                <div className="background-circles">
+                  <div className="circle-1"></div>
+                  <div className="circle-2"></div>
+                  <div className="circle-3"></div>
+                  <div className="circle-4"></div>
+                </div>
               <div className="watermarks">
                 <img
                   src="https://img.icons8.com/?size=100&id=11803&format=png"
@@ -333,9 +335,7 @@ const App = () => (
                     <ProtectedRoute allowedRoles={['admin']}>
                       <TaskDetail />
                     </ProtectedRoute>
-                  } />
-
-                  {/* Catch-all Route */}
+                  } />                  {/* Catch-all Route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
@@ -343,6 +343,7 @@ const App = () => (
           </AppLayout>
         </HashRouter>
       </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -663,7 +663,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
         <div className="container relative z-10">
           <div className="flex justify-between items-center mb-10">
             <Link to="/exams">
-              <h2 className="text-3xl font-bold text-gray-800">Featured Exams</h2>
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Featured Exams</h2>
             </Link>
             <Link to="/exams" className="text-blue-600 hover:text-blue-700 flex items-center font-medium">
               View All <ArrowRight size={18} className="ml-1" />
@@ -673,11 +673,11 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading featured exams...</p>
+              <p className="text-gray-600 dark:text-gray-300">Loading featured exams...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-600 mb-4">{error}</p>
+              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
                 className="text-blue-600 hover:text-blue-700 font-medium"
@@ -693,7 +693,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-600">No featured exams available at the moment.</p>
+              <p className="text-gray-600 dark:text-gray-300">No featured exams available at the moment.</p>
               <Link to="/exams" className="text-blue-600 hover:text-blue-700 font-medium">
                 View All Exams
               </Link>
@@ -739,12 +739,11 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             <div
               className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 transition-all duration-500"
               onClick={() => setIsPartnerSchoolModalOpen(false)}
-            >
-              <div
-                className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
+            >              <div
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6 text-center">
                   Become a Partner School
                 </h2>
                 {schoolSubmitSuccess && (
@@ -1105,12 +1104,11 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             <div
               className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 transition-all duration-500"
               onClick={() => setIsCoordinatorModalOpen(false)}
-            >
-              <div
-                className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
+            >              <div
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6 text-center">
                   Become an Olympiad Coordinator
                 </h2>
                 {coordinatorSubmitSuccess && (
@@ -1473,13 +1471,12 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
         {/* Modal for School Registration Form */}
         </>
       )}
-    
       {/* Testimonials Section */}
       <section className="py-16 relative">
         <div className="container relative z-10">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">What Our Users Say</h2>
-            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">What Our Users Say</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto">
               Hear from students, parents, and schools who have experienced success with Enlighthiq.
             </p>
           </div>

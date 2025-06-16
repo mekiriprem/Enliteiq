@@ -104,13 +104,11 @@ const Hero = () => {
               alt="Banner"
               className="w-full h-full object-cover rounded-lg shadow"
             />
-          </div>
-
-          <div className="lg:w-1/2 mb-10 lg:mb-0 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+          </div>          <div className="lg:w-1/2 mb-10 lg:mb-0 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold dark:text-white">
               Elevate Your <span className="text-education-blue">Academic</span> Journey
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
               Join thousands of students preparing for exams through our comprehensive platform. Expert-designed mock tests, personalized feedback, and proven results.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -147,7 +145,7 @@ const Hero = () => {
 
       {/* Main Content */}
   <div className="container mx-auto px-6 text-center">
-    <h2 className="text-4xl md:text-5xl font-extrabold text-blue mb-6 animate-fade-in">
+    <h2 className="text-4xl md:text-5xl font-extrabold text-blue dark:text-white mb-6 animate-fade-in">
       Who We Are
     </h2>
     <p className="text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed">
@@ -166,31 +164,30 @@ const Hero = () => {
 
      
     </section>
-        
-        {/* Stats Section */}
+          {/* Stats Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BookOpen size={32} className="text-education-blue" />
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+            <div className="bg-blue-100 dark:bg-blue-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BookOpen size={32} className="text-education-blue dark:text-blue-400" />
             </div>
-            <h3 className="text-2xl font-bold text-education-dark mb-2">500+</h3>
-            <p className="text-gray-600">Mock Tests Available</p>
+            <h3 className="text-2xl font-bold text-education-dark dark:text-white mb-2">500+</h3>
+            <p className="text-gray-600 dark:text-gray-300">Mock Tests Available</p>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users size={32} className="text-education-blue" />
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+            <div className="bg-blue-100 dark:bg-blue-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users size={32} className="text-education-blue dark:text-blue-400" />
             </div>
-            <h3 className="text-2xl font-bold text-education-dark mb-2">50,000+</h3>
-            <p className="text-gray-600">Students Enrolled</p>
+            <h3 className="text-2xl font-bold text-education-dark dark:text-white mb-2">50,000+</h3>
+            <p className="text-gray-600 dark:text-gray-300">Students Enrolled</p>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Award size={32} className="text-education-blue" />
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+            <div className="bg-blue-100 dark:bg-blue-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Award size={32} className="text-education-blue dark:text-blue-400" />
             </div>
-            <h3 className="text-2xl font-bold text-education-dark mb-2">95%</h3>
-            <p className="text-gray-600">Success Rate</p>
+            <h3 className="text-2xl font-bold text-education-dark dark:text-white mb-2">95%</h3>
+            <p className="text-gray-600 dark:text-gray-300">Success Rate</p>
           </div>
         </div>
       </div>

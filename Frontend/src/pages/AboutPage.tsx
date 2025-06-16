@@ -166,13 +166,12 @@ const AboutPage = () => {
       image: "/coFounder.jpg"
     }
   ];
-
   return (
     <div className="min-h-screen py-12">
       <div className="education-container">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">About Enlightiq</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark dark:text-white mb-4">About Enlightiq</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Learn more about our mission, values, and how we're helping students excel in academic competitions.
           </p>
         </div>
@@ -203,7 +202,7 @@ const AboutPage = () => {
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Our Mission</h3>
                   </div>
-                  <p className="text-gray-700">{aboutContent.mission}</p>
+                  <p className="text-gray-700 dark:text-gray-300">{aboutContent.mission}</p>
                 </CardContent>
               </Card>
 
@@ -218,7 +217,7 @@ const AboutPage = () => {
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Our Vision</h3>
                   </div>
-                  <p className="text-gray-700">{aboutContent.vision}</p>
+                  <p className="text-gray-700 dark:text-gray-300">{aboutContent.vision}</p>
                 </CardContent>
               </Card>
 
@@ -232,7 +231,7 @@ const AboutPage = () => {
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Our Values</h3>
                   </div>
-                  <ul className="text-gray-700 space-y-2">
+                  <ul className="text-gray-700 dark:text-gray-300 space-y-2">
                     <li className="flex items-center">
                       <span className="bg-green-100 p-1 rounded-full mr-2">
                         <svg className="h-3 w-3 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -420,23 +419,22 @@ const AboutPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-             <div className="floating-symbols">
-  <span className="symbol">π</span>
-  <span className="symbol">∑</span>
-  <span className="symbol">√</span>
-  <span className="symbol">≈</span>
-  <span className="symbol">∫</span>
-  <span className="symbol">⚛</span> {/* Atom symbol */}
-  <span className="symbol">🧪</span> {/* Beaker */}
-</div>
-<div className="fixed-symbols">
-  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
-  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
-  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
-  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
-</div>
+      <div className="floating-symbols">
+        <span className="symbol">π</span>
+        <span className="symbol">∑</span>
+        <span className="symbol">√</span>
+        <span className="symbol">≈</span>
+        <span className="symbol">∫</span>
+        <span className="symbol">⚛</span> {/* Atom symbol */}
+        <span className="symbol">🧪</span> {/* Beaker */}
+      </div>
+      <div className="fixed-symbols">
+        <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+        <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+        <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+        <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+      </div>
     </div>
-    
   );
 };
 

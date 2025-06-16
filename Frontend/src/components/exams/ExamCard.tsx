@@ -11,8 +11,7 @@ interface ExamCardProps {
 }
 
 const ExamCard = ({ id, title, subject, date, duration, image }: ExamCardProps) => {
-  return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 card-hover">
+  return (    <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 card-hover">
       <div className="relative overflow-hidden">
         <img 
           src={image} 
@@ -22,16 +21,16 @@ const ExamCard = ({ id, title, subject, date, duration, image }: ExamCardProps) 
       </div>
       
       <div className="p-5">
-        <div className="flex items-center text-sm text-gray-500 mb-2">
+        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
           <BookOpen size={16} className="mr-1" />
           <span>{subject}</span>
         </div>
         
-        <h3 className="text-lg font-semibold text-education-dark mb-3 line-clamp-2">
+        <h3 className="text-lg font-semibold text-education-dark dark:text-white mb-3 line-clamp-2">
           {title}
         </h3>
         
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300 mb-4">
           <div className="flex items-center">
             <Calendar size={16} className="mr-1" />
             <span>{date}</span>

@@ -97,6 +97,10 @@
   background: linear-gradient(to bottom right, #FFFFFF, #E6F7FA, #B3E5FC); /* White to light blue gradient */
 }
 
+.dark .background-layout::before {
+  background: linear-gradient(to bottom right, #111827, #1F2937, #374151); /* Dark gradient */
+}
+
 /* Animated Circles */
 .background-circles {
   position: fixed;

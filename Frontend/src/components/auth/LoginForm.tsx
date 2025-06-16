@@ -104,24 +104,23 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-education-dark mb-6">Login to Your Account</h2>
+    <div className="w-full max-w-md mx-auto">      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 className="text-2xl font-bold text-education-dark dark:text-white mb-6">Login to Your Account</h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded">
             {error}
           </div>
         )}
 
         <div className="mb-6">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Email Address <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
             id="email"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
             placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -130,14 +129,14 @@ const LoginForm: React.FC = () => {
         </div>
 
         <div className="mb-6">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Password <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               id="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -146,7 +145,7 @@ const LoginForm: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -161,8 +160,7 @@ const LoginForm: React.FC = () => {
               className="h-4 w-4 text-education-blue focus:ring-education-blue border-gray-300 rounded"
               checked={rememberMe}
               onChange={() => setRememberMe(!rememberMe)}
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">
+            />            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 dark:text-gray-300">
               Remember me
             </label>
           </div>
@@ -207,7 +205,7 @@ const LoginForm: React.FC = () => {
         </button>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Don't have an account?{" "}
             <Link to="/register" className="text-education-blue hover:text-blue-700 font-medium">
               Sign up

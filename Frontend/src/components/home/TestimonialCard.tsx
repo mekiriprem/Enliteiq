@@ -10,8 +10,7 @@ interface TestimonialProps {
 }
 
 const TestimonialCard = ({ name, role, content, avatar, rating }: TestimonialProps) => {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 card-hover">
+  return (    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 card-hover">
       <div className="flex items-center mb-4">
         <img 
           src={avatar} 
@@ -19,8 +18,8 @@ const TestimonialCard = ({ name, role, content, avatar, rating }: TestimonialPro
           className="w-12 h-12 rounded-full object-cover mr-4"
         />
         <div>
-          <h4 className="font-semibold text-education-dark">{name}</h4>
-          <p className="text-sm text-gray-500">{role}</p>
+          <h4 className="font-semibold text-education-dark dark:text-white">{name}</h4>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{role}</p>
         </div>
       </div>
       
@@ -29,12 +28,12 @@ const TestimonialCard = ({ name, role, content, avatar, rating }: TestimonialPro
           <Star 
             key={i} 
             size={16} 
-            className={i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+            className={i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 dark:text-gray-600"}
           />
         ))}
       </div>
       
-      <p className="text-gray-600 italic">"{content}"</p>
+      <p className="text-gray-600 dark:text-gray-300 italic">"{content}"</p>
     </div>
   );
 };

@@ -35,12 +35,11 @@ const Features = () => {
     }
   ];
 
-  return (
-    <section className="py-16 bg-white">
+  return (    <section className="py-16 bg-white dark:bg-gray-900">
       <div className="education-container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Why Choose EduVerse?</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-education-dark dark:text-white mb-4">Why Choose EduVerse?</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Our comprehensive platform offers everything you need to excel in your academic pursuits.
           </p>
         </div>
@@ -49,11 +48,11 @@ const Features = () => {
           {features.map((feature, index) => (
             <div 
               key={index} 
-              className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all"
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold mb-3 text-education-dark">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-3 text-education-dark dark:text-white">{feature.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
             </div>
           ))}
         </div>

@@ -43,7 +43,7 @@ const MockTestsPage = () => {
   useEffect(() => {
     const fetchMockTests = async () => {
       try {
-        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/matchsets/1/details');
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/matchsets/all/details');
         if (!response.ok) {
           throw new Error(
             response.status === 404

@@ -16,16 +16,13 @@ const RegisterPage = () => {
     />
    <h1 className="text-5xl font-bold text-yellow-600">Enlightiq</h1>
   </Link>
-</div>
-
-          <h1 className="mt-6 text-3xl font-bold text-education-dark">Create Your Account</h1>
-          <p className="mt-2 text-gray-600">Join Enlightiq to start your learning journey</p>
+</div>          <h1 className="mt-6 text-3xl font-bold text-education-dark dark:text-white">Create Your Account</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">Join Enlightiq to start your learning journey</p>
         </div>
         
         <RegisterForm />
         
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="mt-8 text-center">          <p className="text-sm text-gray-500 dark:text-gray-400">
             By creating an account, you agree to our{" "}
             <Link to="/terms" className="text-education-blue hover:underline">Terms of Service</Link>
             {" "}and{" "}
