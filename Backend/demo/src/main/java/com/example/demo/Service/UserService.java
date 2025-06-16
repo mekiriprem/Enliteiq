@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -84,22 +85,44 @@ public class UserService {
 //        return user;
 //    }
 
-    @Transactional
-    public void registerUserToExam(Long userId, UUID examId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
+    public String registerUserToExam(UUID examId, Long userId) {
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new IllegalArgumentException("Exam not found"));
+            .orElseThrow(() -> new RuntimeException("Exam not found"));
 
-        List<Exam> exams = user.getRegisteredExams();
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!exams.contains(exam)) {
-            exams.add(exam);
-            user.setRegisteredExams(exams);
-            userRepository.save(user);
+        // Check registration deadline
+        if (LocalDateTime.now().isAfter(exam.getRegistrationDeadline())) {
+            return "Registration closed. Deadline passed.";
         }
+
+        // Check eligibility (e.g., "6-10")
+        String eligibility = exam.getEligibility(); // "6-10"
+        try {
+            String[] range = eligibility.replaceAll("[^0-9\\-]", "").split("-");
+            int minClass = Integer.parseInt(range[0]);
+            int maxClass = Integer.parseInt(range[1]);
+            int userClass = Integer.parseInt(user.getUserClass()); // assuming it's a string
+
+            if (userClass < minClass || userClass > maxClass) {
+                return "You are not eligible for this exam.";
+            }
+        } catch (Exception e) {
+            return "Eligibility check failed. Please contact support.";
+        }
+
+        // Prevent duplicate registration
+        if (exam.getRegisteredUsers().contains(user)) {
+            return "Already registered for this exam.";
+        }
+
+        // Register user
+        exam.getRegisteredUsers().add(user);
+        examRepository.save(exam);
+        return "Registration successful.";
     }
+
     
 
     public List<UserDTO> getAllUsers() {

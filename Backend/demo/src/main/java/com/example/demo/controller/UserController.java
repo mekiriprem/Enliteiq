@@ -77,7 +77,7 @@ public class UserController {
         public ResponseEntity<String> registerUserToExam(
                 @PathVariable Long userId,
                 @PathVariable UUID examId) {
-            userService.registerUserToExam(userId, examId);
+            userService.registerUserToExam(examId, userId);
             return ResponseEntity.ok("User registered to exam successfully.");
         }
         
