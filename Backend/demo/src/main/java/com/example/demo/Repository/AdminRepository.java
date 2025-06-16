@@ -7,5 +7,6 @@ import com.example.demo.model.SalesMan;
 
 public interface AdminRepository  extends JpaRepository<Admin, Integer>{
     Admin findByEmail(String email);
+  
 
 }

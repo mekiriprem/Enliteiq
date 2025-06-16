@@ -30,30 +30,30 @@ public class LoginController {
     @Autowired private SchoolRepository schoolRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String email = request.getEmail();
+        String emailOrPhone = (request.getEmail() != null && !request.getEmail().isEmpty())
+                ? request.getEmail()
+                : request.getPhone();
         String password = request.getPassword();
 
-        // 1. Check SalesMan
-        SalesMan sm = salesManRepository.findByEmail(email);
+        // 1. Check SalesMan (by email only)
+        SalesMan sm = salesManRepository.findByEmail(emailOrPhone);
         if (sm != null && "active".equalsIgnoreCase(sm.getStatus()) && passwordEncoder.matches(password, sm.getPassword())) {
-            // Build response without status field
             LoginResponse res = new LoginResponse();
             res.setRole("salesman");
 
-            // Create a response DTO without the `status` field
             SalesManDTO dto = new SalesManDTO();
             dto.setId(sm.getId());
             dto.setName(sm.getName());
             dto.setEmail(sm.getEmail());
 
             res.setData(dto);
-            return ResponseEntity.ok(res); // ✅ wrap in ResponseEntity
+            return ResponseEntity.ok(res);
         }
-        // 2. Check Admin
-        Admin admin = adminRepository.findByEmail(email);
+
+        // 2. Check Admin (by email only)
+        Admin admin = adminRepository.findByEmail(emailOrPhone);
         if (admin != null && passwordEncoder.matches(password, admin.getPassword())) {
             LoginResponse res = new LoginResponse();
             res.setRole("admin");
@@ -61,17 +61,10 @@ public class LoginController {
             return ResponseEntity.ok(res);
         }
 
-        // 3. Check School
-//        School school = schoolRepository.findByschoolEmail(email);
-//        if (school != null && passwordEncoder.matches(password, school.getPassword())) {
-//            LoginResponse res = new LoginResponse();
-//            res.setRole("school");
-//            res.setData(school);
-//            return ResponseEntity.ok(res);
-//        }
+        // 3. Check User (by email or phone)
+        User user = userRepository.findByPhone(emailOrPhone);
+       
 
-        // 4. Check User
-        User user = userRepository.findByEmail(email);
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             LoginResponse res = new LoginResponse();
             res.setRole("user");
@@ -79,7 +72,8 @@ public class LoginController {
             return ResponseEntity.ok(res);
         }
 
+        // ❌ If no match
         return ResponseEntity.status(401).body("Invalid credentials");
     }
-}
 
+}
