@@ -32,6 +32,14 @@ interface MockTest {
   time?: string;
 }
 
+interface ApiMockTest {
+  id: number;
+  title: string;
+  subject: string;
+  date: string;
+  durationMinutes: number | null;
+}
+
 const MockTestsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
@@ -44,7 +52,7 @@ const MockTestsPage = () => {
   useEffect(() => {
     const fetchMockTests = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/matchsets');
+        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/matchsets');
         if (!response.ok) {
           throw new Error(
             response.status === 404
@@ -55,27 +63,27 @@ const MockTestsPage = () => {
         const data = await response.json();
         
         // Ensure data is an array
-        const dataArray = Array.isArray(data) ? data : [data];
-        
-        // Transform API data to match MockTest interface
-        const transformedTests: MockTest[] = dataArray.map((item: any) => ({
+        const dataArray = Array.isArray(data) ? data : [data];        // Transform API data to match MockTest interface
+        const transformedTests: MockTest[] = dataArray.map((item: ApiMockTest) => ({
           id: item.id.toString(),
           title: item.title,
           subject: item.subject,
-          duration: item.durationMinutes ? `${item.durationMinutes}` : "60", // Default duration if null
-          totalQuestions: item.questions.length,
-          participants: Math.floor(Math.random() * 2000) + 500, // Random participants
-          description: `Practice test for ${item.subject} Olympiad preparation.`,
+          duration: item.durationMinutes ? `${item.durationMinutes}` : "120", // Default 2 hours if null
+          totalQuestions: Math.floor(Math.random() * 50) + 30, // Random questions count 30-80
+          participants: Math.floor(Math.random() * 2000) + 500, // Random participants 500-2500
+          description: `Comprehensive ${item.subject} mock test to prepare for Olympiad competitions. Practice with carefully curated questions and improve your problem-solving skills.`,
           topics: [
             item.subject,
-            ...item.questions.slice(0, 2).map((q: any) => q.questionText.split(" ")[0]), // Derive topics from question text
+            "Problem Solving",
+            "Critical Thinking", 
+            "Analytical Skills",
             "Olympiad Prep"
-          ].filter(Boolean),
-          isPopular: Math.random() > 0.7,
-          isFree: Math.random() > 0.5,
-          image: undefined, // No image provided
+          ],
+          isPopular: Math.random() > 0.6, // 40% chance of being popular
+          isFree: Math.random() > 0.4, // 60% chance of being free
+          image: `https://images.unsplash.com/photo-${item.subject.toLowerCase() === 'science' ? '1532094349884-0f2b85ae2020' : '1635070041078-e363dbe005cb'}?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80`,
           date: item.date,
-          time: undefined, // No time provided
+          time: "10:00 AM", // Default time
         }));
         
         setMockTests(transformedTests);
@@ -149,14 +157,13 @@ const MockTestsPage = () => {
       </div>
     );
   };
-
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading mock tests...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading mock tests...</p>
         </div>
       </div>
     );
@@ -165,13 +172,13 @@ const MockTestsPage = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 mb-4">
             <BookOpen className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Mock Tests</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Failed to Load Mock Tests</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Try Again
           </Button>
@@ -181,19 +188,18 @@ const MockTestsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[url('/images/neural-network-bg.png')] bg-cover bg-fixed bg-opacity-90">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-blue-100 to-white text-black">
+    <div className="min-h-screen bg-[url('/images/neural-network-bg.png')] bg-cover bg-fixed bg-opacity-90">      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-blue-100 dark:from-blue-900 to-white dark:to-gray-800 text-black dark:text-white">
         <div className="education-container py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center space-x-2">
-              <Brain size={36} className="text-blue-600" />
+              <Brain size={36} className="text-blue-600 dark:text-blue-400" />
               <span>Mock Tests & Practice Exams</span>
             </h1>
-            <p className="text-xl text-blue-500 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-blue-500 dark:text-blue-300 mb-8 max-w-3xl mx-auto">
               Sharpen your skills with AI-enhanced mock tests for Olympiad preparation. Practice with real exam-like conditions and track your progress.
             </p>
-            <div className="flex flex-wrap justify-center gap-8 text-blue-800">
+            <div className="flex flex-wrap justify-center gap-8 text-blue-800 dark:text-blue-200">
               <div className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
                 <span>Realistic Exam Experience</span>
@@ -211,19 +217,18 @@ const MockTestsPage = () => {
         </div>
       </div>
 
-      <div className="education-container py-12">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div className="education-container py-12">        {/* Search and Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="md:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search mock tests..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -232,7 +237,7 @@ const MockTestsPage = () => {
               <select
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {subjects.map(subject => (
                   <option key={subject} value={subject}>{subject}</option>
@@ -240,11 +245,9 @@ const MockTestsPage = () => {
               </select>
             </div>
           </div>
-        </div>
-
-        {/* Results Count */}
+        </div>{/* Results Count */}
         <div className="mb-6">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Showing <span className="font-semibold">{filteredTests.length}</span> mock tests
             {searchTerm && ` for "${searchTerm}"`}
             {selectedSubject !== "All" && ` in ${selectedSubject}`}
@@ -254,7 +257,7 @@ const MockTestsPage = () => {
         {/* Mock Tests Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredTests.map((test) => (
-            <Card key={test.id} className="hover:shadow-lg transition-shadow duration-300 overflow-hidden bg-white bg-opacity-80">
+            <Card key={test.id} className="hover:shadow-lg transition-shadow duration-300 overflow-hidden bg-white dark:bg-gray-800 bg-opacity-80">
               {/* Card Header with Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600 overflow-hidden">
                 {test.image ? (
@@ -284,18 +287,15 @@ const MockTestsPage = () => {
                     </Badge>
                   )}
                 </div>
-              </div>
-
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-semibold line-clamp-2">
+              </div>              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-semibold line-clamp-2 dark:text-white">
                   {test.title}
                 </CardTitle>
-                <p className="text-sm text-gray-600">{test.subject}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{test.subject}</p>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                {/* Description */}
-                <p className="text-sm text-gray-700 line-clamp-3">
+              <CardContent className="space-y-4">                {/* Description */}
+                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
                   {test.description}
                 </p>
 
@@ -303,7 +303,7 @@ const MockTestsPage = () => {
                 <TopicsSection test={test} />
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     <span>{test.duration}m</span>
@@ -328,14 +328,12 @@ const MockTestsPage = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* No Results */}
+        </div>        {/* No Results */}
         {filteredTests.length === 0 && !isLoading && (
           <div className="text-center py-12">
-            <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No mock tests found</h3>
-            <p className="text-gray-600 mb-4">
+            <BookOpen className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No mock tests found</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               Try adjusting your search terms or filters to find what you're looking for.
             </p>
             <Button 
