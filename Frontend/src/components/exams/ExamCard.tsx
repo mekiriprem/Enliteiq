@@ -43,7 +43,7 @@ const ExamCard = ({ id, title, subject, date, duration, image }: ExamCardProps) 
         </div>
         
         <Link 
-          to={`/exams/${id}`}
+          to={`/exam/${id}`}
           className="inline-flex items-center text-education-blue hover:text-blue-700 font-medium transition-colors"
         >
           Learn More
