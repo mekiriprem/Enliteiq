@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,18 +7,20 @@ import {
   Clock, 
   BookOpen, 
   Users, 
-  Search,
-  Play,
-  Trophy,
-  Target,
-  Zap
+  Search, 
+  Play, 
+  Target, 
+  Trophy, 
+  Zap, 
+  Brain, 
+  Cpu 
 } from "lucide-react";
 
 interface MockTest {
   id: string;
   title: string;
   subject: string;
-  duration: number; // in minutes
+  duration: string; // in minutes
   totalQuestions: number;
   participants: number;
   description: string;
@@ -43,7 +44,7 @@ const MockTestsPage = () => {
   useEffect(() => {
     const fetchMockTests = async () => {
       try {
-        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/matchsets/1/details');
+        const response = await fetch('http://localhost:8081/api/matchsets');
         if (!response.ok) {
           throw new Error(
             response.status === 404
@@ -51,31 +52,40 @@ const MockTestsPage = () => {
               : `Failed to fetch mock tests: ${response.status} ${response.statusText}`
           );
         }
-        const data = await response.json();        // Transform API data to match MockTest interface
-        const transformedTests: MockTest[] = [{
-          id: data.id.toString(),
-          title: data.title,
-          subject: data.subject,
-          duration: 60, // Default duration
-          totalQuestions: data.questions.length,
+        const data = await response.json();
+        
+        // Ensure data is an array
+        const dataArray = Array.isArray(data) ? data : [data];
+        
+        // Transform API data to match MockTest interface
+        const transformedTests: MockTest[] = dataArray.map((item: any) => ({
+          id: item.id.toString(),
+          title: item.title,
+          subject: item.subject,
+          duration: item.durationMinutes ? `${item.durationMinutes}` : "60", // Default duration if null
+          totalQuestions: item.questions.length,
           participants: Math.floor(Math.random() * 2000) + 500, // Random participants
-          description: `Practice test for ${data.subject} to enhance your knowledge and skills.`,
-          topics: [data.subject, "General Knowledge"],
+          description: `Practice test for ${item.subject} Olympiad preparation.`,
+          topics: [
+            item.subject,
+            ...item.questions.slice(0, 2).map((q: any) => q.questionText.split(" ")[0]), // Derive topics from question text
+            "Olympiad Prep"
+          ].filter(Boolean),
           isPopular: Math.random() > 0.7,
           isFree: Math.random() > 0.5,
           image: undefined, // No image provided
-          date: data.date,
+          date: item.date,
           time: undefined, // No time provided
-        }];
+        }));
         
         setMockTests(transformedTests);
       } catch (error) {
         console.error('Error fetching mock tests:', error);
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError('Failed to load mock tests. Please try again later.');
-        }
+        setError(
+          error instanceof Error 
+            ? error.message 
+            : 'Failed to load mock tests. Please try again later.'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -94,14 +104,13 @@ const MockTestsPage = () => {
 
   // Get unique subjects from the loaded tests
   const subjects = ["All", ...Array.from(new Set(mockTests.map(test => test.subject)))];
+
   // Filter tests based on search and filters
   const filteredTests = mockTests.filter(test => {
     const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.topics.some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === "All" || test.subject === selectedSubject;
-    // Note: Difficulty filtering removed as MockTest interface doesn't have difficulty property
-    
     return matchesSearch && matchesSubject;
   });
 
@@ -172,17 +181,17 @@ const MockTestsPage = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[url('/images/neural-network-bg.png')] bg-cover bg-fixed bg-opacity-90">
       {/* Hero Section */}
-      <div className="bg-gradient-to-b text-black">
+      <div className="bg-gradient-to-b from-blue-100 to-white text-black">
         <div className="education-container py-16">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Mock Tests & Practice Exams
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center space-x-2">
+              <Brain size={36} className="text-blue-600" />
+              <span>Mock Tests & Practice Exams</span>
             </h1>
             <p className="text-xl text-blue-500 mb-8 max-w-3xl mx-auto">
-              Sharpen your skills with our comprehensive collection of mock tests. 
-              Practice with real exam-like conditions and track your progress.
+              Sharpen your skills with AI-enhanced mock tests for Olympiad preparation. Practice with real exam-like conditions and track your progress.
             </p>
             <div className="flex flex-wrap justify-center gap-8 text-blue-800">
               <div className="flex items-center gap-2">
@@ -195,14 +204,15 @@ const MockTestsPage = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5" />
-                <span>Instant Results</span>
+                <span>AI-Powered Insights</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="education-container py-12">        {/* Search and Filters */}
+      <div className="education-container py-12">
+        {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
@@ -230,7 +240,9 @@ const MockTestsPage = () => {
               </select>
             </div>
           </div>
-        </div>{/* Results Count */}
+        </div>
+
+        {/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-600">
             Showing <span className="font-semibold">{filteredTests.length}</span> mock tests
@@ -242,7 +254,7 @@ const MockTestsPage = () => {
         {/* Mock Tests Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredTests.map((test) => (
-            <Card key={test.id} className="hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+            <Card key={test.id} className="hover:shadow-lg transition-shadow duration-300 overflow-hidden bg-white bg-opacity-80">
               {/* Card Header with Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600 overflow-hidden">
                 {test.image ? (
@@ -256,14 +268,19 @@ const MockTestsPage = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <BookOpen className="h-16 w-16 text-white/80" />
+                    <Cpu size={48} className="text-white/80" />
                   </div>
                 )}
-                  {/* Badges */}
+                {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
                   {test.isPopular && (
                     <Badge className="bg-orange-500 text-white border-none">
                       Popular
+                    </Badge>
+                  )}
+                  {test.isFree && (
+                    <Badge className="bg-green-500 text-white border-none">
+                      Free
                     </Badge>
                   )}
                 </div>
@@ -283,7 +300,9 @@ const MockTestsPage = () => {
                 </p>
 
                 {/* Topics */}
-                <TopicsSection test={test} />                {/* Stats */}
+                <TopicsSection test={test} />
+
+                {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -318,7 +337,8 @@ const MockTestsPage = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No mock tests found</h3>
             <p className="text-gray-600 mb-4">
               Try adjusting your search terms or filters to find what you're looking for.
-            </p>            <Button 
+            </p>
+            <Button 
               onClick={() => {
                 setSearchTerm("");
                 setSelectedSubject("All");
@@ -331,14 +351,14 @@ const MockTestsPage = () => {
         )}
 
         {/* Additional Info Section */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mt-12">
+        <div className="bg-white bg-opacity-80 rounded-lg shadow-sm p-8 mt-12">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Why Practice with Mock Tests?
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center space-x-2">
+              <Zap size={28} className="text-purple-600" />
+              <span>Why Practice with AI-Enhanced Mock Tests?</span>
             </h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              Mock tests are essential for exam preparation. They help you understand the exam pattern, 
-              improve time management, and identify areas that need more focus.
+              Our AI-powered mock tests simulate real Olympiad exams, provide instant feedback, and offer personalized insights to boost your performance.
             </p>
           </div>
 
@@ -352,44 +372,44 @@ const MockTestsPage = () => {
                 Experience the exact same environment and time pressure as the real exam.
               </p>
             </div>
-            
             <div className="text-center">
               <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Trophy className="h-8 w-8 text-green-600" />
               </div>
               <h3 className="font-semibold mb-2">Performance Analysis</h3>
               <p className="text-sm text-gray-600">
-                Get detailed insights into your performance with comprehensive analytics.
+                Get detailed insights into your performance with AI-driven analytics.
               </p>
             </div>
-            
             <div className="text-center">
               <div className="bg-orange-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Zap className="h-8 w-8 text-orange-600" />
+                <Brain className="h-8 w-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold mb-2">Instant Results</h3>
+              <h3 className="font-semibold mb-2">AI-Powered Insights</h3>
               <p className="text-sm text-gray-600">
-                Receive immediate feedback and detailed explanations for all questions.
+                Receive personalized recommendations to focus on weak areas.
               </p>
             </div>
           </div>
         </div>
       </div>
-            <div className="floating-symbols">
-  <span className="symbol">π</span>
-  <span className="symbol">∑</span>
-  <span className="symbol">√</span>
-  <span className="symbol">≈</span>
-  <span className="symbol">∫</span>
-  <span className="symbol">⚛</span> {/* Atom symbol */}
-  <span className="symbol">🧪</span> {/* Beaker */}
-</div>
-<div className="fixed-symbols">
-  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
-  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
-  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
-  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
-</div>
+
+      {/* Floating and Fixed Symbols (from AIPage) */}
+      <div className="floating-symbols">
+        <span className="symbol">π</span>
+        <span className="symbol">∑</span>
+        <span className="symbol">√</span>
+        <span className="symbol">≈</span>
+        <span className="symbol">∫</span>
+        <Brain size={24} className="symbol text-purple-600" />
+        <span className="symbol">🧪</span>
+      </div>
+      <div className="fixed-symbols">
+        <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+        <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+        <Cpu size={24} className="fixed-symbol text-blue-600" style={{ top: '60%', left: '15%' }} />
+        <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+      </div>
     </div>
   );
 };

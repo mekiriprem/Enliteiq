@@ -123,6 +123,7 @@ public class MatchSetController {
             dto.setQuestionText(q.getQuestionText());
             dto.setOptions(q.getOptions());
             dto.getDurationMinutes();
+            dto.setCorrectAnswer(q.getCorrectAnswer());
             
             return dto;
         }).toList();
@@ -147,6 +148,7 @@ public class MatchSetController {
             qDto.setId(q.getId());
             qDto.setQuestionText(q.getQuestionText());
             qDto.setOptions(q.getOptions());
+            qDto.setCorrectAnswer(q.getCorrectAnswer());
             return qDto;
         }).toList();
 
@@ -154,6 +156,33 @@ public class MatchSetController {
 
         return ResponseEntity.ok(dto);
     }
+    @GetMapping("/all/details")
+    public ResponseEntity<List<TestWithQuestionsDto>> getAllTestDetails() {
+        List<MatchSet> matchSets = matchSetRepository.findAll();
+
+        List<TestWithQuestionsDto> result = matchSets.stream().map(matchSet -> {
+            TestWithQuestionsDto dto = new TestWithQuestionsDto();
+            dto.setId(matchSet.getId());
+            dto.setTitle(matchSet.getTitle());
+            dto.setSubject(matchSet.getSubject());
+            dto.setDate(matchSet.getDate());
+            dto.setDurationMinutes(matchSet.getDurationMinutes());
+
+            List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
+                QuestionDto qDto = new QuestionDto();
+                qDto.setId(q.getId());
+                qDto.setQuestionText(q.getQuestionText());
+                qDto.setOptions(q.getOptions());
+                return qDto;
+            }).toList();
+
+            dto.setQuestions(questions);
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(result);
+    }
+
 
 
 }

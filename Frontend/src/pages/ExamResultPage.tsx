@@ -15,7 +15,7 @@ import QuestionReview from "./results/components/QuestionReview";
 // Interface for backend submission result
 interface BackendResult {
   totalQuestions: number;
-  correctAnswers: number;
+  correctAnswers: String;
   incorrectAnswers: number;
   percentage: number;
   resultStatus: string; // "Pass" or "Fail"
