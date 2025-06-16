@@ -13,6 +13,8 @@ public class MatchSetDto {
     private List<QuestionDto> questions;
    
     private Integer durationMinutes;
+   
+    
     
 }
 

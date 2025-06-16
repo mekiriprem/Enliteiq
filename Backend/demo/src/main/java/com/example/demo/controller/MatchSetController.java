@@ -106,6 +106,8 @@ public class MatchSetController {
             dto.setSubject(ms.getSubject());
             dto.setDate(ms.getDate());
             dto.setDurationMinutes(ms.getDurationMinutes());
+            dto.setQuestionCount(ms.getQuestions() != null ? ms.getQuestions().size() : 0);
+            
             return dto;
         }).collect(Collectors.toList());
 

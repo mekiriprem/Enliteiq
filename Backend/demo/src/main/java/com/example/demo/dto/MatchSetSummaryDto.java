@@ -12,4 +12,6 @@ public class MatchSetSummaryDto {
     private LocalDate date;
     // ✅ Duration of the exam in minutes
     private Integer durationMinutes;
+    private Integer questionCount;
+
 }
