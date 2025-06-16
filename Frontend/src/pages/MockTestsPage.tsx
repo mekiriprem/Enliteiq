@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { 
   Clock, 
   BookOpen, 
-  Users, 
   Search, 
   Play, 
   Target, 
@@ -22,11 +21,8 @@ interface MockTest {
   subject: string;
   duration: string; // in minutes
   totalQuestions: number;
-  participants: number;
   description: string;
   topics: string[];
-  isPopular?: boolean;
-  isFree?: boolean;
   image?: string;
   date?: string;
   time?: string;
@@ -38,6 +34,7 @@ interface ApiMockTest {
   subject: string;
   date: string;
   durationMinutes: number | null;
+  questionCount: number;
 }
 
 const MockTestsPage = () => {
@@ -69,8 +66,7 @@ const MockTestsPage = () => {
           title: item.title,
           subject: item.subject,
           duration: item.durationMinutes ? `${item.durationMinutes}` : "120", // Default 2 hours if null
-          totalQuestions: Math.floor(Math.random() * 50) + 30, // Random questions count 30-80
-          participants: Math.floor(Math.random() * 2000) + 500, // Random participants 500-2500
+          totalQuestions: item.questionCount || 50, // Use actual question count from backend
           description: `Comprehensive ${item.subject} mock test to prepare for Olympiad competitions. Practice with carefully curated questions and improve your problem-solving skills.`,
           topics: [
             item.subject,
@@ -79,11 +75,8 @@ const MockTestsPage = () => {
             "Analytical Skills",
             "Olympiad Prep"
           ],
-          isPopular: Math.random() > 0.6, // 40% chance of being popular
-          isFree: Math.random() > 0.4, // 60% chance of being free
+          date: item.date, // Use actual date from backend
           image: `https://images.unsplash.com/photo-${item.subject.toLowerCase() === 'science' ? '1532094349884-0f2b85ae2020' : '1635070041078-e363dbe005cb'}?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80`,
-          date: item.date,
-          time: "10:00 AM", // Default time
         }));
         
         setMockTests(transformedTests);
@@ -272,22 +265,14 @@ const MockTestsPage = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Cpu size={48} className="text-white/80" />
-                  </div>
-                )}
-                {/* Badges */}
+                  </div>                )}
+                {/* Subject Badge */}
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
-                  {test.isPopular && (
-                    <Badge className="bg-orange-500 text-white border-none">
-                      Popular
-                    </Badge>
-                  )}
-                  {test.isFree && (
-                    <Badge className="bg-green-500 text-white border-none">
-                      Free
-                    </Badge>
-                  )}
+                  <Badge className="bg-blue-500 text-white border-none">
+                    {test.subject}
+                  </Badge>
                 </div>
-              </div>              <CardHeader className="pb-3">
+              </div><CardHeader className="pb-3">
                 <CardTitle className="text-lg font-semibold line-clamp-2 dark:text-white">
                   {test.title}
                 </CardTitle>
@@ -305,17 +290,18 @@ const MockTestsPage = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{test.duration}m</span>
+                    <Clock className="h-4 w-4" />                    <span>{test.duration}m</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <BookOpen className="h-4 w-4" />
                     <span>{test.totalQuestions}Q</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{test.participants}</span>
-                  </div>
+                  {test.date && (
+                    <div className="flex items-center gap-1">
+                      <Target className="h-4 w-4" />
+                      <span>{new Date(test.date).toLocaleDateString()}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Button */}

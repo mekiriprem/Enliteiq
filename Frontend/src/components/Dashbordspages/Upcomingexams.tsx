@@ -54,8 +54,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [imageUploadType, setImageUploadType] = useState<'url' | 'file'>('url');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);  const [imagePreview, setImagePreview] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
@@ -64,9 +63,12 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [selectedExamResults, setSelectedExamResults] = useState<ExamResult[]>([]);
   const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
   const [loadingResults, setLoadingResults] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [isUploadingPdfs, setIsUploadingPdfs] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [newExam, setNewExam] = useState<Partial<Exam>>({
     title: '',
     date: '',
@@ -293,10 +295,58 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleImageUrlChange = (url: string) => {
     setImagePreview(url);
     setNewExam(prev => ({ ...prev, image: url }));
+  };
+
+  const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validPdfFiles = files.filter(file => file.type === 'application/pdf');
+    
+    if (validPdfFiles.length !== files.length) {
+      alert('Please upload only PDF files.');
+      return;
+    }
+    
+    // Check file sizes (limit to 10MB per file)
+    const oversizedFiles = validPdfFiles.filter(file => file.size > 10 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      alert('Each PDF file should be less than 10MB.');
+      return;
+    }
+    
+    setPdfFiles(prev => [...prev, ...validPdfFiles]);
+  };
+
+  const removePdfFile = (index: number) => {
+    setPdfFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadPdfsToServer = async (examId: string, files: File[]): Promise<void> => {
+    if (files.length === 0) return;
+    
+    setIsUploadingPdfs(true);
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('pdf', file);
+        
+        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/${examId}/pdf`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}: ${response.status}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading PDFs:', error);
+      throw error;
+    } finally {
+      setIsUploadingPdfs(false);
+    }
   };
 
   const uploadImageToServer = async (file: File): Promise<string> => {
@@ -318,10 +368,30 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       throw error;
     } finally {
       setIsUploadingImage(false);
-    }
-  };
+    }  };  const uploadPdfToExam = async (examId: string, pdfFile: File): Promise<void> => {
+    console.log('uploadPdfToExam called with examId:', examId, 'file:', pdfFile.name);
+    const formData = new FormData();
+    formData.append('file', pdfFile);
 
+    const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/${examId}/pdf`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.log('PDF upload response status:', response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('PDF upload error:', errorText);
+      throw new Error(`PDF upload failed: ${response.status} - ${errorText}`);
+    }
+    const responseText = await response.text();
+    console.log('PDF upload success response:', responseText);
+  };
   const handleSaveExam = async () => {
+    console.log('handleSaveExam called, isEditing:', isEditing, 'editingExamId:', editingExamId);
+    console.log('pdfFiles:', pdfFiles);
+    console.log('newExam:', newExam);
+    
     if (newExam.title && newExam.date && newExam.time && newExam.subject) {
       try {
         setIsProcessing(true);
@@ -342,35 +412,96 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           description: newExam.description,
           image: finalImageUrl,
           status: newExam.status
-        };
-        if (isEditing && editingExamId) {
+        };        if (isEditing && editingExamId) {
+          console.log('Updating exam with ID:', editingExamId);
           const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${editingExamId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
           });
+          console.log('Update response status:', response.status);
           if (!response.ok) {
             throw new Error(`Failed to update exam: ${response.status}`);
           }
           const updatedExam = await response.json();
-          setExams(prevExams => prevExams.map(exam => 
-            exam.id === editingExamId ? updatedExam : exam
-          ));
+          console.log('Updated exam received:', updatedExam);
+          
+          // Upload PDF if one is selected during editing
+          if (pdfFiles.length > 0) {
+            console.log('Uploading PDF for editing exam:', pdfFiles[0].name);
+            try {
+              setIsUploadingPdfs(true);
+              await uploadPdfToExam(editingExamId, pdfFiles[0]); // Upload first PDF only
+              console.log('PDF upload successful');
+              // Refresh the exam data to get the updated syllabus URL
+              const refreshResponse = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${editingExamId}`);
+              if (refreshResponse.ok) {
+                const refreshedExam = await refreshResponse.json();
+                console.log('Refreshed exam after PDF upload:', refreshedExam);
+                setExams(prevExams => prevExams.map(exam => 
+                  exam.id === editingExamId ? refreshedExam : exam
+                ));
+              } else {
+                console.log('Failed to refresh exam data');
+                setExams(prevExams => prevExams.map(exam => 
+                  exam.id === editingExamId ? updatedExam : exam
+                ));
+              }
+            } catch (pdfError) {
+              console.error('PDF upload failed:', pdfError);
+              alert('Exam updated but PDF upload failed. You can upload the PDF later.');
+              setExams(prevExams => prevExams.map(exam => 
+                exam.id === editingExamId ? updatedExam : exam
+              ));
+            } finally {
+              setIsUploadingPdfs(false);
+            }
+          } else {
+            console.log('No PDF to upload, just updating exam list');
+            setExams(prevExams => prevExams.map(exam => 
+              exam.id === editingExamId ? updatedExam : exam
+            ));
+          }
         } else {
           const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/exams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
-          });
-          if (!response.ok) {
+          });          if (!response.ok) {
             throw new Error(`Failed to add exam: ${response.status}`);
           }
           const newExamData = await response.json();
-          setExams(prevExams => [...prevExams, newExamData]);
+          
+          // Upload PDF if one is selected
+          if (pdfFiles.length > 0) {
+            try {
+              setIsUploadingPdfs(true);
+              await uploadPdfToExam(newExamData.id, pdfFiles[0]); // Upload first PDF only
+              // Refresh the exam data to get the updated syllabus URL
+              const refreshResponse = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${newExamData.id}`);
+              if (refreshResponse.ok) {
+                const refreshedExam = await refreshResponse.json();
+                setExams(prevExams => [...prevExams.filter(e => e.id !== newExamData.id), refreshedExam]);
+              } else {
+                setExams(prevExams => [...prevExams, newExamData]);
+              }
+            } catch (pdfError) {
+              console.error('PDF upload failed:', pdfError);
+              alert('Exam created but PDF upload failed. You can upload the PDF later.');
+              setExams(prevExams => [...prevExams, newExamData]);
+            } finally {
+              setIsUploadingPdfs(false);
+            }
+          } else {
+            setExams(prevExams => [...prevExams, newExamData]);
+          }
         }
+        
+        // Reset form
         setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
         setImageFile(null);
         setImagePreview('');
+        setPdfFiles([]);
         setIsDragOver(false);
         setShowAddExam(false);
         setIsEditing(false);
@@ -876,16 +1007,64 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     <X size={14} />
                   </button>
                 </div>
+              </div>            )}
+          </div>
+          
+          {/* PDF Upload Section */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">Syllabus PDF (Optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <div className="text-center">
+                <FileText className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handlePdfUpload}
+                  className="hidden"
+                  multiple={false}
+                />
+                <button
+                  type="button"
+                  onClick={() => pdfInputRef.current?.click()}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  disabled={isUploadingPdfs}
+                >
+                  {isUploadingPdfs ? 'Uploading...' : 'Choose PDF File'}
+                </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  PDF files up to 10MB
+                </p>
+              </div>
+            </div>
+            {pdfFiles.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {pdfFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-green-100 rounded text-sm text-green-800">
+                    <span className="flex items-center">
+                      <FileText size={16} className="mr-2" />
+                      {file.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPdfFiles(prev => prev.filter((_, i) => i !== index))}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
+          
           <div className="flex justify-end space-x-2">
             <button
               type="button"
-              onClick={() => {
-                setShowAddExam(false);
+              onClick={() => {                setShowAddExam(false);
                 setImagePreview('');
                 setImageFile(null);
+                setPdfFiles([]);
                 setIsDragOver(false);
                 setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
                 setIsEditing(false);
@@ -897,11 +1076,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             </button>
             <button
               type="button"
-              onClick={handleSaveExam}
-              disabled={isProcessing || isUploadingImage}
+              onClick={handleSaveExam}              disabled={isProcessing || isUploadingImage || isUploadingPdfs}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isProcessing || isUploadingImage ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Exam' : 'Add Exam')}
+              {isProcessing || isUploadingImage || isUploadingPdfs ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Exam' : 'Add Exam')}
             </button>
           </div>        </div>
       )}

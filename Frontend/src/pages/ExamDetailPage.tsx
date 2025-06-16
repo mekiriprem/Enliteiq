@@ -6,7 +6,6 @@ import ExamHeader from "./exams/components/ExamHeader";
 import ExamQuickInfo from "./exams/components/ExamQuickInfo";
 import ExamActions from "./exams/components/ExamActions";
 import ExamOverviewTab from "./exams/components/ExamOverviewTab";
-import ExamSyllabusTab from "./exams/components/ExamSyllabusTab";
 import ExamResourcesTab from "./exams/components/ExamResourcesTab";
 import ExamFAQsTab from "./exams/components/ExamFAQsTab";
 
@@ -227,10 +226,8 @@ const ExamDetailPage = () => {
           
           {/* Tabs */}
           <div className="p-6">
-            <Tabs defaultValue="overview" onValueChange={setActiveTab} value={activeTab}>
-              <TabsList className="mb-6">
+            <Tabs defaultValue="overview" onValueChange={setActiveTab} value={activeTab}>              <TabsList className="mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="syllabus">Syllabus</TabsTrigger>
                 <TabsTrigger value="resources">Resources</TabsTrigger>
                 <TabsTrigger value="faqs">FAQs</TabsTrigger>
               </TabsList>
@@ -243,17 +240,12 @@ const ExamDetailPage = () => {
                   examDate={exam.date || "TBD"}
                 />
               </TabsContent>
-              
-              <TabsContent value="syllabus">
-                <ExamSyllabusTab syllabus={exam.syllabus || []} />
-              </TabsContent>
-              
-              <TabsContent value="resources">
-                <ExamResourcesTab resources={exam.resources || []} />
+                <TabsContent value="resources">
+                <ExamResourcesTab examId={id} examData={exam} />
               </TabsContent>
               
               <TabsContent value="faqs">
-                <ExamFAQsTab faqs={exam.faqs || []} />
+                <ExamFAQsTab />
               </TabsContent>
             </Tabs>
           </div>
@@ -278,4 +270,5 @@ const ExamDetailPage = () => {
   );
 };
 
+// Default export
 export default ExamDetailPage;
