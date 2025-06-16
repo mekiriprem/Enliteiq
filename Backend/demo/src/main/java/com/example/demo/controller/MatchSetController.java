@@ -105,7 +105,7 @@ public class MatchSetController {
             dto.setTitle(ms.getTitle());
             dto.setSubject(ms.getSubject());
             dto.setDate(ms.getDate());
-            dto.getDurationMinutes();
+            dto.setDurationMinutes(ms.getDurationMinutes());
             return dto;
         }).collect(Collectors.toList());
 
@@ -156,32 +156,7 @@ public class MatchSetController {
 
         return ResponseEntity.ok(dto);
     }
-    @GetMapping("/all/details")
-    public ResponseEntity<List<TestWithQuestionsDto>> getAllTestDetails() {
-        List<MatchSet> matchSets = matchSetRepository.findAll();
 
-        List<TestWithQuestionsDto> result = matchSets.stream().map(matchSet -> {
-            TestWithQuestionsDto dto = new TestWithQuestionsDto();
-            dto.setId(matchSet.getId());
-            dto.setTitle(matchSet.getTitle());
-            dto.setSubject(matchSet.getSubject());
-            dto.setDate(matchSet.getDate());
-            dto.setDurationMinutes(matchSet.getDurationMinutes());
-
-            List<QuestionDto> questions = matchSet.getQuestions().stream().map(q -> {
-                QuestionDto qDto = new QuestionDto();
-                qDto.setId(q.getId());
-                qDto.setQuestionText(q.getQuestionText());
-                qDto.setOptions(q.getOptions());
-                return qDto;
-            }).toList();
-
-            dto.setQuestions(questions);
-            return dto;
-        }).toList();
-
-        return ResponseEntity.ok(result);
-    }
 
 
 

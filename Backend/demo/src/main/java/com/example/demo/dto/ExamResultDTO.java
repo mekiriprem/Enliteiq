@@ -10,4 +10,6 @@ public class ExamResultDTO {
     private String certificateUrl;
     private Double percentage;
     private String examTitle;
+    
+    
 }

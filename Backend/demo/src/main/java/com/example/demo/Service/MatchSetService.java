@@ -23,6 +23,7 @@ public class MatchSetService {
         matchSet.setTitle(dto.getTitle());
         matchSet.setSubject(dto.getSubject());
         matchSet.setDate(dto.getDate());
+        matchSet.setDurationMinutes(dto.getDurationMinutes());
 
         List<Question> questions = dto.getQuestions().stream().map(qdto -> {
             Question q = new Question();

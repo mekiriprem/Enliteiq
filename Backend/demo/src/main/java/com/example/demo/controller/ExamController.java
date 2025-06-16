@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
 import java.net.URI;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -180,4 +183,50 @@ public class ExamController {
 
         return ResponseEntity.ok(results);
     }
+    @PostMapping("/{id}/pdf")
+    public ResponseEntity<String> uploadExamSyllabusPdf(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        try {
+            // Supabase config
+            String bucket = bucketName; // your bucket name
+            String projectUrl = supabaseUrl;
+            String apiKey = supabaseApiKey;
+
+            String originalFileName = URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8);
+            String fileName = "syllabus_" + id + "_" + originalFileName;
+            String uploadUrl = projectUrl + "/storage/v1/object/" + bucket + "/" + fileName;
+            String publicUrl = projectUrl + "/storage/v1/object/public/" + bucket + "/" + fileName;
+
+            // Upload PDF to Supabase Storage
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uploadUrl))
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", file.getContentType())
+                    .PUT(HttpRequest.BodyPublishers.ofByteArray(file.getBytes()))
+                    .build();
+
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                // Save URL to DB
+                exam.setSyllabus(publicUrl);
+                examRepository.save(exam);
+                return ResponseEntity.ok("Uploaded successfully: " + publicUrl);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                        .body("Upload failed: " + response.body());
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Exception: " + e.getMessage());
+        }
+    }
+
 }

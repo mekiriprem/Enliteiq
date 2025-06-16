@@ -2,6 +2,8 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +24,19 @@ public class Exam {
     private String subject;
     @Column(name = "status", nullable = true)
     private String status;
+    @Column(name = "registration_deadline")
+    private LocalDateTime registrationDeadline;
+
+    @Column(length = 500)
+    private String eligibility; // e.g., "Grade 8-12 students"
+
+    @Column(length = 255)
+    private String syllabus;
     
     @Column(length = 1000)
     private String description;
+    
+   private String duration;
 
     private String image;
 
