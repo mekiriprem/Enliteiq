@@ -115,7 +115,7 @@ const ExamsPage = () => {
               <div className="bg-purple-100 p-2 rounded-full">
                 <BookOpen size={24} className="text-purple-600" />
               </div>
-              <span className="font-medium">History</span>
+              <span className="font-medium">Skill</span>
             </div>
           </div>
         </div>

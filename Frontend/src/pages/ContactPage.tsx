@@ -117,6 +117,10 @@ const ContactPage = () => {
                     <a href="tel:+919652012388" className="text-education-blue hover:underline" target="_blank" rel="noopener noreferrer">
                       +91 96520 12388
                     </a>
+                    <br></br>
+                     <a href="tel:+917075916202" className="text-education-blue hover:underline" target="_blank" rel="noopener noreferrer">
+                     +91 70759 16202
+                    </a>
                   </div>
                 </div>                
                 <div className="flex items-start">
