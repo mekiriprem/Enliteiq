@@ -908,6 +908,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                   </select>
                 </div>
               </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCity">
@@ -1486,6 +1487,23 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       </section>
+      <div className="floating-symbols">
+  <span className="symbol">π</span>
+  <span className="symbol">∑</span>
+  <span className="symbol">√</span>
+  <span className="symbol">≈</span>
+  <span className="symbol">∫</span>
+  <span className="symbol">⚛</span> {/* Atom symbol */}
+  <span className="symbol">🧪</span> {/* Beaker */}
+</div>
+<div className="fixed-symbols">
+  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+</div>
+
+
     </div>
   );
 };

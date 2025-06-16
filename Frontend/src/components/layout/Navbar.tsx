@@ -65,15 +65,22 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-yellow-600">Enlightiq</span>
-            </Link>
+               <div className="flex justify-center items-center ">
+  <Link to="/" className="flex items-center space-x-2 padding:2px">
+    <img
+      src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
+      alt="Enlightiq Logo"
+      className="h-12 w-12 object-contain"
+    />
+   <h1 className="text-3xl font-bold text-yellow-600">Enlightiq</h1>
+  </Link>
+</div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
               <Link to="/" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
                 Home
               </Link>
               <Link to="/ai" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                AiLearnings
+                Ai Learnings
               </Link>
               <Link to="/exams" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
                 Exams

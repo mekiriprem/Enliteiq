@@ -61,7 +61,7 @@ const SkillDevelopmentSection = () => {
           {/* Academic Skills */}
           <div className="bg-white bg-opacity-95 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1 flex flex-col">
             <div className="flex items-center mb-4">
-              <img src="https://img.icons8.com/?size=100&id=11805&format=png" alt="Book" className="w-10 h-10 mr-3" />
+              <img src="https://img.icons8.com/ios-filled/100/4A90E2/book.png" alt="Book" className="w-10 h-10 mr-3" />
               <h3 className="text-xl font-semibold text-blue-800">Academic Skills</h3>
             </div>
             <ul className="list-disc list-inside text-gray-700 space-y-2 flex-grow">
@@ -76,7 +76,7 @@ const SkillDevelopmentSection = () => {
           {/* Cognitive Skills */}
           <div className="bg-white bg-opacity-95 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1 flex flex-col">
             <div className="flex items-center mb-4">
-              <img src="https://img.icons8.com/?size=100&id=11806&format=png" alt="Brain" className="w-10 h-10 mr-3" />
+              <img src="https://img.icons8.com/ios-filled/100/4A90E2/brain.png" alt="Brain" className="w-10 h-10 mr-3" />
               <h3 className="text-xl font-semibold text-purple-800">Cognitive Skills</h3>
             </div>
             <p className="text-gray-600 mb-2 text-sm">Enhance problem-solving for Olympiad challenges.</p>
@@ -156,6 +156,21 @@ const SkillDevelopmentSection = () => {
           animation: spin-slow 20s infinite linear;
         }
       `}</style>
+            <div className="floating-symbols">
+  <span className="symbol">π</span>
+  <span className="symbol">∑</span>
+  <span className="symbol">√</span>
+  <span className="symbol">≈</span>
+  <span className="symbol">∫</span>
+  <span className="symbol">⚛</span> {/* Atom symbol */}
+  <span className="symbol">🧪</span> {/* Beaker */}
+</div>
+<div className="fixed-symbols">
+  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+</div>
     </section>
   );
 };

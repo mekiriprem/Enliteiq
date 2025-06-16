@@ -247,3 +247,186 @@ footer {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
 }
+.floating-symbols {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-symbols .symbol {
+  position: absolute;
+  font-size: 2.5rem;
+  font-weight: bold;
+  opacity: 0.08;
+  animation: float linear infinite;
+  user-select: none;
+  color: #5dbbd8;
+}
+
+/* Multiple floating variants with randomized animations */
+.floating-symbols .symbol:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-duration: 18s;
+  animation-name: float-left-right;
+}
+
+.floating-symbols .symbol:nth-child(2) {
+  top: 70%;
+  left: 25%;
+  animation-duration: 22s;
+  animation-name: float-up-down;
+}
+
+.floating-symbols .symbol:nth-child(3) {
+  top: 40%;
+  left: 60%;
+  animation-duration: 25s;
+  animation-name: float-left-right;
+}
+
+.floating-symbols .symbol:nth-child(4) {
+  top: 15%;
+  left: 75%;
+  animation-duration: 20s;
+  animation-name: float-up-down;
+}
+
+.floating-symbols .symbol:nth-child(5) {
+  top: 50%;
+  left: 35%;
+  animation-duration: 24s;
+  animation-name: float-rotate;
+}
+
+.floating-symbols .symbol:nth-child(6) {
+  top: 80%;
+  left: 80%;
+  animation-duration: 26s;
+  animation-name: float-left-right;
+}
+
+.floating-symbols .symbol:nth-child(7) {
+  top: 5%;
+  left: 50%;
+  animation-duration: 23s;
+  animation-name: float-up-down;
+}
+
+/* Animations */
+@keyframes float-left-right {
+  0% { transform: translateX(0px); opacity: 0.1; }
+  50% { transform: translateX(20px); opacity: 0.2; }
+  100% { transform: translateX(0px); opacity: 0.1; }
+}
+
+@keyframes float-up-down {
+  0% { transform: translateY(0px); opacity: 0.1; }
+  50% { transform: translateY(-20px); opacity: 0.2; }
+  100% { transform: translateY(0px); opacity: 0.1; }
+}
+
+@keyframes float-rotate {
+  0% { transform: rotate(0deg) translateY(0px); opacity: 0.1; }
+  50% { transform: rotate(360deg) translateY(-10px); opacity: 0.2; }
+  100% { transform: rotate(720deg) translateY(0px); opacity: 0.1; }
+}
+.floating-symbols {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-symbols .symbol {
+  position: absolute;
+  font-size:4 rem;
+  font-weight: bold;
+  opacity: 0.15;
+  user-select: none;
+  animation-timing-function: linear;
+  color: #3d6cc4;
+}
+
+/* Example positions and animation types */
+.floating-symbols .symbol:nth-child(1) {
+  bottom: -4rem;
+  left: 10%;
+  animation: float-up 20s infinite;
+}
+
+.floating-symbols .symbol:nth-child(2) {
+  bottom: -4rem;
+  left: 30%;
+  animation: float-up 22s infinite 2s;
+}
+
+.floating-symbols .symbol:nth-child(3) {
+  bottom: -4rem;
+  left: 50%;
+  animation: float-up 24s infinite 4s;
+}
+
+.floating-symbols .symbol:nth-child(4) {
+  bottom: -4rem;
+  left: 70%;
+  animation: float-up 21s infinite 1s;
+}
+
+.floating-symbols .symbol:nth-child(5) {
+  bottom: -4rem;
+  left: 85%;
+  animation: float-up 26s infinite 3s;
+}
+
+.floating-symbols .symbol:nth-child(6) {
+  bottom: -4rem;
+  left: 40%;
+  animation: float-up 25s infinite 1.5s;
+}
+
+.floating-symbols .symbol:nth-child(7) {
+  bottom: -4rem;
+  left: 60%;
+  animation: float-up 23s infinite 2.5s;
+}
+
+/* Floating upward animation */
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-120vh);
+    opacity: 0;
+  }
+}
+.fixed-symbols {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fixed-symbol {
+  position: absolute;
+  font-size: 5rem;
+  opacity: 0.15;
+  color: #314485;
+  user-select: none;
+}
+.glow-text {
+  text-shadow: 0 0 8px #facc15, 0 0 16px #facc15, 0 0 24px #facc15;
+}
+

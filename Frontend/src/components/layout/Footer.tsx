@@ -9,7 +9,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Enlightiq</h3>
+                <div className="flex  items-center ">
+  <Link to="/" className="flex items-center space-x-2 padding:2px">
+    <img
+      src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
+      alt="Enlightiq Logo"
+      className="h-12 w-12 object-contain"
+    />
+   <h1 className="text-3xl font-bold text-yellow-600">Enlightiq</h1>
+  </Link>
+</div>
             <p className="text-gray-300 mb-4">
               Empowering students through quality education and exam preparation. Join our platform to excel in your academic journey.
             </p>

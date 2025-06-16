@@ -84,7 +84,7 @@ const ContactPage = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Contact Us</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Have questions about MyOlympiad? We're here to help! Fill out the form below and our team will get back to you shortly.
+            Have questions about MyEnlightiq? We're here to help! Fill out the form below and our team will get back to you shortly.
           </p>
         </div>
 
@@ -117,6 +117,10 @@ const ContactPage = () => {
                     <p className="font-medium">Phone</p>
                     <a href="tel:+1234567890" className="text-education-blue hover:underline">
                       +91 96520 12388
+                    </a>
+                    <br></br>
+                    <a href="tel:+1234567890" className="text-education-blue hover:underline">
+                      +91 7075916202
                     </a>
                   </div>
                 </div>
@@ -312,6 +316,21 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
+            <div className="floating-symbols">
+  <span className="symbol">π</span>
+  <span className="symbol">∑</span>
+  <span className="symbol">√</span>
+  <span className="symbol">≈</span>
+  <span className="symbol">∫</span>
+  <span className="symbol">⚛</span> {/* Atom symbol */}
+  <span className="symbol">🧪</span> {/* Beaker */}
+</div>
+<div className="fixed-symbols">
+  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+</div>
     </div>
   );
 };

@@ -19,7 +19,7 @@ const AboutPage = () => {
   // FAQ Data
   const faqs = [
     {
-      question: "What is MyOlympiad?",
+      question: "What is MyEnlightiq?",
       answer: "MyOlympiad is an educational platform designed to help students prepare for academic competitions and olympiads through practice exams, mock tests, and comprehensive learning resources. We focus on subjects like mathematics, science, and language arts to help students excel in competitive examinations."
     },
     {
@@ -54,9 +54,9 @@ const AboutPage = () => {
 
   // About Content
   const aboutContent = {
-    mission: "At MyOlympiad, our mission is to democratize access to high-quality academic competition preparation, enabling students from all backgrounds to showcase their talents and reach their full potential.",
+    mission: "At EnlightIQ Educational Private Limited, our mission is to empower learners through innovative, technology-driven educational solutions that foster critical thinking, creativity, and lifelong learning. We strive to bridge the gap between traditional education and future-ready skills, making quality learning accessible, engaging, and impactful for all.",
     vision: "We envision a world where every student has the opportunity to participate in academic competitions that challenge their intellect, build confidence, and open doors to future educational and career opportunities.",
-    story: "MyOlympiad was founded in 2020 by a group of education enthusiasts who saw a gap in the availability of quality preparation resources for academic competitions. What started as a small collection of practice tests has grown into a comprehensive platform serving students worldwide. Our team consists of educators, technologists, and former olympiad champions who understand what it takes to succeed in these competitive environments.",
+    story: "MyOlympiad was founded in 2025 by a group of education enthusiasts who saw a gap in the availability of quality preparation resources for academic competitions. What started as a small collection of practice tests has grown into a comprehensive platform serving students worldwide. Our team consists of educators, technologists, and former olympiad champions who understand what it takes to succeed in these competitive environments.",
     team: [
       {
         name: "Dr. Jane Wilson",
@@ -150,18 +150,20 @@ const AboutPage = () => {
   // Founders Data
   const founders = [
     {
-      name: "Mudavath Prem Nayak",
+      name: "Krishna Kiriti",
       role: "Founder & Visionary",
-      qualifications: "M.Ed. in Educational Leadership, 10+ years in educational program development",
-      message: "At the heart of our Olympiad initiative is a simple vision — to inspire young minds to think critically, solve creatively, and grow beyond limits. This platform is not just a competition; it’s a journey of discovery, passion, and learning for every student.",
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"
+      // qualifications: "M.Ed. in Educational Leadership, 10+ years in educational program development",
+      message: "At Enlightiq, we believe in empowering you to become architects of your own future. Education is not just about acquiring knowledge; it's about igniting curiosity, fostering creativity, and building resilience. Embrace challenges as opportunities, and remember, your potential is limitless when fueled by passion and purpose.",
+      quote: "Stay curious, stay inspired."
+,
+      image: "/Founder.jpg"
     },
     {
-      name: "Krishna Kiriti",
+      name: "Mudavath Prem Nayak",
       role: "Co-Founder & Strategist",
-      qualifications: "Ph.D. in Education Technology, former Olympiad champion",
+      // qualifications: "Ph.D. in Education Technology, former Olympiad champion",
       message: "Our goal is to empower every student with the tools to succeed in competitive academics. We’re building a platform that not only prepares students for exams but also fosters a lifelong love for learning and problem-solving.",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"
+      image: "/coFounder.jpg"
     }
   ];
 
@@ -286,8 +288,12 @@ const AboutPage = () => {
                     <p className="text-lg text-gray-700 leading-relaxed mb-4">
                       "{founders[0].message}"
                     </p>
+                    <br></br>
+                    <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                      "{founders[0].quote}"
+                    </p>
                     <p className="text-gray-600">
-                      <span className="font-semibold">Qualifications: </span>{founders[0].qualifications}
+                     
                     </p>
                   </div>
                 </div>
@@ -308,7 +314,7 @@ const AboutPage = () => {
                       "{founders[1].message}"
                     </p>
                     <p className="text-gray-600">
-                      <span className="font-semibold">Qualifications: </span>{founders[1].qualifications}
+                    
                     </p>
                   </div>
                 </div>
@@ -322,88 +328,11 @@ const AboutPage = () => {
                   {aboutContent.story}
                 </p>
               </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-gray-50 px-3 text-lg font-medium text-gray-900">Our Milestones</span>
-                </div>
               </div>
 
-              <div className="mt-8 max-w-3xl mx-auto">
-                <div className="flex flex-col space-y-6">
-                  <div className="flex">
-                    <div className="flex flex-col items-center mr-4">
-                      <div className="h-10 w-10 rounded-full bg-education-blue flex items-center justify-center">
-                        <span className="text-white font-semibold">1</span>
-                      </div>
-                      <div className="h-full w-0.5 bg-education-blue/30"></div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm flex-1 mb-4">
-                      <div className="font-semibold mb-1">2020: Foundation</div>
-                      <p className="text-gray-600 text-sm">MyOlympiad was founded with a mission to democratize access to high-quality academic competition preparation.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex">
-                    <div className="flex flex-col items-center mr-4">
-                      <div className="h-10 w-10 rounded-full bg-education-blue flex items-center justify-center">
-                        <span className="text-white font-semibold">2</span>
-                      </div>
-                      <div className="h-full w-0.5 bg-education-blue/30"></div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm flex-1 mb-4">
-                      <div className="font-semibold mb-1">2021: First Olympiad</div>
-                      <p className="text-gray-600 text-sm">Successfully hosted our first online Mathematics Olympiad with participants from 12 countries.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex">
-                    <div className="flex flex-col items-center mr-4">
-                      <div className="h-10 w-10 rounded-full bg-education-blue flex items-center justify-center">
-                        <span className="text-white font-semibold">3</span>
-                      </div>
-                      <div className="h-full w-0.5 bg-education-blue/30"></div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm flex-1 mb-4">
-                      <div className="font-semibold mb-1">2022: School Partnerships</div>
-                      <p className="text-gray-600 text-sm">Launched our school partnership program, enabling institutions to easily register their students for olympiads.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex">
-                    <div className="flex flex-col items-center mr-4">
-                      <div className="h-10 w-10 rounded-full bg-education-blue flex items-center justify-center">
-                        <span className="text-white font-semibold">4</span>
-                      </div>
-                      <div className="h-full w-0.5 bg-education-blue/30 hidden"></div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm flex-1">
-                      <div className="font-semibold mb-1">2024: Global Expansion</div>
-                      <p className="text-gray-600 text-sm">Reached 100,000 students across 50+ countries with exams available in 10 different languages.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              
 
-            <div>
-              <h2 className="text-2xl font-semibold mb-6 text-education-dark">Our Team</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {aboutContent.team.map((member, index) => (
-                  <div key={index} className="bg-white rounded-lg overflow-hidden shadow-sm">
-                    <img src={member.image} alt={member.name} className="w-full h-48 object-cover object-center" />
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg">{member.name}</h3>
-                      <p className="text-education-blue mb-2">{member.role}</p>
-                      <p className="text-sm text-gray-600">{member.bio}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          
           </TabsContent>
 
           {/* FAQ Tab Content */}
@@ -491,7 +420,23 @@ const AboutPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+             <div className="floating-symbols">
+  <span className="symbol">π</span>
+  <span className="symbol">∑</span>
+  <span className="symbol">√</span>
+  <span className="symbol">≈</span>
+  <span className="symbol">∫</span>
+  <span className="symbol">⚛</span> {/* Atom symbol */}
+  <span className="symbol">🧪</span> {/* Beaker */}
+</div>
+<div className="fixed-symbols">
+  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+</div>
     </div>
+    
   );
 };
 
