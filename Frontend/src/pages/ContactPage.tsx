@@ -79,10 +79,9 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen ">
-      <div className="container">
+    <div className="min-h-screen ">      <div className="container">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Contact Us</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4 animate-fade-in">Contact Us</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Have questions about MyEnlightiq? We're here to help! Fill out the form below and our team will get back to you shortly.
           </p>
@@ -308,7 +307,7 @@ const ContactPage = () => {
                       style={{ border: 0 }} 
                       allowFullScreen={false} 
                       loading="lazy"
-                      title="MyOlympiad Location Map"
+                      title="Enlightiq Location Map"
                     ></iframe>
                   </div>
                 </CardContent>

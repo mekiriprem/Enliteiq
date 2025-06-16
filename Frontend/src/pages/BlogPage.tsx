@@ -140,10 +140,9 @@ const BlogPage = () => {
   const featuredPosts = blogPosts.filter(post => post.featured);
   
   return (
-    <div className="min-h-scre py-12">
-      <div className="education-container">
+    <div className="min-h-scre py-12">      <div className="education-container">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Enlightiq Blog</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4 animate-fade-in">Enlightiq Blog</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Stay updated with the latest news, tips, and insights for academic olympiads and competitions.
           </p>

@@ -430,3 +430,18 @@ footer {
   text-shadow: 0 0 8px #facc15, 0 0 16px #facc15, 0 0 24px #facc15;
 }
 
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}

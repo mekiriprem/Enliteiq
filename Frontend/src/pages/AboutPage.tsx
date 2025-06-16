@@ -20,7 +20,7 @@ const AboutPage = () => {
   const faqs = [
     {
       question: "What is MyEnlightiq?",
-      answer: "MyOlympiad is an educational platform designed to help students prepare for academic competitions and olympiads through practice exams, mock tests, and comprehensive learning resources. We focus on subjects like mathematics, science, and language arts to help students excel in competitive examinations."
+      answer: "Enlightiq is an educational platform designed to help students prepare for academic competitions and olympiads through practice exams, mock tests, and comprehensive learning resources. We focus on subjects like mathematics, science, and language arts to help students excel in competitive examinations."
     },
     {
       question: "How do I register for an exam?",
@@ -56,7 +56,7 @@ const AboutPage = () => {
   const aboutContent = {
     mission: "At EnlightIQ Educational Private Limited, our mission is to empower learners through innovative, technology-driven educational solutions that foster critical thinking, creativity, and lifelong learning. We strive to bridge the gap between traditional education and future-ready skills, making quality learning accessible, engaging, and impactful for all.",
     vision: "We envision a world where every student has the opportunity to participate in academic competitions that challenge their intellect, build confidence, and open doors to future educational and career opportunities.",
-    story: "MyOlympiad was founded in 2025 by a group of education enthusiasts who saw a gap in the availability of quality preparation resources for academic competitions. What started as a small collection of practice tests has grown into a comprehensive platform serving students worldwide. Our team consists of educators, technologists, and former olympiad champions who understand what it takes to succeed in these competitive environments.",
+    story: "Enlightiq was founded in 2025 by a group of education enthusiasts who saw a gap in the availability of quality preparation resources for academic competitions. What started as a small collection of practice tests has grown into a comprehensive platform serving students worldwide. Our team consists of educators, technologists, and former olympiad champions who understand what it takes to succeed in these competitive environments.",
     team: [
       {
         name: "Dr. Jane Wilson",
@@ -91,15 +91,15 @@ const AboutPage = () => {
     sections: [
       {
         title: "1. Acceptance of Terms",
-        content: "By accessing or using the MyOlympiad platform, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site."
+        content: "By accessing or using the Enlightiq platform, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site."
       },
       {
         title: "2. Use License",
-        content: "Permission is granted to temporarily access the materials on MyOlympiad's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not: modify or copy the materials; use the materials for any commercial purpose; attempt to decompile or reverse engineer any software contained on MyOlympiad's website; remove any copyright or other proprietary notations from the materials; or transfer the materials to another person or 'mirror' the materials on any other server."
+        content: "Permission is granted to temporarily access the materials on Enlightiq's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not: modify or copy the materials; use the materials for any commercial purpose; attempt to decompile or reverse engineer any software contained on Enlightiq's website; remove any copyright or other proprietary notations from the materials; or transfer the materials to another person or 'mirror' the materials on any other server."
       },
       {
         title: "3. User Accounts",
-        content: "To access certain features of the platform, you will need to create a user account. You are responsible for maintaining the confidentiality of your account information, including your password, and for all activities that occur under your account. You must immediately notify MyOlympiad of any unauthorized use of your account or any other breach of security."
+        content: "To access certain features of the platform, you will need to create a user account. You are responsible for maintaining the confidentiality of your account information, including your password, and for all activities that occur under your account. You must immediately notify Enlightiq of any unauthorized use of your account or any other breach of security."
       },
       {
         title: "4. Exam and Test Rules",
@@ -107,11 +107,11 @@ const AboutPage = () => {
       },
       {
         title: "5. Payment and Refunds",
-        content: "Payments for premium services are processed through secure third-party payment processors. All fees are non-refundable unless otherwise specified in the specific exam or service description. In cases of technical failure that prevents completion of an exam, MyOlympiad may provide a retake opportunity or credit at its discretion."
+        content: "Payments for premium services are processed through secure third-party payment processors. All fees are non-refundable unless otherwise specified in the specific exam or service description. In cases of technical failure that prevents completion of an exam, Enlightiq may provide a retake opportunity or credit at its discretion."
       },
       {
         title: "6. Limitation of Liability",
-        content: "MyOlympiad shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages resulting from your access to or use of, or inability to access or use, the platform or any content provided by MyOlympiad."
+        content: "Enlightiq shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages resulting from your access to or use of, or inability to access or use, the platform or any content provided by Enlightiq."
       }
     ]
   };
@@ -168,10 +168,9 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="education-container">
+    <div className="min-h-screen py-12">      <div className="education-container">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">About Enlightiq</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4 animate-fade-in">About Enlightiq</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Learn more about our mission, values, and how we're helping students excel in academic competitions.
           </p>
@@ -369,7 +368,7 @@ const AboutPage = () => {
                   <a href="/contact" className="bg-education-blue text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
                     Contact Us
                   </a>
-                  <a href="mailto:support@myolympiad.com" className="bg-white text-education-blue px-4 py-2 rounded border border-education-blue hover:bg-blue-50 transition-colors">
+                  <a href="mailto:support@Enlightiq.com" className="bg-white text-education-blue px-4 py-2 rounded border border-education-blue hover:bg-blue-50 transition-colors">
                     Email Support
                   </a>
                 </div>
@@ -411,7 +410,7 @@ const AboutPage = () => {
 
             <div className="mt-8 bg-gray-100 p-6 rounded-lg text-center">
               <p className="text-gray-600 mb-3">
-                By using the MyOlympiad platform, you acknowledge that you have read and understood our Terms of Service and Privacy Policy.
+                By using the Enlightiq platform, you acknowledge that you have read and understood our Terms of Service and Privacy Policy.
               </p>
               <p className="text-sm text-gray-500">
                 If you have any questions or concerns about these policies, please <a href="/contact" className="text-education-blue hover:underline">contact us</a>.

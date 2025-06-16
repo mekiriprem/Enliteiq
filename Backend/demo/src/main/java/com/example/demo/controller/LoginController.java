@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,11 +61,19 @@ public class LoginController {
             res.setRole("admin");
             res.setData(admin);
             return ResponseEntity.ok(res);
+        }        // 3. Check User (by email or phone)
+        User user = null;
+        
+        // First try to find by phone
+        user = userRepository.findByPhone(emailOrPhone);
+        
+        // If not found by phone, try to find by email
+        if (user == null) {
+            List<User> usersByEmail = userRepository.findByEmail(emailOrPhone);
+            if (!usersByEmail.isEmpty()) {
+                user = usersByEmail.get(0); // Take the first user if multiple found
+            }
         }
-
-        // 3. Check User (by email or phone)
-        User user = userRepository.findByPhone(emailOrPhone);
-       
 
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             LoginResponse res = new LoginResponse();

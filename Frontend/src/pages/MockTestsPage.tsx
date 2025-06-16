@@ -182,10 +182,9 @@ const MockTestsPage = () => {
 
   return (
     <div className="min-h-screen bg-[url('/images/neural-network-bg.png')] bg-cover bg-fixed bg-opacity-90">      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-blue-100 dark:from-blue-900 to-white dark:to-gray-800 text-black dark:text-white">
-        <div className="education-container py-16">
+      <div className="bg-gradient-to-b from-blue-100 dark:from-blue-900 to-white dark:to-gray-800 text-black dark:text-white">        <div className="education-container py-16">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center space-x-2">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center space-x-2 animate-fade-in">
               <Brain size={36} className="text-blue-600 dark:text-blue-400" />
               <span>Mock Tests & Practice Exams</span>
             </h1>

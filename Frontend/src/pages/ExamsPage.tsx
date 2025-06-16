@@ -46,9 +46,8 @@ const ExamsPage = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="education-container">
-        <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4">Available Exams</h1>
+      <div className="education-container">        <div className="mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-education-dark mb-4 animate-fade-in">Available Exams</h1>
           <p className="text-lg text-gray-600 max-w-3xl">
             Browse our collection of exams and mock tests to help you prepare for your upcoming academic challenges.
           </p>

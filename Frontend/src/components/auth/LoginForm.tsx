@@ -24,33 +24,71 @@ interface UserData {
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState<string>("");
+  const [emailOrPhone, setEmailOrPhone] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper function to validate email
+  const isValidEmail = (input: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(input);
+  };
+
+  // Helper function to validate phone number (10 digits)
+  const isValidPhone = (input: string): boolean => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(input);
+  };
+
+  // Helper function to determine input type and validate
+  const validateInput = (input: string): { isValid: boolean; isEmail: boolean; isPhone: boolean } => {
+    const isEmail = isValidEmail(input);
+    const isPhone = isValidPhone(input);
+    return {
+      isValid: isEmail || isPhone,
+      isEmail,
+      isPhone
+    };
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);    try {
+    setError(null);
+
+    // Validate input
+    const { isValid, isEmail, isPhone } = validateInput(emailOrPhone.trim());
+    
+    if (!isValid) {
+      setError("Please enter a valid email address or 10-digit phone number.");
+      setIsLoading(false);
+      return;
+    }    try {
+      // Prepare request body based on input type
+      const requestBody: { password: string; email?: string; phone?: string } = {
+        password,
+      };
+
+      if (isEmail) {
+        requestBody.email = emailOrPhone.trim();
+      } else if (isPhone) {
+        requestBody.phone = emailOrPhone.trim();
+      }
+
       const response = await fetch(" https://olympiad-zynlogic.hardikgarg.me/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });      if (!response.ok) {
-        // Handle non-JSON error responses
-        let errorMessage = "Invalid email or password. Please try again.";
+        body: JSON.stringify(requestBody),
+      });if (!response.ok) {        // Handle non-JSON error responses
+        let errorMessage = "Invalid credentials. Please try again.";
         
         // Handle specific status codes
         if (response.status === 401) {
-          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+          errorMessage = "Invalid credentials. Please check your email/phone and password and try again.";
         } else if (response.status === 403) {
           errorMessage = "Access denied. Please contact support if you believe this is an error.";
         } else if (response.status === 500) {
@@ -66,12 +104,11 @@ const LoginForm: React.FC = () => {
           // If response is not JSON, try to get text
           try {
             const errorText = await response.text();
-            if (errorText && errorText.trim()) {
-              // Check if it's a common error message
+            if (errorText && errorText.trim()) {              // Check if it's a common error message
               if (errorText.toLowerCase().includes("invalid credentials") || 
                   errorText.toLowerCase().includes("invalid email") || 
                   errorText.toLowerCase().includes("invalid password")) {
-                errorMessage = "Invalid email or password. Please check your credentials and try again.";
+                errorMessage = "Invalid credentials. Please check your email/phone and password and try again.";
               } else {
                 errorMessage = errorText;
               }
@@ -154,21 +191,30 @@ const LoginForm: React.FC = () => {
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
           </div>
-        )}
-
-        <div className="mb-6">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address <span className="text-red-500">*</span>
+        )}        <div className="mb-6">
+          <label htmlFor="emailOrPhone" className="block text-sm font-medium text-gray-700 mb-1">
+            Email or Phone Number <span className="text-red-500">*</span>
           </label>
           <input
-            type="email"
-            id="email"
+            type="text"
+            id="emailOrPhone"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-education-blue focus:border-transparent"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com or 1234567890"
+            value={emailOrPhone}
+            onChange={(e) => setEmailOrPhone(e.target.value)}
             required
           />
+          {emailOrPhone && (
+            <div className="mt-1 text-xs">
+              {isValidEmail(emailOrPhone.trim()) ? (
+                <span className="text-green-600">✓ Valid email format</span>
+              ) : isValidPhone(emailOrPhone.trim()) ? (
+                <span className="text-green-600">✓ Valid phone format</span>
+              ) : (
+                <span className="text-red-500">⚠ Please enter a valid email or 10-digit phone number</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="mb-6">
