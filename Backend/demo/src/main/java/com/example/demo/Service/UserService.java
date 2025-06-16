@@ -95,21 +95,61 @@ public class UserService {
         // Check registration deadline
         if (LocalDateTime.now().isAfter(exam.getRegistrationDeadline())) {
             return "Registration closed. Deadline passed.";
-        }
-
-        // Check eligibility (e.g., "6-10")
-        String eligibility = exam.getEligibility(); // "6-10"
-        try {
-            String[] range = eligibility.replaceAll("[^0-9\\-]", "").split("-");
-            int minClass = Integer.parseInt(range[0]);
-            int maxClass = Integer.parseInt(range[1]);
-            int userClass = Integer.parseInt(user.getUserClass()); // assuming it's a string
-
-            if (userClass < minClass || userClass > maxClass) {
-                return "You are not eligible for this exam.";
+        }        // Check eligibility (e.g., "6-10", "Grade 8-12", etc.)
+        String eligibility = exam.getEligibility();
+        if (eligibility != null && !eligibility.trim().isEmpty()) {
+            try {
+                // Extract numbers from eligibility string
+                String cleanEligibility = eligibility.replaceAll("[^0-9\\-]", "");
+                
+                if (cleanEligibility.contains("-")) {
+                    String[] range = cleanEligibility.split("-");
+                    if (range.length >= 2) {
+                        int minClass = Integer.parseInt(range[0]);
+                        int maxClass = Integer.parseInt(range[1]);
+                        
+                        // Get user's class and validate
+                        String userClassStr = user.getUserClass();
+                        if (userClassStr == null || userClassStr.trim().isEmpty()) {
+                            return "You are not eligible for this exam. Please update your class information.";
+                        }
+                        
+                        // Extract number from user class (handle "Class 10", "Grade 8", "10", etc.)
+                        String cleanUserClass = userClassStr.replaceAll("[^0-9]", "");
+                        if (cleanUserClass.isEmpty()) {
+                            return "You are not eligible for this exam. Invalid class information.";
+                        }
+                        
+                        int userClass = Integer.parseInt(cleanUserClass);
+                        
+                        if (userClass < minClass || userClass > maxClass) {
+                            return "You are not eligible for this exam. Eligibility requirement: Class " + minClass + "-" + maxClass + ".";
+                        }
+                    }
+                } else if (!cleanEligibility.isEmpty()) {
+                    // Single class requirement
+                    int requiredClass = Integer.parseInt(cleanEligibility);
+                    String userClassStr = user.getUserClass();
+                    
+                    if (userClassStr == null || userClassStr.trim().isEmpty()) {
+                        return "You are not eligible for this exam. Please update your class information.";
+                    }
+                    
+                    String cleanUserClass = userClassStr.replaceAll("[^0-9]", "");
+                    if (cleanUserClass.isEmpty()) {
+                        return "You are not eligible for this exam. Invalid class information.";
+                    }
+                    
+                    int userClass = Integer.parseInt(cleanUserClass);
+                    if (userClass != requiredClass) {
+                        return "You are not eligible for this exam. Eligibility requirement: Class " + requiredClass + ".";
+                    }
+                }
+            } catch (NumberFormatException e) {
+                return "Eligibility check failed. Please contact support.";
+            } catch (Exception e) {
+                return "Eligibility check failed. Please contact support.";
             }
-        } catch (Exception e) {
-            return "Eligibility check failed. Please contact support.";
         }
 
         // Prevent duplicate registration

@@ -64,8 +64,7 @@ const ExamDetailPage = () => {
     } else {
       setError("No exam ID provided");
       setLoading(false);
-    }
-  }, [id]); // Re-fetch if id changes
+    }  }, [id]); // Re-fetch if id changes
 
   // Handle exam registration
   const handleRegister = async () => {
@@ -84,16 +83,49 @@ const ExamDetailPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to register for the exam");
+      });      if (!response.ok) {
+        let errorMessage = "Failed to register for the exam";
+        
+        // Handle specific status codes
+        if (response.status === 400) {
+          errorMessage = "You are not eligible for this exam or there was an issue with your request.";
+        } else if (response.status === 403) {
+          errorMessage = "You are not eligible to register for this exam. Please check the eligibility requirements.";
+        } else if (response.status === 409) {
+          errorMessage = "You are already registered for this exam.";
+        } else if (response.status === 500) {
+          errorMessage = "Server error occurred. Please try again later.";
+        }
+        
+        // Try to get more specific error message from response
+        try {
+          const errorText = await response.text();
+          if (errorText && errorText.trim()) {
+            if (errorText.toLowerCase().includes("user not found")) {
+              errorMessage = "User account not found. Please try logging in again.";
+            } else if (errorText.toLowerCase().includes("exam not found")) {
+              errorMessage = "This exam is no longer available or has been removed.";
+            } else if (errorText.toLowerCase().includes("not eligible")) {
+              errorMessage = "You are not eligible for this exam. Please check the eligibility requirements.";
+            } else if (errorText.toLowerCase().includes("already registered")) {
+              errorMessage = "You are already registered for this exam.";
+            } else {
+              errorMessage = errorText;
+            }
+          }
+        } catch (parseError) {
+          console.error("Error parsing response:", parseError);
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.text(); // Expecting text response: "User registered to exam successfully."
-      setRegistrationStatus(data);
+      setRegistrationStatus(data || "Successfully registered for the exam!");
     } catch (err) {
-      setRegistrationError(err.message);
+      console.error("Registration error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to register for the exam. Please try again.";
+      setRegistrationError(errorMessage);
     } finally {
       setRegistrationLoading(false);
     }
@@ -251,21 +283,21 @@ const ExamDetailPage = () => {
           </div>
         </div>
       </div>
-            <div className="floating-symbols">
-  <span className="symbol">π</span>
-  <span className="symbol">∑</span>
-  <span className="symbol">√</span>
-  <span className="symbol">≈</span>
-  <span className="symbol">∫</span>
-  <span className="symbol">⚛</span> {/* Atom symbol */}
-  <span className="symbol">🧪</span> {/* Beaker */}
-</div>
-<div className="fixed-symbols">
-  <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
-  <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
-  <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
-  <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
-</div>
+      <div className="floating-symbols">
+        <span className="symbol">π</span>
+        <span className="symbol">∑</span>
+        <span className="symbol">√</span>
+        <span className="symbol">≈</span>
+        <span className="symbol">∫</span>
+        <span className="symbol">⚛</span> {/* Atom symbol */}
+        <span className="symbol">🧪</span> {/* Beaker */}
+      </div>
+      <div className="fixed-symbols">
+        <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+        <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+        <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+        <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
+      </div>
     </div>
   );
 };

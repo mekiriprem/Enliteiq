@@ -69,16 +69,34 @@ public class UserController {
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 //        }
 //    }
-//    
-//  
-
-
-        @PostMapping("/user/{userId}/exam/{examId}")
-        public ResponseEntity<String> registerUserToExam(
+    @PostMapping("/user/{userId}/exam/{examId}")
+    public ResponseEntity<String> registerUserToExam(
                 @PathVariable Long userId,
                 @PathVariable UUID examId) {
-            userService.registerUserToExam(examId, userId);
-            return ResponseEntity.ok("User registered to exam successfully.");
+            try {
+                String result = userService.registerUserToExam(examId, userId);
+                
+                // Handle different response messages with appropriate status codes
+                if (result.equals("Registration successful.")) {
+                    return ResponseEntity.ok(result);
+                } else if (result.contains("Registration closed") || result.contains("Deadline passed")) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+                } else if (result.contains("not eligible")) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+                } else if (result.contains("Already registered")) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+                } else if (result.contains("Eligibility check failed")) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+                } else if (result.contains("not found")) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+                } else {
+                    // For any other error messages
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("An error occurred while registering for the exam. Please try again later.");
+            }
         }
         
         @GetMapping("/getallUsers")

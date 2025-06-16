@@ -7,14 +7,15 @@ import { useAuth } from "./AuthContext";
 interface LoginResponse {
   role: string;
   data: {
-    id: string;
+    id: string | number;
     name: string;
     email: string;
   };
+  message?: string;
 }
 
 interface UserData {
-  id: string;
+  id: number;
   name: string;
   email: string;
   role: "admin" | "user" | "school" | "salesman";
@@ -33,9 +34,7 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
-
-    try {
+    setError(null);    try {
       const response = await fetch(" https://olympiad-zynlogic.hardikgarg.me/api/login", {
         method: "POST",
         headers: {
@@ -45,13 +44,47 @@ const LoginForm: React.FC = () => {
           email,
           password,
         }),
-      });
+      });      if (!response.ok) {
+        // Handle non-JSON error responses
+        let errorMessage = "Invalid email or password. Please try again.";
+        
+        // Handle specific status codes
+        if (response.status === 401) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else if (response.status === 403) {
+          errorMessage = "Access denied. Please contact support if you believe this is an error.";
+        } else if (response.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+        
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (jsonError) {
+          // If response is not JSON, try to get text
+          try {
+            const errorText = await response.text();
+            if (errorText && errorText.trim()) {
+              // Check if it's a common error message
+              if (errorText.toLowerCase().includes("invalid credentials") || 
+                  errorText.toLowerCase().includes("invalid email") || 
+                  errorText.toLowerCase().includes("invalid password")) {
+                errorMessage = "Invalid email or password. Please check your credentials and try again.";
+              } else {
+                errorMessage = errorText;
+              }
+            }
+          } catch (textError) {
+            // Use default message if both JSON and text parsing fail
+            console.error("Error parsing response:", textError);
+          }
+        }
+        throw new Error(errorMessage);
+      }
 
-      const data: LoginResponse = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }      // Log the raw response for debugging
+      const data: LoginResponse = await response.json();// Log the raw response for debugging
       console.log("Login successful, raw response:", data);
 
       // Normalize role to handle inconsistencies (trim and lowercase)
@@ -62,11 +95,9 @@ const LoginForm: React.FC = () => {
       const validRoles: UserData["role"][] = ["admin", "user", "school", "salesman"];
       if (!validRoles.includes(role)) {
         throw new Error(`Invalid role received: ${role}. Please contact support.`);
-      }
-
-      // Prepare user data
+      }      // Prepare user data
       const userData: UserData = {
-        id: data.data.id,
+        id: typeof data.data.id === 'string' ? parseInt(data.data.id, 10) : data.data.id,
         name: data.data.name,
         email: data.data.email,
         role: role,
@@ -93,10 +124,21 @@ const LoginForm: React.FC = () => {
           break;
         default:
           throw new Error("Unexpected role, redirecting to default dashboard");
-      }
-    } catch (err: unknown) {
+      }    } catch (err: unknown) {
       console.error("Login error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Login failed. Please try again.";
+      let errorMessage = "Login failed. Please try again.";
+      
+      if (err instanceof Error) {
+        // Handle network errors
+        if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        } else if (err.message.includes("timeout")) {
+          errorMessage = "Request timed out. Please try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
