@@ -711,7 +711,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-blue-300'
                           }`}
-                        >                          <div className="h-32 bg-gray-100 rounded mb-3 overflow-hidden flex items-center justify-center">
+                        >                          <div className="h-0 bg-gray-100 rounded mb-3 overflow-hidden flex items-center justify-center">
                             <div className="text-center">
                               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                               <p className="text-sm text-gray-500">PDF Template</p>
