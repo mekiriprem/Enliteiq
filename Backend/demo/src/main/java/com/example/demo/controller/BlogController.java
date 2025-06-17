@@ -4,11 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.Repository.BlogRepository;
+import com.example.demo.Service.SupabaseService;
 import com.example.demo.model.Blog;
 
 @RestController
@@ -19,13 +23,16 @@ public class BlogController {
     @Autowired
     private BlogRepository blogRepository;
 
-    // Get all blogs
+    @Autowired
+    private SupabaseService supabaseService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @GetMapping
     public List<Blog> getAllBlogs() {
         return blogRepository.findAll();
     }
 
-    // Get a blog by ID
     @GetMapping("/{id}")
     public ResponseEntity<Blog> getBlogById(@PathVariable UUID id) {
         return blogRepository.findById(id)
@@ -33,46 +40,68 @@ public class BlogController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Get a blog by slug
     @GetMapping("/slug/{slug}")
     public ResponseEntity<Blog> getBlogBySlug(@PathVariable String slug) {
         return blogRepository.findBySlug(slug)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Blog> createBlog(@RequestPart("blog") String blogJson,
+                                           @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            Blog blog = objectMapper.readValue(blogJson, Blog.class);
 
-    // Create a new blog
-    @PostMapping
-    public Blog createBlog(@RequestBody Blog blog) {
-        blog.setSlug(generateSlug(blog.getTitle()));
-        blog.setPublishedDate(LocalDate.now());
-        return blogRepository.save(blog);
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = supabaseService.uploadFile(image, "blog-images");
+                blog.setImageUrl(imageUrl);
+            }
+
+            blog.setSlug(generateSlug(blog.getTitle()));
+            blog.setPublishedDate(LocalDate.now());
+            return ResponseEntity.ok(blogRepository.save(blog));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    // Update a blog
-    @PutMapping("/{id}")
-    public ResponseEntity<Blog> updateBlog(@PathVariable UUID id, @RequestBody Blog updatedBlog) {
-        return blogRepository.findById(id)
-                .map(existingBlog -> {
-                    existingBlog.setTitle(updatedBlog.getTitle());
-                    existingBlog.setSlug(generateSlug(updatedBlog.getTitle()));
-                    existingBlog.setExcerpt(updatedBlog.getExcerpt());
-                    existingBlog.setContent(updatedBlog.getContent());
-                    existingBlog.setAuthor(updatedBlog.getAuthor());
-                    existingBlog.setCategory(updatedBlog.getCategory());
-                    existingBlog.setTags(updatedBlog.getTags());
-                    existingBlog.setImageUrl(updatedBlog.getImageUrl());
-                    existingBlog.setFeatured(updatedBlog.getFeatured());
-                    existingBlog.setReadTime(updatedBlog.getReadTime());
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<Blog> updateBlog(@PathVariable UUID id,
+                                           @RequestPart("blog") String blogJson,
+                                           @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            Blog updatedBlog = objectMapper.readValue(blogJson, Blog.class);
 
-                    Blog savedBlog = blogRepository.save(existingBlog);
-                    return ResponseEntity.ok(savedBlog);
-                })
-                .orElse(ResponseEntity.notFound().build());
+            return blogRepository.findById(id)
+                    .map(existingBlog -> {
+                        existingBlog.setTitle(updatedBlog.getTitle());
+                        existingBlog.setSlug(generateSlug(updatedBlog.getTitle()));
+                        existingBlog.setExcerpt(updatedBlog.getExcerpt());
+                        existingBlog.setContent(updatedBlog.getContent());
+                        existingBlog.setAuthor(updatedBlog.getAuthor());
+                        existingBlog.setCategory(updatedBlog.getCategory());
+                        existingBlog.setTags(updatedBlog.getTags());
+                        existingBlog.setFeatured(updatedBlog.getFeatured());
+                        existingBlog.setReadTime(updatedBlog.getReadTime());
+
+                        if (image != null && !image.isEmpty()) {
+                            String imageUrl = supabaseService.uploadFile(image, "blog-images");
+                            existingBlog.setImageUrl(imageUrl);
+                        }
+
+                        return ResponseEntity.ok(blogRepository.save(existingBlog));
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    // Helper method to generate slug
+
     private String generateSlug(String title) {
         return title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
     }
 }
+
