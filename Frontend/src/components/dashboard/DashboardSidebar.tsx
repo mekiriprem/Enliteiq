@@ -10,7 +10,8 @@ import {
   Users,
   Menu,
   Check,
-  X
+  X,
+  Edit
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -52,14 +53,14 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/sales-dashboard' },
           { icon: <Users size={20} />, label: 'Schools', path: '/sales-schools' },
           { icon: <Check size={20} />, label: 'Tasks', path: '/sales-tasks' },
-        ];
-      case 'admin':
+        ];      case 'admin':
         return [
           { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin-dashboard' },
           { icon: <Users size={20} />, label: 'Schools', path: '/admin-schools' },
           { icon: <Users size={20} />, label: 'Users', path: '/admin-users' },
           { icon: <FileText size={20} />, label: 'Exam Results', path: '/admin-upcoming-exams'},
           { icon: <FileText size={20} />, label: 'Mock Tests', path: '/admin-mock-tests' },
+          { icon: <Edit size={20} />, label: 'Blog Management', path: '/admin-blog-management' },
           { icon: <Check size={20} />, label: 'Sales Tasks', path: '/admin-tasks' },
           { icon: <Users size={20} />, label: 'Sales Team', path: '/admin-sales-team' },
         ];

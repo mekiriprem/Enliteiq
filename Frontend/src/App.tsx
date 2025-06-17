@@ -41,6 +41,7 @@ import Tasks from "./components/Dashbordspages/Tasks";
 import UpcomingExams from "./components/Dashbordspages/Upcomingexams";
 import Users from "./components/Dashbordspages/Users";
 import MockTests from "./components/Dashbordspages/MockTests";
+import BlogManagement from "./components/Dashbordspages/BlogManagement";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import TaskDetail from "./components/Dashbordspages/TaskDetail";
 import ProfilePage from './pages/ProfilePage';
@@ -143,7 +144,6 @@ const SchoolsWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
 // Tasks component with proper type handling
 const TasksWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
   const userName = userType === 'student' ? 'Rahul Gupta' : 
-                 userType === 'school' ? 'Delhi Public School' : 
                  userType === 'sales' ? 'Sales Team' : 'Admin';
                  
   return (
@@ -158,7 +158,6 @@ const TasksWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
 // Upcoming Exams component with proper type handling
 const UpcomingExamsWithLayout: React.FC<WithLayoutProps> = ({ userType }) => {
   const userName = userType === 'student' ? 'Rahul Gupta' : 
-                 userType === 'school' ? 'Delhi Public School' : 
                  userType === 'sales' ? 'Sales Team' : 'Admin';
                  
   return (
@@ -186,7 +185,7 @@ const App = () => (
                 <div className="circle-2"></div>
                 <div className="circle-3"></div>
                 <div className="circle-4"></div>
-              </div>
+              </div>              
               <div className="watermarks">
                 <img
                   src="https://img.icons8.com/?size=100&id=11803&format=png"
@@ -203,6 +202,21 @@ const App = () => (
                   alt="Geometry Symbol"
                   className="geometry-symbol"
                 />
+              </div>
+              <div className="floating-symbols">
+                <span className="symbol">π</span>
+                <span className="symbol">∑</span>
+                <span className="symbol">√</span>
+                <span className="symbol">≈</span>
+                <span className="symbol">∫</span>
+                <span className="symbol">⚛</span> {/* Atom symbol */}
+                <span className="symbol">🧪</span> {/* Beaker */}
+              </div>
+              <div className="fixed-symbols">
+                <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
+                <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
+                <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
+                <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
               </div>
               <div className="content-wrapper">
                 <Routes>                  {/* Public Routes */}
@@ -310,6 +324,15 @@ const App = () => (
                       <DashboardLayout userType="admin" title="Mock Tests Management" userName="Admin">
                         <div className="p-3 sm:p-4 md:p-6">
                           <MockTests userType="admin" />
+                        </div>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin-blog-management" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <DashboardLayout userType="admin" title="Blog Management" userName="Admin">
+                        <div className="p-3 sm:p-4 md:p-6">
+                          <BlogManagement userType="admin" />
                         </div>
                       </DashboardLayout>
                     </ProtectedRoute>

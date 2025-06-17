@@ -96,9 +96,21 @@ public class BlogController {
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBlog(@PathVariable UUID id) {
+        try {
+            if (blogRepository.existsById(id)) {
+                blogRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
-
 
     private String generateSlug(String title) {
         return title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");

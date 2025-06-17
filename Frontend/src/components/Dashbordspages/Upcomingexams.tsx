@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon, Search } from 'lucide-react';
+import { Clock, Calendar, Info, Download, Plus, Upload, X, FileText, Check, Image as ImageIcon, Link as LinkIcon, Search, Trash2 } from 'lucide-react';
 
 interface Exam {
   id: string;
@@ -10,6 +10,7 @@ interface Exam {
   description?: string;
   image?: string;
   status?: string | null;
+  duration?: string;
 }
 
 interface ExamResult {
@@ -68,15 +69,15 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const pdfInputRef = useRef<HTMLInputElement>(null);
-  const [newExam, setNewExam] = useState<Partial<Exam>>({
+  const pdfInputRef = useRef<HTMLInputElement>(null);  const [newExam, setNewExam] = useState<Partial<Exam>>({
     title: '',
     date: '',
     time: '',
     subject: '',
     description: '',
     image: '',
-    status: null
+    status: null,
+    duration: ''
   });
 
   useEffect(() => {
@@ -156,44 +157,32 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setLoadingResults(false);
     }
   };
-
   const handleUpdateExamStatus = async (id: string, recommend: boolean) => {
     try {
       setIsProcessing(true);
       
-      if (recommend) {
-        // Use the recommend API for recommending an exam
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/recommend?examId=${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to recommend exam: ${response.status}`);
-        }
-        
-        const result = await response.text();
-        console.log('API Response:', result);
-      } else {
-        // Use the exam update API to set status to null since there's no unrecommend API
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: null }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to update exam status: ${response.status}`);
-        }
+      // Always use the recommend API since it toggles the status
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/recommend?examId=${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to toggle exam recommendation: ${response.status}`);
       }
       
-      // Update the local state
+      const result = await response.text();
+      console.log('API Response:', result);
+      
+      // Update the local state - toggle the current status
       setExams(prevExams => 
-        prevExams.map(exam => 
-          exam.id === id 
-            ? { ...exam, status: recommend ? 'recommended' : null }
-            : exam
-        )
+        prevExams.map(exam => {
+          if (exam.id === id) {
+            const newStatus = exam.status === 'recommended' ? null : 'recommended';
+            return { ...exam, status: newStatus };
+          }
+          return exam;
+        })
       );
       
     } catch (error) {
@@ -255,7 +244,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       alert('Please drop a valid image file (PNG, JPG, or JPEG)');
     }
   };
-
   const handleEditExam = (exam: Exam) => {
     setIsEditing(true);
     setEditingExamId(exam.id);
@@ -266,11 +254,43 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       subject: exam.subject,
       description: exam.description || '',
       image: exam.image || '',
-      status: exam.status || null
+      status: exam.status || null,
+      duration: exam.duration || ''
     });
     setImagePreview(exam.image || '');
     setImageUploadType(exam.image ? 'url' : 'file');
     setShowAddExam(true);
+  };
+
+  const handleDeleteExam = async (examId: string, examTitle: string) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the exam "${examTitle}"? This action cannot be undone.`);
+    
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${examId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete exam: ${response.status}`);
+      }
+
+      // Remove the exam from the local state
+      setExams(prevExams => prevExams.filter(exam => exam.id !== examId));
+      alert('Exam deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting exam:', error);
+      alert('Failed to delete exam. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -403,16 +423,16 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             console.warn('Image upload failed, proceeding without server upload');
             finalImageUrl = imagePreview;
           }
-        }
-        const examData = {
+        }        const examData = {
           title: newExam.title,
           date: newExam.date,
           time: newExam.time,
           subject: newExam.subject,
           description: newExam.description,
           image: finalImageUrl,
-          status: newExam.status
-        };        if (isEditing && editingExamId) {
+          status: newExam.status,
+          duration: newExam.duration
+        };if (isEditing && editingExamId) {
           console.log('Updating exam with ID:', editingExamId);
           const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${editingExamId}`, {
             method: 'PUT',
@@ -496,9 +516,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             setExams(prevExams => [...prevExams, newExamData]);
           }
         }
-        
-        // Reset form
-        setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+          // Reset form
+        setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
         setImageFile(null);
         setImagePreview('');
         setPdfFiles([]);
@@ -648,15 +667,14 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   return (    <div className="p-3 sm:p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Upcoming Exams</h1>
-        {(userType === 'admin' || userType === 'school') && (
-          <button 
+        {(userType === 'admin' || userType === 'school') && (          <button 
             onClick={() => {
               if (showAddExam) {
                 // Hide the form
                 setShowAddExam(false);
                 setIsEditing(false);
                 setEditingExamId(null);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
                 setImagePreview('');
                 setImageFile(null);
               } else {
@@ -664,7 +682,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 setShowAddExam(true);
                 setIsEditing(false);
                 setEditingExamId(null);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
                 setImagePreview('');
                 setImageFile(null);
               }
@@ -879,13 +897,22 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 onChange={(e) => setNewExam({...newExam, date: e.target.value})}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
-            <div>
+            </div>            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Time *</label>
               <input
                 type="time"
                 value={newExam.time}
                 onChange={(e) => setNewExam({...newExam, time: e.target.value})}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+              <input
+                type="text"
+                value={newExam.duration || ''}
+                onChange={(e) => setNewExam({...newExam, duration: e.target.value})}
+                placeholder="e.g., 2 hours, 90 minutes"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -991,7 +1018,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     alt="Exam preview" 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQ2iIgZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDIyTDE1LjA5IDguMjZMMjIgOUwxNS4wOSAxNS43NE0xMiAyMkw4LjkxIDE1Ljc0TDIgOUw5LjkxIDguMjZMMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQ2iIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDE1LjA5IDguMjZMMjIgOUwxNS4wOSAxNS43NE0xMiAyMkw4LjkxIDE1Ljc0TDIgOUw5LjkxIDguMjZMMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
                       e.currentTarget.alt = 'Failed to load image';
                     }}
                   />
@@ -1063,10 +1090,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
               type="button"
               onClick={() => {                setShowAddExam(false);
                 setImagePreview('');
-                setImageFile(null);
-                setPdfFiles([]);
+                setImageFile(null);                setPdfFiles([]);
                 setIsDragOver(false);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
                 setIsEditing(false);
                 setEditingExamId(null);
               }}
@@ -1161,7 +1187,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     alt={exam.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA5TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA9TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA9TDE4LjA5IDguMjZMMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
                       e.currentTarget.alt = 'Failed to load exam image';
                     }}
                   />
@@ -1187,11 +1213,16 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4 text-blue-500" />
                       <span>{formatDate(exam.date)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    </div>                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Clock className="h-4 w-4 text-blue-500" />
                       <span>{exam.time}</span>
                     </div>
+                    {exam.duration && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="h-4 w-4 text-green-500" />
+                        <span>Duration: {exam.duration}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Info className="h-4 w-4 text-blue-500" />
                       <span className="font-medium">{exam.subject}</span>
@@ -1273,6 +1304,13 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                         >
                           Edit
                         </button>
+                        <button
+                          onClick={() => handleDeleteExam(exam.id, exam.title)}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
                       </>
                     )}
                   </div>
@@ -1298,10 +1336,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             </p>            {(userType === 'admin' || userType === 'school') && !isLoading && searchTerm === '' && examFilter === 'all' && (
               <button
                 onClick={() => {
-                  setShowAddExam(true);
-                  setIsEditing(false);
+                  setShowAddExam(true);                  setIsEditing(false);
                   setEditingExamId(null);
-                  setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null });
+                  setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
                   setImagePreview('');
                   setImageFile(null);
                 }}

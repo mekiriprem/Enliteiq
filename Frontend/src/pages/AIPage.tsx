@@ -74,21 +74,6 @@ const AIPage = () => {
           </div>
         </div>
       </div>
-      <div className="floating-symbols">
-        <span className="symbol">π</span>
-        <span className="symbol">∑</span>
-        <span className="symbol">√</span>
-        <span className="symbol">≈</span>
-        <span className="symbol">∫</span>
-        <Cpu size={24} className="symbol text-blue-600" />
-        <span className="symbol">🧪</span>
-      </div>
-      <div className="fixed-symbols">
-        <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
-        <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
-        <Brain size={24} className="fixed-symbol text-purple-600" style={{ top: '60%', left: '15%' }} />
-        <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
-      </div>
     </section>
   );
 };

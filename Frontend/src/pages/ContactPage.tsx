@@ -320,21 +320,6 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-      <div className="floating-symbols">
-        <span className="symbol">π</span>
-        <span className="symbol">∑</span>
-        <span className="symbol">√</span>
-        <span className="symbol">≈</span>
-        <span className="symbol">∫</span>
-        <span className="symbol">⚛</span> {/* Atom symbol */}
-        <span className="symbol">🧪</span> {/* Beaker */}
-      </div>
-      <div className="fixed-symbols">
-        <span className="fixed-symbol" style={{ top: '10%', left: '5%' }}>π</span>
-        <span className="fixed-symbol" style={{ top: '30%', right: '10%' }}>∑</span>
-        <span className="fixed-symbol" style={{ top: '60%', left: '15%' }}>⚛</span>
-        <span className="fixed-symbol" style={{ top: '80%', right: '20%' }}>🧪</span>
-      </div>
     </div>
   );
 };
