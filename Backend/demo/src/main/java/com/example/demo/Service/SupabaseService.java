@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,26 +14,65 @@ import java.util.UUID;
 @Service
 public class SupabaseService {
 
-    private static final String SUPABASE_BUCKET = "uploads";
-    private static final String SUPABASE_PROJECT_ID = "umizvvtljajrvrbzdpzi"; // Only project ID
-    private static final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtaXp2dnRsamFqcnZyYnpkcHppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTAxNjI3OSwiZXhwIjoyMDY0NTkyMjc5fQ.16B7k1iM64z2_npyfKT3ryC0jjaDfNDgvbFa_qpDwMw";
+    @Value("${supabase.url}")
+    private String supabaseUrl;
 
-    private static final String BASE_URL = "https://" + SUPABASE_PROJECT_ID + ".supabase.co";
-    private static final String STORAGE_API_URL = BASE_URL + "/storage/v1/object";
+    @Value("${supabase.api-key}")
+    private String apiKey;
+
+    @Value("${supabase.bucket-name}")
+    private String bucket;
+
+    private String getStorageApiUrl() {
+        return supabaseUrl + "/storage/v1/object";
+    }
 
     /**
-     * Upload a PDF file to Supabase Storage
+     * Upload any file (image, PDF, etc.) to Supabase Storage
+     *
+     * @param file   the uploaded file
+     * @param folder optional folder inside bucket
+     * @return public URL of the uploaded file
+     */
+    public String uploadFile(MultipartFile file, String folder) {
+        try {
+            String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
+            String objectPath = folder + "/" + filename;
+            String uploadUrl = getStorageApiUrl() + "/" + bucket + "/" + objectPath;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setBearerAuth(apiKey);
+            headers.set("x-upsert", "true");
+
+            HttpEntity<byte[]> request = new HttpEntity<>(file.getBytes(), headers);
+            RestTemplate restTemplate = new RestTemplate();
+
+            ResponseEntity<String> response = restTemplate.exchange(uploadUrl, HttpMethod.PUT, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return supabaseUrl + "/storage/v1/object/public/" + bucket + "/" + objectPath;
+            } else {
+                throw new RuntimeException("Upload failed: " + response.getStatusCode() + " - " + response.getBody());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Supabase file upload failed", e);
+        }
+    }
+
+    /**
+     * Upload PDF file specifically with content-type `application/pdf`
      */
     public String uploadPdf(String fileName, byte[] fileBytes) {
-        String objectPath = SUPABASE_BUCKET + "/" + fileName;
-        String uploadUrl = STORAGE_API_URL + "/" + objectPath;
+        String objectPath = bucket + "/" + fileName;
+        String uploadUrl = getStorageApiUrl() + "/" + objectPath;
 
         try {
             URL url = new URL(uploadUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("PUT"); // PUT is idempotent and preferred
-            connection.setRequestProperty("apikey", API_KEY);
-            connection.setRequestProperty("Authorization", "Bearer " + API_KEY);
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("apikey", apiKey);
+            connection.setRequestProperty("Authorization", "Bearer " + apiKey);
             connection.setRequestProperty("Content-Type", "application/pdf");
             connection.setRequestProperty("x-upsert", "true");
             connection.setDoOutput(true);
@@ -44,41 +84,12 @@ public class SupabaseService {
 
             int responseCode = connection.getResponseCode();
             if (responseCode == 200 || responseCode == 201) {
-                return BASE_URL + "/storage/v1/object/public/" + objectPath;
+                return supabaseUrl + "/storage/v1/object/public/" + objectPath;
             } else {
                 throw new RuntimeException("Upload failed: " + responseCode + " - " + connection.getResponseMessage());
             }
         } catch (Exception e) {
             throw new RuntimeException("Supabase PDF upload failed", e);
-        }
-    }
-
-    /**
-     * Upload a file (image or any type) to Supabase Storage
-     */
-    public String uploadFile(MultipartFile file, String folder) {
-        try {
-            String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            String objectPath = folder + "/" + filename;
-            String uploadUrl = STORAGE_API_URL + "/" + objectPath;
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setBearerAuth(API_KEY);
-            headers.set("x-upsert", "true");
-
-            HttpEntity<byte[]> request = new HttpEntity<>(file.getBytes(), headers);
-            RestTemplate restTemplate = new RestTemplate();
-
-            ResponseEntity<String> response = restTemplate.exchange(uploadUrl, HttpMethod.PUT, request, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return BASE_URL + "/storage/v1/object/public/" + objectPath;
-            } else {
-                throw new RuntimeException("Upload failed: " + response.getBody());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Supabase file upload failed", e);
         }
     }
 }

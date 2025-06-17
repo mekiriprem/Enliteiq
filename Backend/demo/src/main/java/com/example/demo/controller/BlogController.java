@@ -55,6 +55,7 @@ public class BlogController {
                 String imageUrl = supabaseService.uploadFile(image, "blog-images");
                 blog.setImageUrl(imageUrl);
             } else if (blog.getImageUrl() != null && blog.getImageUrl().isEmpty()) {
+                
                 // If imageUrl is explicitly set to empty string, set it to null
                 blog.setImageUrl(null);
             }
