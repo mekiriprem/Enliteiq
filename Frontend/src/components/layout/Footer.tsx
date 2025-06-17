@@ -157,10 +157,20 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-6 mt-8 text-center text-gray-400 text-sm">
-          <p>&copy; {new Date().getFullYear()} Enlightiq. All rights reserved.</p>
-        </div>
-      </div>
+   <div className="relative border-t border-gray-700 pt-6 mt-8 text-gray-400 text-sm">
+  {/* Left-aligned */}
+  <p className="text-left">&copy; {new Date().getFullYear()} Enlightiq. All rights reserved.</p>
+
+  {/* Center-aligned */}
+  <div className="absolute left-1/2 transform -translate-x-1/2 top-6 flex items-center text-sm">
+    <span>Developed by</span>
+    <img src="/Logo-removebg-preview.png" alt="Zynlogic Logo" className="h-4 mx-1 inline-block" />
+    <span>Zynlogic</span>
+  </div>
+</div>
+
+
+</div>
     </footer>
   );
 };
