@@ -156,18 +156,32 @@ const Footer = () => {
             </ul>
           </div>
         </div>
+<div className="border-t border-gray-700 pt-6 mt-8 text-gray-400 text-sm">
+  <div className="flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-4 relative">
+    
+    {/* Left: Enlightiq © */}
+    <p className="md:absolute left-0 md:left-6">
+      &copy; {new Date().getFullYear()} Enlightiq. All rights reserved.
+    </p>
 
-   <div className="relative border-t border-gray-700 pt-6 mt-8 text-gray-400 text-sm">
-  {/* Left-aligned */}
-  <p className="text-left">&copy; {new Date().getFullYear()} Enlightiq. All rights reserved.</p>
-
-  {/* Center-aligned */}
-  <div className="absolute left-1/2 transform -translate-x-1/2 top-6 flex items-center text-sm">
-    <span>Developed by</span>
-    <img src="/Logo-removebg-preview.png" alt="Zynlogic Logo" className="h-4 mx-1 inline-block" />
-    <span>Zynlogic</span>
+    {/* Center: Developed by Zynlogic */}
+    <a
+      href="https://zynlogic.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center mx-auto"
+    >
+      <span>Developed by</span>
+      <img
+        src="/Logo-removebg-preview.png"
+        alt="Zynlogic Logo"
+        className="h-4 mx-1 inline-block"
+      />
+      <span>Zynlogic</span>
+    </a>
   </div>
 </div>
+
 
 
 </div>
