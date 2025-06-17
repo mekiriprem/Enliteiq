@@ -45,23 +45,28 @@ public class BlogController {
         return blogRepository.findBySlug(slug)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
+    }    
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<Blog> createBlog(@RequestPart("blog") String blogJson,
                                            @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
-            Blog blog = objectMapper.readValue(blogJson, Blog.class);
-
+            Blog blog = objectMapper.readValue(blogJson, Blog.class);            // Handle image upload - prioritize file upload over URL
             if (image != null && !image.isEmpty()) {
                 String imageUrl = supabaseService.uploadFile(image, "blog-images");
                 blog.setImageUrl(imageUrl);
+            } else if (blog.getImageUrl() != null && blog.getImageUrl().isEmpty()) {
+                // If imageUrl is explicitly set to empty string, set it to null
+                blog.setImageUrl(null);
             }
+            // If no file uploaded but imageUrl is provided in JSON, keep the URL
+            // (imageUrl is already set from JSON parsing)
 
             blog.setSlug(generateSlug(blog.getTitle()));
             blog.setPublishedDate(LocalDate.now());
             return ResponseEntity.ok(blogRepository.save(blog));
 
         } catch (Exception e) {
+            e.printStackTrace(); // Add logging for debugging
             return ResponseEntity.badRequest().build();
         }
     }
@@ -81,13 +86,15 @@ public class BlogController {
                         existingBlog.setContent(updatedBlog.getContent());
                         existingBlog.setAuthor(updatedBlog.getAuthor());
                         existingBlog.setCategory(updatedBlog.getCategory());
-                        existingBlog.setTags(updatedBlog.getTags());
-                        existingBlog.setFeatured(updatedBlog.getFeatured());
-                        existingBlog.setReadTime(updatedBlog.getReadTime());
-
+                        existingBlog.setTags(updatedBlog.getTags());                        existingBlog.setFeatured(updatedBlog.getFeatured());
+                        existingBlog.setReadTime(updatedBlog.getReadTime());                        // Handle image update - prioritize file upload over URL
                         if (image != null && !image.isEmpty()) {
                             String imageUrl = supabaseService.uploadFile(image, "blog-images");
                             existingBlog.setImageUrl(imageUrl);
+                        } else if (updatedBlog.getImageUrl() != null) {
+                            // If no file uploaded but imageUrl is provided in JSON, update the URL
+                            // This handles both URL updates and clearing (empty string)
+                            existingBlog.setImageUrl(updatedBlog.getImageUrl().isEmpty() ? null : updatedBlog.getImageUrl());
                         }
 
                         return ResponseEntity.ok(blogRepository.save(existingBlog));
@@ -95,8 +102,9 @@ public class BlogController {
                     .orElse(ResponseEntity.notFound().build());
 
         } catch (Exception e) {
+            e.printStackTrace(); // Add logging for debugging
             return ResponseEntity.badRequest().build();
-        }    }
+        }}
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBlog(@PathVariable UUID id) {

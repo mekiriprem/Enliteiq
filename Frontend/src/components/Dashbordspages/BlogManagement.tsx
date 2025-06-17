@@ -131,7 +131,6 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
       setIsLoading(false);
     }
   };
-
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -141,6 +140,9 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
         return;
       }
       setImageFile(file);
+      // Clear the URL since we're uploading a file
+      setNewBlog({...newBlog, imageUrl: ''});
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
@@ -168,19 +170,24 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
           readTime: newBlog.readTime
         };
 
-        // Add image URL if it's a URL upload
-        if (imageUploadType === 'url' && newBlog.imageUrl) {
+        // Always include imageUrl in the JSON - the backend will handle prioritization
+        if (newBlog.imageUrl) {
           blogData.imageUrl = newBlog.imageUrl;
         }
 
         formData.append('blog', JSON.stringify(blogData));
         
+        // Append image file if uploading a file
         if (imageUploadType === 'file' && imageFile) {
           formData.append('image', imageFile);
-        }
-
-        if (isEditing && editingBlogId) {
+        }        if (isEditing && editingBlogId) {
           console.log('Updating blog with ID:', editingBlogId);
+          console.log('FormData contents:', {
+            blog: JSON.stringify(blogData),
+            hasImage: imageUploadType === 'file' && imageFile ? 'Yes' : 'No',
+            imageUploadType: imageUploadType
+          });
+          
           const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/blogs/${editingBlogId}`, {
             method: 'PUT',
             body: formData,
@@ -188,7 +195,9 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
           
           console.log('Update response status:', response.status);
           if (!response.ok) {
-            throw new Error(`Failed to update blog: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Update error response:', errorText);
+            throw new Error(`Failed to update blog: ${response.status} - ${errorText}`);
           }
           
           const updatedBlog = await response.json();
@@ -201,6 +210,12 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
           );
         } else {
           console.log('Creating new blog');
+          console.log('FormData contents:', {
+            blog: JSON.stringify(blogData),
+            hasImage: imageUploadType === 'file' && imageFile ? 'Yes' : 'No',
+            imageUploadType: imageUploadType
+          });
+          
           const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/blogs', {
             method: 'POST',
             body: formData,
@@ -208,7 +223,9 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
           
           console.log('Creation response status:', response.status);
           if (!response.ok) {
-            throw new Error(`Failed to create blog: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Creation error response:', errorText);
+            throw new Error(`Failed to create blog: ${response.status} - ${errorText}`);
           }
           
           const newBlogData = await response.json();
@@ -225,11 +242,11 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
         setIsEditing(false);
         setEditingBlogId(null);
         setTagInput('');
-        
-        alert(isEditing ? 'Blog updated successfully!' : 'Blog created successfully!');
+          alert(isEditing ? 'Blog updated successfully!' : 'Blog created successfully!');
       } catch (error) {
         console.error('Error saving blog:', error);
-        alert('Failed to save blog. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        alert(`Failed to save blog: ${errorMessage}`);
       } finally {
         setIsProcessing(false);
       }
@@ -588,10 +605,12 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">Blog Image</label>
-                <div className="flex gap-4 mb-4">
-                  <button 
+                <div className="flex gap-4 mb-4">                  <button 
                     type="button"
-                    onClick={() => setImageUploadType('url')}
+                    onClick={() => {
+                      setImageUploadType('url');
+                      setImageFile(null); // Clear file when switching to URL
+                    }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                       imageUploadType === 'url' 
                         ? 'bg-blue-50 border-blue-300 text-blue-700' 
@@ -603,7 +622,11 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
                   </button>
                   <button 
                     type="button"
-                    onClick={() => setImageUploadType('file')}
+                    onClick={() => {
+                      setImageUploadType('file');
+                      setNewBlog({...newBlog, imageUrl: ''}); // Clear URL when switching to file
+                      setImagePreview(''); // Clear preview
+                    }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                       imageUploadType === 'file' 
                         ? 'bg-blue-50 border-blue-300 text-blue-700' 
@@ -644,15 +667,27 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
                       Choose Image File
                     </button>
                   </div>
-                )}
-
-                {imagePreview && (
+                )}                {imagePreview && (
                   <div className="mt-4">
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300"
-                    />
+                    <div className="relative inline-block">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview('');
+                          setImageFile(null);
+                          setNewBlog({...newBlog, imageUrl: ''});
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                        title="Remove image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
