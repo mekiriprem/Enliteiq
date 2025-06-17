@@ -150,7 +150,7 @@ const AboutPage = () => {
   // Founders Data
   const founders = [
     {
-      name: "Krishna Kiriti",
+      name: "VELUPUGONDA KRISHNAKIRITI",
       role: "Founder & Visionary",
       // qualifications: "M.Ed. in Educational Leadership, 10+ years in educational program development",
       message: "At Enlightiq, we believe in empowering you to become architects of your own future. Education is not just about acquiring knowledge; it's about igniting curiosity, fostering creativity, and building resilience. Embrace challenges as opportunities, and remember, your potential is limitless when fueled by passion and purpose.",

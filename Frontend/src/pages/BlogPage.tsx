@@ -342,23 +342,7 @@ const BlogPage = () => {
           )}
         </div>
         
-        {/* Newsletter Signup */}
-        {/* <div className="bg-education-blue/10 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-2 text-education-dark">Stay Updated</h2>
-          <p className="text-gray-600 mb-6 max-w-xl mx-auto">
-            Subscribe to our newsletter to receive the latest articles, olympiad tips, and exclusive resources directly in your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <Input 
-              type="email" 
-              placeholder="Your email address" 
-              className="bg-white flex-grow"
-            />
-            <Button className="bg-education-blue hover:bg-blue-700 whitespace-nowrap">
-              Subscribe <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div> */}
+       
       </div>
             <div className="floating-symbols">
   <span className="symbol">π</span>

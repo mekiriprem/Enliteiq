@@ -43,7 +43,7 @@ const SkillDevelopmentSection = () => {
           </p>
           <ul className="list-disc list-inside text-gray-700 space-y-2">
             <li>Weekly mock tests covering algebra, geometry, physics, and chemistry.</li>
-            <li>Adaptive difficulty levels for grades 6-12.</li>
+            <li>Adaptive difficulty levels for grades 3-10.</li>
             <li>Instant scoring with in-depth solution explanations.</li>
             <li>Virtual medals and certificates to boost motivation.</li>
             <li>Access to past Olympiad questions and practice sets.</li>

@@ -127,7 +127,8 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-3">              <li className="flex items-start">
+            <ul className="space-y-3">              
+              <li className="flex items-center">
                 <MapPin size={18} className="mr-2 mt-1 flex-shrink-0" />
                 <a 
                   href="https://maps.google.com/maps?ll=17.453802,78.389876&z=22&t=m&hl=en&gl=IN&mapclient=embed&cid=3800074837228319126"
@@ -141,7 +142,13 @@ const Footer = () => {
               <li className="flex items-center">
                 <Phone size={18} className="mr-2 flex-shrink-0" />
                 <a href="tel:+919652012388" className="text-gray-300 hover:text-white">+91 96520 12388</a>
-              </li>
+                </li>
+                
+             <li className="flex items-center">
+                <Phone size={18} className="mr-2 flex-shrink-0" />
+                <a href="tel:+917075916202" className="text-gray-300 hover:text-white">+91 70759 16202 </a>
+               </li>
+           
               <li className="flex items-center">
                 <Mail size={18} className="mr-2 flex-shrink-0" />
                 <a href="mailto:collaborations@enlightiq.in" className="text-gray-300 hover:text-white">collaborations@enlightiq.in</a>
