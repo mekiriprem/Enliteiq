@@ -81,7 +81,7 @@ const ExamResultsPage: React.FC<ExamResultsPageProps> = ({ userType = 'student' 
         setError(null);
 
         // Fetch exam results from backend API
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/users/${loggedInUser.id}/exam-results`, {
+        const response = await fetch(`https://api.infororg.com/api/users/${loggedInUser.id}/exam-results`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -65,7 +65,7 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/blogs');
+        const response = await fetch('https://api.infororg.com/api/blogs');
         if (!response.ok) {
           throw new Error(`Failed to fetch blogs: ${response.status}`);
         }
@@ -110,7 +110,7 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/blogs/${blogId}`, {
+      const response = await fetch(`https://api.infororg.com/api/blogs/${blogId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
             imageUploadType: imageUploadType
           });
           
-          const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/blogs/${editingBlogId}`, {
+          const response = await fetch(`https://api.infororg.com/api/blogs/${editingBlogId}`, {
             method: 'PUT',
             body: formData,
           });
@@ -216,7 +216,7 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ userType }) => {
             imageUploadType: imageUploadType
           });
           
-          const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/blogs', {
+          const response = await fetch('https://api.infororg.com/api/blogs', {
             method: 'POST',
             body: formData,
           });

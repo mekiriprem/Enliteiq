@@ -41,7 +41,7 @@ const ExamDetailPage = () => {
     const fetchExam = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${id}`);
+        const response = await fetch(`https://api.infororg.com/api/exams/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch exam details");
         }
@@ -78,7 +78,7 @@ const ExamDetailPage = () => {
     setRegistrationStatus(null);
 
     try {
-      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/user/${user.id}/exam/${id}`, {
+      const response = await fetch(`https://api.infororg.com/api/user/${user.id}/exam/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

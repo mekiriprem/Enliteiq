@@ -24,7 +24,7 @@ const Hero = () => {
     const fetchRecommendedExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/recommended');
+        const response = await fetch('https://api.infororg.com/api/recommended');
         
         if (!response.ok) {
           throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);

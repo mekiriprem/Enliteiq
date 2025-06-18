@@ -43,7 +43,7 @@ const MockTestPage = () => {
       }
 
       try {
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/matchsets/${id}/details`);
+        const response = await fetch(`https://api.infororg.com/api/matchsets/${id}/details`);
         if (!response.ok) {
           throw new Error(`Failed to fetch exam data: ${response.status}`);
         }
@@ -148,7 +148,7 @@ const MockTestPage = () => {
 
     try {
       // Submit to API
-      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/matchsets/submit', {
+      const response = await fetch('https://api.infororg.com/api/matchsets/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

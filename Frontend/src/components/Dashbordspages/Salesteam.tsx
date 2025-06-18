@@ -66,7 +66,7 @@ const SalesTeam: React.FC = () => {
   const fetchSalesPersons = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/salesman/all');
+      const response = await fetch('https://api.infororg.com/api/salesman/all');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch sales persons: ${response.status} ${response.statusText}`);
@@ -117,7 +117,7 @@ const SalesTeam: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/salesman/register', {
+      const response = await fetch('https://api.infororg.com/api/salesman/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ const SalesTeam: React.FC = () => {
   // Update sales person status
   const handleStatusChange = async (id: number, newStatus: 'active' | 'inactive') => {
     try {
-      const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/salesman/${id}/status?status=${newStatus}`, {
+      const response = await fetch(`https://api.infororg.com/api/salesman/${id}/status?status=${newStatus}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -14,7 +14,7 @@ const ExamsPage = () => {
     const fetchExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/exams");
+        const response = await fetch("https://api.infororg.com/api/exams");
         if (!response.ok) {
           throw new Error("Failed to fetch exams");
         }

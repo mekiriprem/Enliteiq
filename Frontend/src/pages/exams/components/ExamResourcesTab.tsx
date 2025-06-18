@@ -63,7 +63,7 @@ const ExamResourcesTab = ({ examId, examData }: ExamResourcesTabProps) => {
         }
         
         // Otherwise, fetch exam data to get syllabus URL
-        const response = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/exams/${examId}`);
+        const response = await fetch(`https://api.infororg.com/api/exams/${examId}`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch exam data: ${response.status}`);

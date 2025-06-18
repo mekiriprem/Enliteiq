@@ -63,7 +63,7 @@ const SchoolDashboard: React.FC = () => {
       setError(null);
 
       // Fetch all users to calculate total students and active classes
-      const usersResponse = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/getallUsers', {
+      const usersResponse = await fetch('https://api.infororg.com/api/getallUsers', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ const SchoolDashboard: React.FC = () => {
       }
 
       // Fetch all exams to calculate upcoming tests and pending results
-      const examsResponse = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/exams', {
+      const examsResponse = await fetch('https://api.infororg.com/api/exams', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

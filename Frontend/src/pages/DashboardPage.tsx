@@ -49,7 +49,7 @@ const DashboardPage = () => {
         try {
           // Fetch user data
           console.log(`Fetching user data for userId: ${loggedInUser.userId}`);
-          const userResponse = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/${loggedInUser.id}`, {
+          const userResponse = await fetch(`https://api.infororg.com/api/${loggedInUser.id}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const DashboardPage = () => {
 
           // Fetch exam results
           console.log(`Fetching exam results for userId: ${loggedInUser.userId}`);
-          const resultsResponse = await fetch(`https://olympiad-zynlogic.hardikgarg.me/api/users/${loggedInUser.id}/exam-results`, {
+          const resultsResponse = await fetch(`https://api.infororg.com/api/users/${loggedInUser.id}/exam-results`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -97,7 +97,7 @@ const DashboardPage = () => {
 
           // Fetch exams
           console.log("Fetching all exams");
-          const examsResponse = await fetch("https://olympiad-zynlogic.hardikgarg.me/api/exams", {
+          const examsResponse = await fetch("https://api.infororg.com/api/exams", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
