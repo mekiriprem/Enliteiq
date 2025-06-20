@@ -92,10 +92,10 @@ const Navbar = () => {
                 Blog
               </Link>
               <Link to="/skill-development" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                SkillDevelopment
+                Skill Development
               </Link>
               <Link to="/about" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                AboutUs
+                About Us
               </Link>
               <Link to="/contact" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
                 Contact
