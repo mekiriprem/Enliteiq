@@ -4,25 +4,51 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EduVerse Olympiad</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png" type="image/png" />
+
+    <!-- Open Graph (for link previews) -->
+    <meta property="og:title" content="Enlightiq" />
+    <meta property="og:description" content="India's most engaging academic competition platform." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://enlightiq.in" />
+    <meta property="og:image" content="https://enlightiq.in/branding/opengraph.png" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Enlightiq" />
+    <meta name="twitter:description" content="Explore, Learn, Win – with Enlightiq Olympiad!" />
+    <meta name="twitter:image" content="https://enlightiq.in/branding/opengraph.png" />
+
+    <!-- Google Search Logo Support -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Enlightiq",
+      "url": "https://enlightiq.in",
+      "logo": "https://enlightiq.in/favicon.png"
+    }
+    </script>
+
+    <!-- GitHub Pages SPA Redirect Fix -->
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
       (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
           }).join('?');
           window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
+            l.pathname.slice(0, -1) + decoded + l.hash
           );
         }
-      }(window.location))
+      }(window.location));
     </script>
   </head>
+
   <body>
     <script>
-      // Redirect to the index.html file
       window.location.href = '/index.html' + window.location.search + window.location.hash;
     </script>
   </body>
