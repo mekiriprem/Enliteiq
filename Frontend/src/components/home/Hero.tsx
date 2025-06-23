@@ -98,7 +98,19 @@ const Hero = () => {
 
       <div className="container relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between">
-          <div className="lg:w-5/12 lg:pl-8 relative overflow-hidden" style={{ height: '400px' }}>
+          <div
+  className="
+    w-full                 /* Full width on mobile */
+    sm:h-[250px]
+    md:h-[300px]
+    lg:w-5/12 lg:h-[400px] /* Desktop width and height */
+    xl:h-[450px]
+    lg:pl-8
+    relative
+    overflow-hidden
+    rounded-lg
+"
+>
             <img
               src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
               alt="Banner"

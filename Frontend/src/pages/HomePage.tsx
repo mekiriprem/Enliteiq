@@ -372,66 +372,6 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
     return errors;
   };
 
-  // const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-  //   if (e) e.preventDefault();
-  //   setSubmitError(null);
-  //   setSubmitSuccess(false);
-  //   setEmailError(null);
-  //   setPasswordError(null);
-
-  //   const validationErrors = validateForm();
-  //   if (validationErrors.length > 0) {
-  //     setSubmitError(validationErrors.join(". "));
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-  //   try {
-  //     const apiData = {
-  //       schoolName: formData.schoolName.trim(),
-  //       schoolAddress: formData.schoolAddress.trim(),
-  //       schoolEmail: formData.schoolEmail.trim(),
-  //       schoolAdminName: formData.schoolAdminName.trim(),
-  //       password: formData.password,
-  //     };
-
-  //     const response = await fetch("http://localhost:8080/api/schools/register", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(apiData),
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.text();
-  //       throw new Error(`Registration failed: ${response.status} - ${errorData}`);
-  //     }
-
-  //     const result = await response.json();
-  //     console.log("School registration successful:", result);
-  //     setSubmitSuccess(true);
-  //     setFormData({
-  //       schoolName: "",
-  //       schoolAddress: "",
-  //       schoolEmail: "",
-  //       schoolAdminName: "",
-  //       password: "",
-  //       confirmPassword: "",
-  //     });
-  //     setEmailError(null);
-  //     setPasswordError(null);
-  //     setTimeout(() => {
-  //       setIsModalOpen(false);
-  //       setSubmitSuccess(false);
-  //     }, 2000);
-  //   } catch (error) {
-  //     console.error("Error registering school:", error);
-  //     setSubmitError(error instanceof Error ? error.message : "Registration failed. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
  const handleSchoolSubmit = async (e: React.FormEvent) => {
   e.preventDefault();

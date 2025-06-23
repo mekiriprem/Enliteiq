@@ -19,7 +19,6 @@ const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth() as AuthContextType;
   const location = useLocation();
 
-  // Hide navbar on dashboard routes when user is authenticated
   const isDashboardRoute =
     location.pathname.includes("-dashboard") ||
     location.pathname.includes("/admin-") ||
@@ -27,26 +26,22 @@ const Navbar = () => {
     location.pathname.includes("/school-") ||
     location.pathname.includes("/sales-");
 
-  // Close mobile menu when the route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
-  
+
   if (isAuthenticated && isDashboardRoute) {
-    return null; // Don't render navbar on dashboard pages
+    return null;
   }
 
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
-
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
   };
+
   const getDashboardRoute = () => {
     if (!user) return "/student-dashboard";
-
     switch (user.role) {
       case "admin":
         return "/admin-dashboard";
@@ -62,187 +57,151 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-               <div className="flex justify-center items-center ">
-  <Link to="/" className="flex items-center space-x-2 padding:2px">
-    <img
-      src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
-      alt="Enlightiq Logo"
-      className="h-12 w-12 object-contain"
-    />
-   <h1 className="text-3xl font-bold text-yellow-600">Enlightiq</h1>
-  </Link>
-</div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
-              <Link to="/" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Home
-              </Link>
-              <Link to="/ai" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Ai Learnings
-              </Link>
-              <Link to="/exams" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Exams
-              </Link>
-              <Link to="/mock-tests" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                MockTests
-              </Link>
-              <Link to="/blog" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Blog
-              </Link>
-              <Link to="/skill-development" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Skill Development
-              </Link>
-              <Link to="/about" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                About Us
-              </Link>
-              <Link to="/contact" className="text-gray-800 hover:text-blue-600 px-2 py-2 font-medium">
-                Contact
-              </Link>
-            </div>
-          </div>
-          <div className="hidden sm:flex sm:items-center sm:ml-4 sm:space-x-3">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <Link to={getDashboardRoute()} className="flex items-center text-blue-600 hover:text-blue-700">
-                  <User size={20} className="mr-1" />
-                  <span>Dashboard</span>
-                </Link>
-                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center text-red-600 hover:text-red-700"
-                >
-                  <LogOut size={20} className="mr-1" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Link to="/login" className="flex items-center text-blue-600 hover:text-blue-700">
-                  <LogIn size={20} className="mr-1" />
-                  <span>Login</span>
-                </Link>
-                <Link to="/register" className="btn-primary">
-                  SignUp
-                </Link>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center sm:hidden">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:text-blue-600 focus:outline-none"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMenuOpen}
-            >
-              {isMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
-            </button>
-          </div>
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex flex-wrap justify-between items-center py-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2 shrink-0">
+            <img
+              src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
+              alt="Enlightiq Logo"
+              className="h-10 w-10 object-contain"
+            />
+            <h1 className="text-2xl font-bold text-yellow-600">Enlightiq</h1>
+          </Link>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="sm:hidden bg-white border-t">
-          <div className="pt-2 pb-4 space-y-1">
-            <Link
-              to="/"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/ai"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              AiLearnings
-            </Link>
-            <Link
-              to="/exams"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Exams
-            </Link>
-            <Link
-              to="/mock-tests"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Mock Tests
-            </Link>
-            <Link
-              to="/blog"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/skill-development"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              SkillDevelopment
-            </Link>
-            <Link
-              to="/about"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              AboutUs
-            </Link>
-            <Link
-              to="/contact"
-              className="block px-2 py-1 text-base font-medium text-gray-800 hover:bg-blue-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
+          {/* Mobile Menu Button (visible on < md) */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden text-gray-800 hover:text-blue-600"
+          >
+            {isMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
+          </button>
+
+          {/* Main Nav (desktop) */}
+          <div className="hidden md:flex md:flex-wrap items-center space-x-4">
+            {[
+              ["Home", "/"],
+              ["Ai Learnings", "/ai"],
+              ["Exams", "/exams"],
+              ["Mock Tests", "/mock-tests"],
+              ["Blog", "/blog"],
+              ["Skill Development", "/skill-development"],
+              ["About Us", "/about"],
+              ["Contact", "/contact"],
+            ].map(([label, path], i) => (
+              <Link
+                key={i}
+                to={path}
+                className="text-gray-800 hover:text-blue-600 font-medium"
+              >
+                {label}
+              </Link>
+            ))}
           </div>
-          <div className="pt-3 pb-3 border-t border-gray-200">
+
+          {/* Desktop Auth */}
+          <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="space-y-1">
+              <>
                 <Link
                   to={getDashboardRoute()}
-                  className="block px-2 py-1 text-base font-medium text-blue-600 hover:bg-blue-50"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="text-blue-600 hover:text-blue-700 flex items-center"
                 >
-                  Dashboard
+                  <User size={18} className="mr-1" /> Dashboard
                 </Link>
-                <div className="px-2 py-1 text-sm text-gray-600">Welcome, {user?.name}</div>
+                <span className="text-sm text-gray-600">Hi, {user?.name}</span>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-2 py-1 text-base font-medium text-red-600 hover:bg-red-50"
+                  className="text-red-600 hover:text-red-700 flex items-center"
                 >
-                  Logout
+                  <LogOut size={18} className="mr-1" /> Logout
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex flex-col space-y-2 p-2">
+              <>
                 <Link
                   to="/login"
-                  className="w-full text-center py-1 text-blue-600 border border-blue-600 rounded-md"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="text-blue-600 hover:text-blue-700 flex items-center"
                 >
-                  Login
+                  <LogIn size={18} className="mr-1" /> Login
                 </Link>
                 <Link
                   to="/register"
-                  className="w-full text-center py-1 bg-blue-600 text-white rounded-md"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
                 >
                   Sign Up
                 </Link>
-              </div>
+              </>
             )}
           </div>
         </div>
-      )}
+
+        {/* Mobile Dropdown Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t py-3">
+            <div className="space-y-1">
+              {[
+                ["Home", "/"],
+                ["Ai Learnings", "/ai"],
+                ["Exams", "/exams"],
+                ["Mock Tests", "/mock-tests"],
+                ["Blog", "/blog"],
+                ["Skill Development", "/skill-development"],
+                ["About Us", "/about"],
+                ["Contact", "/contact"],
+              ].map(([label, path], index) => (
+                <Link
+                  key={index}
+                  to={path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-800 hover:bg-blue-50"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+            <div className="border-t px-4 py-3">
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to={getDashboardRoute()}
+                    className="block text-blue-600 mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Welcome, {user?.name}
+                  </p>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="block text-center py-1 text-blue-600 border border-blue-600 rounded-md mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block text-center py-1 bg-blue-600 text-white rounded-md"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </nav>
   );
 };
