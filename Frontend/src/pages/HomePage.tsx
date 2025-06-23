@@ -448,7 +448,7 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("https://api.infororg.com/api/schools/register", {
+    const response = await fetch("https://enlightiq.enlightiq.in/api/schools/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -512,7 +512,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("https://api.infororg.com/api/coordinators/register", {
+    const response = await fetch("https://enlightiq.enlightiq.in/api/coordinators/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -573,7 +573,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     const fetchRecommendedExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://api.infororg.com/api/recommended");
+        const response = await fetch("https://enlightiq.enlightiq.in/api/recommended");
         if (!response.ok) {
           throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);
         }

@@ -68,7 +68,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('https://api.infororg.com/api/getallUsers', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/getallUsers', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
     }
 
     try {
-      const response = await fetch('https://api.infororg.com/api/signup', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
     if (!editingUser) return;
 
     try {
-      const response = await fetch(`https://api.infororg.com/api/users/${editingUser.id}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/users/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
     }
 
     try {
-      const response = await fetch(`https://api.infororg.com/api/users/${userId}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/users/${userId}`, {
         method: 'DELETE',
       });
 

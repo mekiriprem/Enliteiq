@@ -92,7 +92,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('https://api.infororg.com/api/matchsets', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/matchsets', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
         // Fetch question count for each test
         let questionCount = 0;
         try {
-          const questionsResponse = await fetch(`https://api.infororg.com/api/matchsets/${test.id}/questions`);
+          const questionsResponse = await fetch(`https://enlightiq.enlightiq.in/api/matchsets/${test.id}/questions`);
           if (questionsResponse.ok) {
             const questions = await questionsResponse.json();
             questionCount = questions.length;
@@ -163,7 +163,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
         questions: []
       };
 
-      const response = await fetch('https://api.infororg.com/api/matchsets', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/matchsets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
     }
 
     try {
-      const response = await fetch(`https://api.infororg.com/api/matchsets/${testId}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/matchsets/${testId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -236,7 +236,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
   // Upload questions to mock test
   const handleUploadQuestions = async (testId: number, questions: Question[]) => {
     try {
-      const response = await fetch(`https://api.infororg.com/api/matchsets/${testId}/questions/bulk`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/matchsets/${testId}/questions/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
   const fetchQuestionsForView = async (testId: number) => {
     try {
       setLoadingQuestions(true);
-      const response = await fetch(`https://api.infororg.com/api/matchsets/${testId}/details`);
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/matchsets/${testId}/details`);
       
       if (response.ok) {
         const data = await response.json();

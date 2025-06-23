@@ -24,7 +24,7 @@ const Hero = () => {
     const fetchRecommendedExams = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.infororg.com/api/recommended');
+        const response = await fetch('https://enlightiq.enlightiq.in/api/recommended');
         
         if (!response.ok) {
           throw new Error(`Failed to fetch recommended exams: ${response.status} ${response.statusText}`);

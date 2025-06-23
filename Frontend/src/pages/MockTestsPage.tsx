@@ -49,7 +49,7 @@ const MockTestsPage = () => {
   useEffect(() => {
     const fetchMockTests = async () => {
       try {
-        const response = await fetch('https://api.infororg.com/api/matchsets');
+        const response = await fetch('https://enlightiq.enlightiq.in/api/matchsets');
         if (!response.ok) {
           throw new Error(
             response.status === 404

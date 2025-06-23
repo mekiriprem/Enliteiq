@@ -37,7 +37,7 @@ const BlogDetailPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await axios.get<Blog>(`https://api.infororg.com/api/blogs/${id}`);
+        const response = await axios.get<Blog>(`https://enlightiq.enlightiq.in/api/blogs/${id}`);
         setBlog(response.data);
       } catch (err) {
         console.error("Error fetching blog:", err);

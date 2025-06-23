@@ -36,7 +36,7 @@ const BlogPage = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://api.infororg.com/api/blogs");
+        const response = await fetch("https://enlightiq.enlightiq.in/api/blogs");
         
         if (!response.ok) {
           throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText}`);

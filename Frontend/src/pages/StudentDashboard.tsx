@@ -134,7 +134,7 @@ const StudentDashboard: React.FC = () => {
         setError(null);
 
         // Fetch user details
-        const userResponse = await fetch(`https://api.infororg.com/api/${loggedInUser.id}`, {
+        const userResponse = await fetch(`https://enlightiq.enlightiq.in/api/${loggedInUser.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -148,7 +148,7 @@ const StudentDashboard: React.FC = () => {
         const userDetails: UserData = await userResponse.json();
 
         // Fetch exam results
-        const resultsResponse = await fetch(`https://api.infororg.com/api/users/${loggedInUser.id}/exam-results`, {
+        const resultsResponse = await fetch(`https://enlightiq.enlightiq.in/api/users/${loggedInUser.id}/exam-results`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

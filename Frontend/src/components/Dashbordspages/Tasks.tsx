@@ -143,7 +143,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
         let taskResponse;
         if (userType === 'admin') {
           // Admin sees all tasks
-          taskResponse = await fetch('https://api.infororg.com/api/tasks', {
+          taskResponse = await fetch('https://enlightiq.enlightiq.in/api/tasks', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
           });
@@ -154,7 +154,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
           if (!salesmanId) {
             throw new Error('Salesman ID not found. Please login again.');
           }
-          taskResponse = await fetch(`https://api.infororg.com/api/tasks/bysalesman/${salesmanId}`, {
+          taskResponse = await fetch(`https://enlightiq.enlightiq.in/api/tasks/bysalesman/${salesmanId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
           });
@@ -176,7 +176,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
 
         // Only fetch salesmen for admin users (for the add task form)
         if (userType === 'admin') {
-          const salesmanResponse = await fetch('https://api.infororg.com/api/salesman/all', {
+          const salesmanResponse = await fetch('https://enlightiq.enlightiq.in/api/salesman/all', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
           });
@@ -221,7 +221,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
         priority: newTask.priority,
       };
       console.log('Adding task payload:', payload);
-      const response = await fetch(`https://api.infororg.com/api/tasks/assign/${newTask.salesManId}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/tasks/assign/${newTask.salesManId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -235,7 +235,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       
       // Refresh tasks list
       if (userType === 'admin') {
-        const taskResponse = await fetch('https://api.infororg.com/api/tasks');
+        const taskResponse = await fetch('https://enlightiq.enlightiq.in/api/tasks');
         if (taskResponse.ok) {
           const taskData: TaskDto[] = await taskResponse.json();
           setTasks(taskData);
@@ -275,7 +275,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
         remark: remark.trim(),
       };
 
-      const response = await fetch(`https://api.infororg.com/api/tasks/${taskId}/remark`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/tasks/${taskId}/remark`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -288,7 +288,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
 
       // Refresh tasks to show updated remark
       if (userType === 'admin') {
-        const taskResponse = await fetch('https://api.infororg.com/api/tasks');
+        const taskResponse = await fetch('https://enlightiq.enlightiq.in/api/tasks');
         if (taskResponse.ok) {
           const taskData: TaskDto[] = await taskResponse.json();
           setTasks(taskData);
@@ -296,7 +296,7 @@ const Tasks: React.FC<TasksProps> = ({ userType }) => {
       } else if (userType === 'sales') {
         const salesmanId = getCurrentUserId();
         if (salesmanId) {
-          const taskResponse = await fetch(`https://api.infororg.com/api/tasks/bysalesman/${salesmanId}`);
+          const taskResponse = await fetch(`https://enlightiq.enlightiq.in/api/tasks/bysalesman/${salesmanId}`);
           if (taskResponse.ok) {
             const taskData: TaskDto[] = await taskResponse.json();
             setTasks(taskData);

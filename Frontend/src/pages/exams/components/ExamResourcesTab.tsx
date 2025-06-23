@@ -63,7 +63,7 @@ const ExamResourcesTab = ({ examId, examData }: ExamResourcesTabProps) => {
         }
         
         // Otherwise, fetch exam data to get syllabus URL
-        const response = await fetch(`https://api.infororg.com/api/exams/${examId}`);
+        const response = await fetch(`https://enlightiq.enlightiq.in/api/exams/${examId}`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch exam data: ${response.status}`);

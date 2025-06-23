@@ -37,9 +37,9 @@ interface Template {
 }
 
 const CERTIFICATE_TEMPLATES: Template[] = [
-  { name: 'template1', title: 'Classic', previewUrl: 'https://api.infororg.com/api/templates/preview/template1' },
-  { name: 'template2', title: 'Gold', previewUrl: 'https://api.infororg.com/api/templates/preview/template2' },
-  { name: 'template3', title: 'Blue', previewUrl: 'https://api.infororg.com/api/templates/preview/template3' }
+  { name: 'template1', title: 'Classic', previewUrl: 'https://enlightiq.enlightiq.in/api/templates/preview/template1' },
+  { name: 'template2', title: 'Gold', previewUrl: 'https://enlightiq.enlightiq.in/api/templates/preview/template2' },
+  { name: 'template3', title: 'Blue', previewUrl: 'https://enlightiq.enlightiq.in/api/templates/preview/template3' }
 ];
 
 const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
@@ -83,7 +83,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await fetch('https://api.infororg.com/api/exams');
+        const response = await fetch('https://enlightiq.enlightiq.in/api/exams');
         if (!response.ok) {
           throw new Error(`Failed to fetch exams: ${response.status}`);
         }
@@ -134,7 +134,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       }
 
       // Fetch exam results from API
-      const response = await fetch(`https://api.infororg.com/api/exam/${examId}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/exam/${examId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setIsProcessing(true);
       
       // Always use the recommend API since it toggles the status
-      const response = await fetch(`https://api.infororg.com/api/recommend?examId=${id}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/recommend?examId=${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -271,7 +271,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`https://api.infororg.com/api/exams/${examId}`, {
+      const response = await fetch(`https://enlightiq.enlightiq.in/api/exams/${examId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         const formData = new FormData();
         formData.append('pdf', file);
         
-        const response = await fetch(`https://api.infororg.com/api/${examId}/pdf`, {
+        const response = await fetch(`https://enlightiq.enlightiq.in/api/${examId}/pdf`, {
           method: 'POST',
           body: formData,
         });
@@ -374,7 +374,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const response = await fetch('https://api.infororg.com/api/upload/image', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/upload/image', {
         method: 'POST',
         body: formData,
       });
@@ -393,7 +393,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     const formData = new FormData();
     formData.append('file', pdfFile);
 
-    const response = await fetch(`https://api.infororg.com/api/${examId}/pdf`, {
+    const response = await fetch(`https://enlightiq.enlightiq.in/api/${examId}/pdf`, {
       method: 'POST',
       body: formData,
     });
@@ -434,7 +434,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           duration: newExam.duration
         };if (isEditing && editingExamId) {
           console.log('Updating exam with ID:', editingExamId);
-          const response = await fetch(`https://api.infororg.com/api/exams/${editingExamId}`, {
+          const response = await fetch(`https://enlightiq.enlightiq.in/api/exams/${editingExamId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
@@ -454,7 +454,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
               await uploadPdfToExam(editingExamId, pdfFiles[0]); // Upload first PDF only
               console.log('PDF upload successful');
               // Refresh the exam data to get the updated syllabus URL
-              const refreshResponse = await fetch(`https://api.infororg.com/api/exams/${editingExamId}`);
+              const refreshResponse = await fetch(`https://enlightiq.enlightiq.in/api/exams/${editingExamId}`);
               if (refreshResponse.ok) {
                 const refreshedExam = await refreshResponse.json();
                 console.log('Refreshed exam after PDF upload:', refreshedExam);
@@ -483,7 +483,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             ));
           }
         } else {
-          const response = await fetch('https://api.infororg.com/api/exams', {
+          const response = await fetch('https://enlightiq.enlightiq.in/api/exams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
@@ -498,7 +498,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
               setIsUploadingPdfs(true);
               await uploadPdfToExam(newExamData.id, pdfFiles[0]); // Upload first PDF only
               // Refresh the exam data to get the updated syllabus URL
-              const refreshResponse = await fetch(`https://api.infororg.com/api/exams/${newExamData.id}`);
+              const refreshResponse = await fetch(`https://enlightiq.enlightiq.in/api/exams/${newExamData.id}`);
               if (refreshResponse.ok) {
                 const refreshedExam = await refreshResponse.json();
                 setExams(prevExams => [...prevExams.filter(e => e.id !== newExamData.id), refreshedExam]);
@@ -605,7 +605,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       templateName: selectedTemplate
     }));
     try {
-      const response = await fetch('https://api.infororg.com/api/templates/generate', {
+      const response = await fetch('https://enlightiq.enlightiq.in/api/templates/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -77,7 +77,7 @@ const LoginForm: React.FC = () => {
         requestBody.phone = emailOrPhone.trim();
       }
 
-      const response = await fetch(" https://api.infororg.com/api/login", {
+      const response = await fetch(" https://enlightiq.enlightiq.in/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
