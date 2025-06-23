@@ -84,13 +84,16 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ userType, isSidebarOpen, onC
       <aside
         className={`min-h-screen bg-education-blue flex flex-col text-white fixed md:static top-0 left-0 z-50 transition-all duration-300 ease-in-out w-[85%] sm:w-72 md:w-60 ${isSidebarOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full shadow-none'} md:translate-x-0 md:shadow-none overflow-y-auto`}
       >
-        <div className="flex flex-col h-full">
-          <div className="px-4 md:px-6 py-6 md:py-8 flex items-center justify-between">
+        <div className="flex flex-col h-full">          <div className="px-4 md:px-6 py-6 md:py-8 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <div className="bg-white rounded-full w-9 md:w-10 h-9 md:h-10 flex items-center justify-center">
-                <span className="text-education-blue font-bold text-lg md:text-xl">O</span>
+              <div className=" rounded-full w-9 md:w-10 h-9 md:h-10 flex items-center justify-center">
+                <img
+                  src="/ChatGPT_Image_Jun_12__2025__10_58_53_AM-removebg-preview.png"
+                  alt="Enlightiq Logo"
+                  className="h-8 w-8 md:h-9 md:w-9 object-contain"
+                />
               </div>
-              <span className="font-bold text-lg md:text-xl">EduVerse</span>
+              <span className="font-bold text-lg md:text-xl">Elightiq</span>
             </Link>
             {isMobile && (
               <button 
