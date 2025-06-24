@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Add useLocation, useNavigate
 import { ArrowRight } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 import Hero from "../components/home/Hero";
@@ -57,21 +57,21 @@ interface CoordinatorFormData {
 }
 
 const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: () => void; isLoggedIn?: boolean }) => {
-  // Check for authentication from localStorage/sessionStorage
   const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const location = useLocation(); // Get current location
+  const navigate = useNavigate(); // For clearing hash after modal open
+  const [isPartnerSchoolModalOpen, setIsPartnerSchoolModalOpen] = useState(false);
+  const [isCoordinatorModalOpen, setIsCoordinatorModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check if anyone is logged in by looking for user data or tokens in storage
     const checkLoginStatus = () => {
-      // Check for various types of stored authentication data
       const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const authToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
       const accessToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
       const userSession = localStorage.getItem("userSession") || sessionStorage.getItem("userSession");
       const isAuthenticated = localStorage.getItem("isAuthenticated") || sessionStorage.getItem("isAuthenticated");
-      
-      // Check if any authentication data exists
+
       if (userData || token || authToken || accessToken || userSession || isAuthenticated === "true") {
         setUserLoggedIn(true);
       } else {
@@ -79,24 +79,38 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
       }
     };
 
-    // Initial check
     checkLoginStatus();
 
-    // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = () => {
       checkLoginStatus();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };  }, []);
+    window.addEventListener("storage", handleStorageChange);
 
-  // Use either the prop or the detected login status
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  // Handle modal opening based on URL hash or navigation state
+  useEffect(() => {
+    const hash = location.hash;
+    const state = location.state as { openModal?: string } | null;
+
+    if (state?.openModal === "partner-school" || hash === "#partner-school") {
+      setIsPartnerSchoolModalOpen(true);
+      setIsCoordinatorModalOpen(false);
+      // Clear hash to prevent re-triggering
+      navigate("/", { replace: true });
+    } else if (state?.openModal === "coordinator" || hash === "#coordinator") {
+      setIsCoordinatorModalOpen(true);
+      setIsPartnerSchoolModalOpen(false);
+      navigate("/", { replace: true });
+    }
+  }, [location, navigate]);
+
   const isAnyoneLoggedIn = isLoggedIn || userLoggedIn;
-  
+
   const [formData, setFormData] = useState({
     schoolName: "",
     schoolAddress: "",
@@ -144,8 +158,6 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPartnerSchoolModalOpen, setIsPartnerSchoolModalOpen] = useState(false);
-  const [isCoordinatorModalOpen, setIsCoordinatorModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -157,14 +169,11 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
   const [coordinatorSubmitError, setCoordinatorSubmitError] = useState<string | null>(null);
   const [coordinatorSubmitSuccess, setCoordinatorSubmitSuccess] = useState(false);
   const [coordinatorEmailError, setCoordinatorEmailError] = useState<string | null>(null);
-  // Country, State, City dropdown state
   const [countries, setCountries] = useState<{ isoCode: string; name: string }[]>([]);
   const [states, setStates] = useState<{ isoCode: string; name: string }[]>([]);
   const [cities, setCities] = useState<{ name: string }[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedState, setSelectedState] = useState<string>("");
-
-  // Country codes for phone numbers
   const [yourMobileCountryCode, setYourMobileCountryCode] = useState<string>("+91");
   const [schoolPhoneCountryCode, setSchoolPhoneCountryCode] = useState<string>("+91");
   const [principalContactCountryCode, setPrincipalContactCountryCode] = useState<string>("+91");
@@ -208,6 +217,7 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
       }
     }
   };
+
   const handleSchoolInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -217,7 +227,6 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
       [name]: value,
     }));
 
-    // Handle country selection
     if (name === "schoolCountry") {
       setSelectedCountry(value);
       setSchoolFormData((prev) => ({
@@ -227,7 +236,6 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
       }));
     }
 
-    // Handle state selection
     if (name === "schoolState") {
       setSelectedState(value);
       setSchoolFormData((prev) => ({
@@ -372,138 +380,134 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
     return errors;
   };
 
+  const handleSchoolSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSchoolSubmitError(null);
+    setSchoolSubmitSuccess(false);
+    setSchoolEmailError(null);
 
- const handleSchoolSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setSchoolSubmitError(null);
-  setSchoolSubmitSuccess(false);
-  setSchoolEmailError(null);
-
-  const validationErrors = validateSchoolForm();
-  if (validationErrors.length > 0) {
-    setSchoolSubmitError(validationErrors.join(". "));
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    const response = await fetch("https://enlightiq.enlightiq.in/api/schools/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(schoolFormData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Registration failed");
+    const validationErrors = validateSchoolForm();
+    if (validationErrors.length > 0) {
+      setSchoolSubmitError(validationErrors.join(". "));
+      return;
     }
 
-    const data = await response.json();
-    console.log("School registered successfully:", data);
-    setSchoolSubmitSuccess(true);
+    setIsSubmitting(true);
 
-    // Reset the form
-    setSchoolFormData({
-      areYou: "",
-      yourName: "",
-      yourEmail: "",
-      yourMobile: "",
-      schoolName: "",
-      schoolAddress: "",
-      schoolCity: "",
-      schoolState: "",
-      schoolCountry: "",
-      schoolPincode: "",
-      schoolEmail: "",
-      schoolPhone: "",
-      principalName: "",
-      principalContact: "",
-    });
+    try {
+      const response = await fetch("https://enlightiq.enlightiq.in/api/schools/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(schoolFormData),
+      });
 
-    // Close modal after 2s
-    setTimeout(() => {
-      setIsPartnerSchoolModalOpen(false);
-      setSchoolSubmitSuccess(false);
-    }, 2000);
-  } catch (error) {
-    console.error("Error submitting school partner form:", error);
-    setSchoolSubmitError(error instanceof Error ? error.message : "Submission failed. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
 
+      const data = await response.json();
+      console.log("School registered successfully:", data);
+      setSchoolSubmitSuccess(true);
 
-const handleCoordinatorSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setCoordinatorSubmitError(null);
-  setCoordinatorSubmitSuccess(false);
-  setCoordinatorEmailError(null);
+      setSchoolFormData({
+        areYou: "",
+        yourName: "",
+        yourEmail: "",
+        yourMobile: "",
+        schoolName: "",
+        schoolAddress: "",
+        schoolCity: "",
+        schoolState: "",
+        schoolCountry: "",
+        schoolPincode: "",
+        schoolEmail: "",
+        schoolPhone: "",
+        principalName: "",
+        principalContact: "",
+      });
 
-  const validationErrors = validateCoordinatorForm();
-  if (validationErrors.length > 0) {
-    setCoordinatorSubmitError(validationErrors.join(". "));
-    return;
-  }
+      setTimeout(() => {
+        setIsPartnerSchoolModalOpen(false);
+        setSchoolSubmitSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error submitting school partner form:", error);
+      setSchoolSubmitError(error instanceof Error ? error.message : "Submission failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  setIsSubmitting(true);
+  const handleCoordinatorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCoordinatorSubmitError(null);
+    setCoordinatorSubmitSuccess(false);
+    setCoordinatorEmailError(null);
 
-  try {
-    const response = await fetch("https://enlightiq.enlightiq.in/api/coordinators/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(coordinatorFormData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Registration failed");
+    const validationErrors = validateCoordinatorForm();
+    if (validationErrors.length > 0) {
+      setCoordinatorSubmitError(validationErrors.join(". "));
+      return;
     }
 
-    const result = await response.json();
-    console.log("Coordinator registered:", result);
-    setCoordinatorSubmitSuccess(true);
+    setIsSubmitting(true);
 
-    setCoordinatorFormData({
-      fullName: "",
-      email: "",
-      mobile: "",
-      address: "",
-      city: "",
-      district: "",
-      state: "",
-      pinCode: "",
-      age: "",
-      educationalQualifications: "",
-      otherQualifications: "",
-      profession: "",
-      experienceWithSchools: "No",
-      reasonToWork: "",
-      yearsOfExperience: "",
-      principalsKnown: "",
-      knowAnyoneInEnlighthiq: "No",
-      additionalInfo: "",
-      howHeardAbout: "",
-    });
+    try {
+      const response = await fetch("https://enlightiq.enlightiq.in/api/coordinators/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(coordinatorFormData),
+      });
 
-    setTimeout(() => {
-      setIsCoordinatorModalOpen(false);
-      setCoordinatorSubmitSuccess(false);
-    }, 2000);
-  } catch (error) {
-    console.error("Error submitting coordinator form:", error);
-    setCoordinatorSubmitError(
-      error instanceof Error ? error.message : "Submission failed. Please try again."
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      const result = await response.json();
+      console.log("Coordinator registered:", result);
+      setCoordinatorSubmitSuccess(true);
+
+      setCoordinatorFormData({
+        fullName: "",
+        email: "",
+        mobile: "",
+        address: "",
+        city: "",
+        district: "",
+        state: "",
+        pinCode: "",
+        age: "",
+        educationalQualifications: "",
+        otherQualifications: "",
+        profession: "",
+        experienceWithSchools: "No",
+        reasonToWork: "",
+        yearsOfExperience: "",
+        principalsKnown: "",
+        knowAnyoneInEnlighthiq: "No",
+        additionalInfo: "",
+        howHeardAbout: "",
+      });
+
+      setTimeout(() => {
+        setIsCoordinatorModalOpen(false);
+        setCoordinatorSubmitSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error submitting coordinator form:", error);
+      setCoordinatorSubmitError(
+        error instanceof Error ? error.message : "Submission failed. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const [featuredExams, setFeaturedExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -530,7 +534,6 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     fetchRecommendedExams();
   }, []);
 
-  // Load countries on component mount
   useEffect(() => {
     const loadCountries = () => {
       const countryList = Country.getAllCountries();
@@ -539,7 +542,6 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     loadCountries();
   }, []);
 
-  // Load states when country changes
   useEffect(() => {
     if (selectedCountry) {
       const stateList = State.getStatesOfCountry(selectedCountry);
@@ -553,7 +555,6 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     }
   }, [selectedCountry]);
 
-  // Load cities when state changes
   useEffect(() => {
     if (selectedCountry && selectedState) {
       const cityList = City.getCitiesOfState(selectedCountry, selectedState);
@@ -598,7 +599,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
 
   return (
     <div>
-      <Hero />      {/* Featured Exams Section */}
+      <Hero />
       <section className="py-16 relative">
         <div className="container relative z-10">
           <div className="flex justify-between items-center mb-10">
@@ -618,8 +619,8 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-red-600 mb-4">{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
+              <button
+                onClick={() => window.location.reload()}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Try Again
@@ -639,13 +640,11 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
               </Link>
             </div>
           )}
-        </div>      
-      </section>      
-      
-      {/* Become a Partner School and Olympiad Coordinator Sections - Hidden when user is logged in */}
+        </div>
+      </section>
+
       {!isAnyoneLoggedIn && (
         <>
-          {/* Become a Partner School Section */}
           <section id="partner-school" className="py-16 relative">
             <div className="container relative z-10">
               <div className="text-center mb-8">
@@ -658,7 +657,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                 <p className="text-md text-gray-600 max-w-2xl mx-auto mb-6">
                   An Enlighthiq representative will contact you & assist you in registering with & appearing in Enlighthiq Olympiads.
                 </p>
-                <div className="text-center mt-8 pt -10">
+                <div className="text-center mt-8 pt-10">
                   <button
                     onClick={() => {
                       setIsPartnerSchoolModalOpen(true);
@@ -674,16 +673,15 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             </div>
           </section>
 
-          {/* Partner School Modal */}
           {isPartnerSchoolModalOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 transition-all duration-500"
-              onClick={() => setIsPartnerSchoolModalOpen(false)}
-            >
-              <div
-                className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
-                onClick={(e) => e.stopPropagation()}
-              >
+           <div
+  className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 pt-20 transition-all duration-500"
+  onClick={() => setIsPartnerSchoolModalOpen(false)}
+>
+  <div
+    className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300"
+    onClick={(e) => e.stopPropagation()}
+  >
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
                   Become a Partner School
                 </h2>
@@ -743,9 +741,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                       value={schoolFormData.yourEmail}
                       onChange={handleSchoolInputChange}
                       className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
-                        schoolEmailError 
-                          ? "border-red-300 focus:ring-red-500" 
-                          : "border-gray-300 focus:ring-blue-500"
+                        schoolEmailError ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
                       }`}
                       placeholder="Enter your email"
                       required
@@ -753,11 +749,13 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                     {schoolEmailError && (
                       <p className="mt-1 text-sm text-red-600">{schoolEmailError}</p>
                     )}
-                  </div>              <div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="yourMobile">
                       Your Mobile No * (10 digits)
                     </label>
-                    <div className="flex">                  <select
+                    <div className="flex">
+                      <select
                         value={yourMobileCountryCode}
                         onChange={(e) => setYourMobileCountryCode(e.target.value)}
                         className="w-20 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
@@ -810,7 +808,9 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                       placeholder="Enter complete school address"
                       rows={3}
                       required
-                    />              </div>              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCountry">
                         School Country *
@@ -851,7 +851,6 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                       </select>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolCity">
@@ -898,9 +897,7 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                       value={schoolFormData.schoolEmail}
                       onChange={handleSchoolInputChange}
                       className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
-                        schoolEmailError 
-                          ? "border-red-300 focus:ring-red-500" 
-                          : "border-gray-300 focus:ring-blue-500"
+                        schoolEmailError ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
                       }`}
                       placeholder="Enter school email"
                       required
@@ -908,7 +905,8 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                     {schoolEmailError && (
                       <p className="mt-1 text-sm text-red-600">{schoolEmailError}</p>
                     )}
-                  </div>              <div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="schoolPhone">
                       School Phone No * (10 digits)
                     </label>
@@ -953,7 +951,8 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
                       placeholder="Enter principal name"
                       required
                     />
-                  </div>              <div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="principalContact">
                       Principal Contact No * (10 digits)
                     </label>
@@ -1006,7 +1005,6 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          {/* Olympiad Coordinator Section */}
           <section id="coordinator" className="py-16 relative">
             <div className="container relative z-10">
               <div className="text-center mb-8">
@@ -1040,381 +1038,375 @@ const handleCoordinatorSubmit = async (e: React.FormEvent) => {
             </div>
           </section>
 
-          {/* Olympiad Coordinator Modal */}
-          {isCoordinatorModalOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 transition-all duration-500"
-              onClick={() => setIsCoordinatorModalOpen(false)}
-            >
-              <div
-                className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-0 sm:scale-100"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
-                  Become an Olympiad Coordinator
-                </h2>
-                {coordinatorSubmitSuccess && (
-                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-green-800 text-sm text-center">
-                      Application submitted successfully! We'll be in touch soon.
-                    </p>
-                  </div>
-                )}
-                {coordinatorSubmitError && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-red-800 text-sm">{coordinatorSubmitError}</p>
-                  </div>
-                )}
-                <form onSubmit={handleCoordinatorSubmit} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="fullName">
-                      Your Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={coordinatorFormData.fullName}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-                      Your E-Mail ID *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={coordinatorFormData.email}
-                      onChange={handleCoordinatorInputChange}
-                      className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
-                        coordinatorEmailError 
-                          ? "border-red-300 focus:ring-red-500" 
-                          : "border-gray-300 focus:ring-blue-500"
-                      }`}
-                      placeholder="Enter your email"
-                      required
-                    />
-                    {coordinatorEmailError && (
-                      <p className="mt-1 text-sm text-red-600">{coordinatorEmailError}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="mobile">
-                      Mobile No./Resi. No. *
-                    </label>
-                    <input
-                      type="text"
-                      name="mobile"
-                      value={coordinatorFormData.mobile}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your mobile number"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="address">
-                      Address * (Max 500 characters)
-                    </label>
-                    <textarea
-                      name="address"
-                      value={coordinatorFormData.address}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your address"
-                      rows={3}
-                      maxLength={500}
-                      required
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      {coordinatorFormData.address.length}/500 characters
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="city">
-                        City *
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={coordinatorFormData.city}
-                        onChange={handleCoordinatorInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                        placeholder="Enter your city"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="district">
-                        District *
-                      </label>
-                      <input
-                        type="text"
-                        name="district"
-                        value={coordinatorFormData.district}
-                        onChange={handleCoordinatorInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                        placeholder="Enter your district"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="state">
-                        State *
-                      </label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={coordinatorFormData.state}
-                        onChange={handleCoordinatorInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                        placeholder="Enter your state"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="pinCode">
-                        Pin Code *
-                      </label>
-                      <input
-                        type="text"
-                        name="pinCode"
-                        value={coordinatorFormData.pinCode}
-                        onChange={handleCoordinatorInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                        placeholder="Enter your pin code"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="age">
-                      Your Age * (Only in Numbers)
-                    </label>
-                    <input
-                      type="text"
-                      name="age"
-                      value={coordinatorFormData.age}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your age"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="educationalQualifications">
-                      Educational Qualifications *
-                    </label>
-                    <input
-                      type="text"
-                      name="educationalQualifications"
-                      value={coordinatorFormData.educationalQualifications}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your educational qualifications"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="otherQualifications">
-                      Other Qualifications
-                    </label>
-                    <input
-                      type="text"
-                      name="otherQualifications"
-                      value={coordinatorFormData.otherQualifications}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter other qualifications (optional)"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="profession">
-                      Profession *
-                    </label>
-                    <input
-                      type="text"
-                      name="profession"
-                      value={coordinatorFormData.profession}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter your profession"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Do you have experience of working with schools? *
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          name="experienceWithSchools"
-                          value="Yes"
-                          checked={coordinatorFormData.experienceWithSchools === "Yes"}
-                          onChange={handleCoordinatorInputChange}
-                          className="mr-2"
-                          required
-                        />
-                        Yes
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          name="experienceWithSchools"
-                          value="No"
-                          checked={coordinatorFormData.experienceWithSchools === "No"}
-                          onChange={handleCoordinatorInputChange}
-                          className="mr-2"
-                          required
-                        />
-                        No
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reasonToWork">
-                      Why do you want to work with Enlighthiq? Give 3 words which capture your reply. *
-                    </label>
-                    <input
-                      type="text"
-                      name="reasonToWork"
-                      value={coordinatorFormData.reasonToWork}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="E.g., Passion Education Impact"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="yearsOfExperience">
-                      How many years of total work experience do you have? *
-                    </label>
-                    <input
-                      type="text"
-                      name="yearsOfExperience"
-                      value={coordinatorFormData.yearsOfExperience}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter years of experience"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="principalsKnown">
-                      How many school principals do you know in your area? *
-                    </label>
-                    <input
-                      type="text"
-                      name="principalsKnown"
-                      value={coordinatorFormData.principalsKnown}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter number of principals"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Do you know anyone in Enlighthiq? *
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          name="knowAnyoneInEnlighthiq"
-                          value="Yes"
-                          checked={coordinatorFormData.knowAnyoneInEnlighthiq === "Yes"}
-                          onChange={handleCoordinatorInputChange}
-                          className="mr-2"
-                          required
-                        />
-                        Yes
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          name="knowAnyoneInEnlighthiq"
-                          value="No"
-                          checked={coordinatorFormData.knowAnyoneInEnlighthiq === "No"}
-                          onChange={handleCoordinatorInputChange}
-                          className="mr-2"
-                          required
-                        />
-                        No
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="additionalInfo">
-                      Any other useful information you would like to share (Max 500 characters)
-                    </label>
-                    <textarea
-                      name="additionalInfo"
-                      value={coordinatorFormData.additionalInfo}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      placeholder="Enter additional information (optional)"
-                      rows={3}
-                      maxLength={500}
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      {coordinatorFormData.additionalInfo.length}/500 characters
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="howHeardAbout">
-                      How did you come to know about Enlighthiq? *
-                    </label>
-                    <select
-                      name="howHeardAbout"
-                      value={coordinatorFormData.howHeardAbout}
-                      onChange={handleCoordinatorInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
-                      required
-                    >
-                      <option value="">Select an option</option>
-                      <option value="School">School</option>
-                      <option value="Student">Student</option>
-                      <option value="Internet">Internet</option>
-                      <option value="News Paper">News Paper</option>
-                      <option value="From Somebody">From Somebody</option>
-                      <option value="WhatsApp">WhatsApp</option>
-                      <option value="Others">Others</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
-                    <button
-                      onClick={() => setIsCoordinatorModalOpen(false)}
-                      disabled={isSubmitting}
-                      className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transition-all duration-300"
-                    >
-                      Close
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold transition-all duration-300"
-                    >
-                      {isSubmitting ? "Submitting..." : "Submit"}
-                    </button>
-                  </div>
-                </form>
-              </div>        </div>
-          )}
+        {isCoordinatorModalOpen && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 pt-20 transition-all duration-500"
+    onClick={() => setIsCoordinatorModalOpen(false)}
+  >
+    <div
+      className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
+        Become an Olympiad Coordinator
+      </h2>
+      {coordinatorSubmitSuccess && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-green-800 text-sm text-center">
+            Application submitted successfully! We'll be in touch soon.
+          </p>
+        </div>
+      )}
+      {coordinatorSubmitError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800 text-sm">{coordinatorSubmitError}</p>
+        </div>
+      )}
 
-        {/* Modal for School Registration Form */}
+
+
+      <form onSubmit={handleCoordinatorSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="fullName">
+            Your Full Name *
+          </label>
+          <input
+            type="text"
+            name="fullName"
+            value={coordinatorFormData.fullName}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your full name"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+            Your E-Mail ID *
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={coordinatorFormData.email}
+            onChange={handleCoordinatorInputChange}
+            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 text-sm sm:text-base transition-all duration-200 ${
+              coordinatorEmailError ? "border-red-300 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+            }`}
+            placeholder="Enter your email"
+            required
+          />
+          {coordinatorEmailError && (
+            <p className="mt-1 text-sm text-red-600">{coordinatorEmailError}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="mobile">
+            Mobile No./Resi. No. *
+          </label>
+          <input
+            type="text"
+            name="mobile"
+            value={coordinatorFormData.mobile}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your mobile number"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="address">
+            Address * (Max 500 characters)
+          </label>
+          <textarea
+            name="address"
+            value={coordinatorFormData.address}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your address"
+            rows={3}
+            maxLength={500}
+            required
+          />
+          <p className="text-sm text-gray-500 mt-1">{coordinatorFormData.address.length}/500 characters</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="city">
+              City *
+            </label>
+            <input
+              type="text"
+              name="city"
+              value={coordinatorFormData.city}
+              onChange={handleCoordinatorInputChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+              placeholder="Enter your city"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="district">
+              District *
+            </label>
+            <input
+              type="text"
+              name="district"
+              value={coordinatorFormData.district}
+              onChange={handleCoordinatorInputChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+              placeholder="Enter your district"
+              required
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="state">
+              State *
+            </label>
+            <input
+              type="text"
+              name="state"
+              value={coordinatorFormData.state}
+              onChange={handleCoordinatorInputChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+              placeholder="Enter your state"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="pinCode">
+              Pin Code *
+            </label>
+            <input
+              type="text"
+              name="pinCode"
+              value={coordinatorFormData.pinCode}
+              onChange={handleCoordinatorInputChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+              placeholder="Enter your pin code"
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="age">
+            Your Age * (Only in Numbers)
+          </label>
+          <input
+            type="text"
+            name="age"
+            value={coordinatorFormData.age}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your age"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="educationalQualifications">
+            Educational Qualifications *
+          </label>
+          <input
+            type="text"
+            name="educationalQualifications"
+            value={coordinatorFormData.educationalQualifications}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your educational qualifications"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="otherQualifications">
+            Other Qualifications
+          </label>
+          <input
+            type="text"
+            name="otherQualifications"
+            value={coordinatorFormData.otherQualifications}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter other qualifications (optional)"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="profession">
+            Profession *
+          </label>
+          <input
+            type="text"
+            name="profession"
+            value={coordinatorFormData.profession}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter your profession"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Do you have experience of working with schools? *
+          </label>
+          <div className="flex space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="experienceWithSchools"
+                value="Yes"
+                checked={coordinatorFormData.experienceWithSchools === "Yes"}
+                onChange={handleCoordinatorInputChange}
+                className="mr-2"
+                required
+              />
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="experienceWithSchools"
+                value="No"
+                checked={coordinatorFormData.experienceWithSchools === "No"}
+                onChange={handleCoordinatorInputChange}
+                className="mr-2"
+                required
+              />
+              No
+            </label>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reasonToWork">
+            Why do you want to work with Enlighthiq? Give 3 words which capture your reply. *
+          </label>
+          <input
+            type="text"
+            name="reasonToWork"
+            value={coordinatorFormData.reasonToWork}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="E.g., Passion Education Impact"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="yearsOfExperience">
+            How many years of total work experience do you have? *
+          </label>
+          <input
+            type="text"
+            name="yearsOfExperience"
+            value={coordinatorFormData.yearsOfExperience}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter years of experience"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="principalsKnown">
+            How many school principals do you know in your area? *
+          </label>
+          <input
+            type="text"
+            name="principalsKnown"
+            value={coordinatorFormData.principalsKnown}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter number of principals"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Do you know anyone in Enlighthiq? *
+          </label>
+          <div className="flex space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="knowAnyoneInEnlighthiq"
+                value="Yes"
+                checked={coordinatorFormData.knowAnyoneInEnlighthiq === "Yes"}
+                onChange={handleCoordinatorInputChange}
+                className="mr-2"
+                required
+              />
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="knowAnyoneInEnlighthiq"
+                value="No"
+                checked={coordinatorFormData.knowAnyoneInEnlighthiq === "No"}
+                onChange={handleCoordinatorInputChange}
+                className="mr-2"
+                required
+              />
+              No
+            </label>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="additionalInfo">
+            Any other useful information you would like to share (Max 500 characters)
+          </label>
+          <textarea
+            name="additionalInfo"
+            value={coordinatorFormData.additionalInfo}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            placeholder="Enter additional information (optional)"
+            rows={3}
+            maxLength={500}
+          />
+          <p className="text-sm text-gray-500 mt-1">{coordinatorFormData.additionalInfo.length}/500 characters</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="howHeardAbout">
+            How did you come to know about Enlighthiq? *
+          </label>
+          <select
+            name="howHeardAbout"
+            value={coordinatorFormData.howHeardAbout}
+            onChange={handleCoordinatorInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base transition-all duration-200"
+            required
+          >
+            <option value="">Select an option</option>
+            <option value="School">School</option>
+            <option value="Student">Student</option>
+            <option value="Internet">Internet</option>
+            <option value="News Paper">News Paper</option>
+            <option value="From Somebody">From Somebody</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+          <button
+            onClick={() => setIsCoordinatorModalOpen(false)}
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transition-all duration-300"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold transition-all duration-300"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
         </>
       )}
-    
-      {/* Testimonials Section */}
+
       <section className="py-16 relative">
         <div className="container relative z-10">
           <div className="text-center mb-8">
