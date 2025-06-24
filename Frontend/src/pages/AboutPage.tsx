@@ -428,7 +428,7 @@ const AboutPage = () => {
                 <h3 className="text-xl font-semibold mb-3">Still Have Questions?</h3>
                 <p className="mb-4">Can't find the answer you're looking for? Please reach out to our customer support team.</p>
                 <div className="flex space-x-4">
-                  <a href="/contact" className="bg-education-blue text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                  <a href="#/contact" className="bg-education-blue text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
                     Contact Us
                   </a>
                   <a
