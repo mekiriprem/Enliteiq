@@ -25,16 +25,16 @@ public class MatchSetService {
         matchSet.setDate(dto.getDate());
         matchSet.setDurationMinutes(dto.getDurationMinutes());
 
-        List<Question> questions = dto.getQuestions().stream().map(qdto -> {
-            Question q = new Question();
-            q.setQuestionText(qdto.getQuestionText());
-            q.setOptions(qdto.getOptions());
-            q.setCorrectAnswer(qdto.getCorrectAnswer());
-            q.setMatchSet(matchSet);
-            return q;
-        }).collect(Collectors.toList());
-
-        matchSet.setQuestions(questions);
+//        List<Question> questions = dto.getQuestions().stream().map(qdto -> {
+//            Question q = new Question();
+//            q.setQuestionText(qdto.getQuestionText());
+//            q.setOptions(qdto.getOptions());
+//            q.setCorrectAnswer(qdto.getCorrectAnswer());
+//            q.setMatchSet(matchSet);
+//            return q;
+//        }).collect(Collectors.toList());
+//
+//        matchSet.setQuestions(questions);
         return matchSetRepo.save(matchSet);
     }
     
