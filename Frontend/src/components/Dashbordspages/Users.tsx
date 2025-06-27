@@ -468,7 +468,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Education</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exams</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th> */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -498,7 +498,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
                       {user.registeredExams?.length || 0} exams
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
                         onClick={() => setViewingUser(user)}
@@ -526,7 +526,7 @@ const Users: React.FC<UsersProps> = ({ userType }) => {
                         </button>
                       )}
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

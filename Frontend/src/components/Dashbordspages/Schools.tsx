@@ -599,7 +599,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">Admin Name</th>
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">Phone</th>
                   <th className="px-4 py-3 text-sm font-medium text-gray-500">Status</th>
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
+                  {/* <th className="px-4 py-3 text-sm font-medium text-gray-500">Actions</th> */}
                 </tr>
               </thead>              <tbody>
                 {filteredSchools.map((school) => (
@@ -623,27 +623,7 @@ const Schools: React.FC<SchoolsProps> = ({ userType }) => {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm">                      <div className="flex items-center space-x-2">
-                        {(userType === 'admin' || userType === 'sales') && (
-                          <button
-                            onClick={() => handleEditSchool(school)}
-                            className="text-blue-600 hover:text-blue-700"
-                            title="Edit School"
-                          >
-                            <PenLine size={16} />
-                          </button>
-                        )}
-                        {userType === 'admin' && (
-                          <button
-                            onClick={() => handleDeleteSchool(school.schoolRegistrationId)}
-                            className="text-red-600 hover:text-red-700"
-                            title="Delete School"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
+                    
                   </tr>
                 ))}
               </tbody>
