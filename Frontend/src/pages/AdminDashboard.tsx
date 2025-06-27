@@ -46,7 +46,7 @@ const AdminDashboard: React.FC = () => {
         setError(null);
 
         // Fetch all users (students)
-        const usersResponse = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/getallUsers', {
+        const usersResponse = await fetch('https://enlightiq.enlightiq.in/api/getallUsers', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const AdminDashboard: React.FC = () => {
         }
 
         // Fetch all schools
-        const schoolsResponse = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/schools', {
+        const schoolsResponse = await fetch('https://enlightiq.enlightiq.in/api/schools', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const AdminDashboard: React.FC = () => {
         }
 
         // Fetch all exams
-        const examsResponse = await fetch('https://olympiad-zynlogic.hardikgarg.me/api/exams', {
+        const examsResponse = await fetch('https://enlightiq.enlightiq.in/api/exams', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

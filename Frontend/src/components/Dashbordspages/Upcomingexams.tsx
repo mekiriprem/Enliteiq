@@ -313,7 +313,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       }
       setImageFile(file);
       const reader = new FileReader();
-      reader.onload = Freload = (e) => {
+      reader.onload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
         setNewExam(prev => ({ ...prev, image: result }));

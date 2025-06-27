@@ -63,6 +63,15 @@ public class MatchSetService {
         matchSetRepo.save(matchSet);
     }
 
+    public void deleteMatchSet(Long matchSetId) {
+        MatchSet matchSet = matchSetRepo.findById(matchSetId)
+            .orElseThrow(() -> new RuntimeException("MatchSet not found with ID: " + matchSetId));
+        
+        // Additional business logic can be added here if needed
+        // For example: check if any students have taken this test, cleanup related data, etc.
+        
+        matchSetRepo.delete(matchSet);
+    }
 
 }
 

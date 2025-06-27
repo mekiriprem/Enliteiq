@@ -65,6 +65,7 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
   const [showQuestionUpload, setShowQuestionUpload] = useState<MockTest | null>(null);
   const [viewingQuestions, setViewingQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; test: MockTest | null }>({ show: false, test: null });
   
   // Form data
   const [formData, setFormData] = useState<MockTestForm>({
@@ -204,11 +205,8 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
       return;
     }
 
-    if (!confirm('Are you sure you want to delete this mock test? This action cannot be undone.')) {
-      return;
-    }
-
     try {
+      setLoading(true);
       const response = await fetch(`https://enlightiq.enlightiq.in/api/matchsets/${testId}`, {
         method: 'DELETE',
         headers: {
@@ -218,19 +216,34 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || 'Failed to delete mock test');
+        throw new Error(errorText || `Failed to delete mock test (Status: ${response.status})`);
       }
 
       // Remove from local state
       setMockTests(prev => prev.filter(test => test.id !== testId));
+      
+      // Close confirmation modal
+      setDeleteConfirmation({ show: false, test: null });
       
       // Show success message
       alert('Mock test deleted successfully!');
 
     } catch (err) {
       console.error('Error deleting mock test:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete mock test');
       alert(err instanceof Error ? err.message : 'Failed to delete mock test');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Show delete confirmation
+  const showDeleteConfirmation = (test: MockTest) => {
+    if (userType !== 'admin') {
+      alert('Only admin users can delete mock tests');
+      return;
+    }
+    setDeleteConfirmation({ show: true, test });
   };
 
   // Upload questions to mock test
@@ -520,8 +533,9 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
                   
                   {userType === 'admin' && (
                     <button
-                      onClick={() => handleDeleteTest(test.id)}
+                      onClick={() => showDeleteConfirmation(test)}
                       className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                      title="Delete Test"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -877,6 +891,59 @@ const MockTests: React.FC<MockTestsProps> = ({ userType }) => {
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation.show && deleteConfirmation.test && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-red-100 rounded-full">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Delete Mock Test</h2>
+                <p className="text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Are you sure you want to delete the mock test <strong>"{deleteConfirmation.test.title}"</strong>?
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                This will permanently remove the test and all its {deleteConfirmation.test.totalQuestions} questions.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmation({ show: false, test: null })}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteConfirmation.test && handleDeleteTest(deleteConfirmation.test.id)}
+                disabled={loading}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete
+                  </>
+                )}
               </button>
             </div>
           </div>
