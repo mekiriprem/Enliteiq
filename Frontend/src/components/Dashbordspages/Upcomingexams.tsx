@@ -11,6 +11,8 @@ interface Exam {
   image?: string;
   status?: string | null;
   duration?: string;
+  registrationDeadline?: string;
+  eligibility?: string;
 }
 
 interface ExamResult {
@@ -47,7 +49,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddExam, setShowAddExam] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingExamId, setEditingExamId] = useState<string | null>(null);  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [editingExamId, setEditingExamId] = useState<string | null>(null);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('template1');
   const [studentData, setStudentData] = useState<StudentData[]>([]);
@@ -55,7 +58,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [imageUploadType, setImageUploadType] = useState<'url' | 'file'>('url');
-  const [imageFile, setImageFile] = useState<File | null>(null);  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [examFilter, setExamFilter] = useState<'all' | 'recommended' | 'not_recommended'>('all');
@@ -69,7 +73,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const pdfInputRef = useRef<HTMLInputElement>(null);  const [newExam, setNewExam] = useState<Partial<Exam>>({
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [newExam, setNewExam] = useState<Partial<Exam>>({
     title: '',
     date: '',
     time: '',
@@ -77,7 +82,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     description: '',
     image: '',
     status: null,
-    duration: ''
+    duration: '',
+    registrationDeadline: '',
+    eligibility: ''
   });
 
   useEffect(() => {
@@ -95,10 +102,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       } finally {
         setIsLoading(false);
       }
-    };    fetchExams();
+    };
+    fetchExams();
   }, []);
 
-  // Handle escape key for certificate modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -117,9 +124,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
 
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
-    };  }, [showCertificateModal, showResultsModal]);
+    };
+  }, [showCertificateModal, showResultsModal]);
 
-  // Handle viewing exam results
   const handleViewResults = async (examId: string) => {
     try {
       setLoadingResults(true);
@@ -127,13 +134,11 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setSelectedExamForResults(null);
       setShowResultsModal(true);
 
-      // Find the exam details
       const exam = exams.find(e => e.id === examId);
       if (exam) {
         setSelectedExamForResults(exam);
       }
 
-      // Fetch exam results from API
       const response = await fetch(`https://enlightiq.enlightiq.in/api/exam/${examId}`, {
         method: 'GET',
         headers: {
@@ -157,11 +162,11 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       setLoadingResults(false);
     }
   };
+
   const handleUpdateExamStatus = async (id: string, recommend: boolean) => {
     try {
       setIsProcessing(true);
       
-      // Always use the recommend API since it toggles the status
       const response = await fetch(`https://enlightiq.enlightiq.in/api/recommend?examId=${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,7 +179,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       const result = await response.text();
       console.log('API Response:', result);
       
-      // Update the local state - toggle the current status
       setExams(prevExams => 
         prevExams.map(exam => {
           if (exam.id === id) {
@@ -187,7 +191,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       
     } catch (error) {
       console.error('Error updating exam status:', error);
-      alert(`Failed to update exam status: ${error.message || error}`);
+      alert(`Failed to eventiupdate exam status: ${error.message || error}`);
     } finally {
       setIsProcessing(false);
     }
@@ -244,6 +248,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       alert('Please drop a valid image file (PNG, JPG, or JPEG)');
     }
   };
+
   const handleEditExam = (exam: Exam) => {
     setIsEditing(true);
     setEditingExamId(exam.id);
@@ -255,7 +260,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       description: exam.description || '',
       image: exam.image || '',
       status: exam.status || null,
-      duration: exam.duration || ''
+      duration: exam.duration || '',
+      registrationDeadline: exam.registrationDeadline || '',
+      eligibility: exam.eligibility || ''
     });
     setImagePreview(exam.image || '');
     setImageUploadType(exam.image ? 'url' : 'file');
@@ -282,7 +289,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         throw new Error(`Failed to delete exam: ${response.status}`);
       }
 
-      // Remove the exam from the local state
       setExams(prevExams => prevExams.filter(exam => exam.id !== examId));
       alert('Exam deleted successfully!');
     } catch (error) {
@@ -302,12 +308,12 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
+        alert('FileilitarFile size should be less than 5MB');
         return;
       }
       setImageFile(file);
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = Freload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
         setNewExam(prev => ({ ...prev, image: result }));
@@ -315,6 +321,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       reader.readAsDataURL(file);
     }
   };
+
   const handleImageUrlChange = (url: string) => {
     setImagePreview(url);
     setNewExam(prev => ({ ...prev, image: url }));
@@ -329,7 +336,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       return;
     }
     
-    // Check file sizes (limit to 10MB per file)
     const oversizedFiles = validPdfFiles.filter(file => file.size > 10 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
       alert('Each PDF file should be less than 10MB.');
@@ -352,7 +358,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         const formData = new FormData();
         formData.append('pdf', file);
         
-        const response = await fetch(`https://enlightiq.enlightiq.in/api/${examId}/pdf`, {
+        const response = await fetch(`https://enlightiq.enlightiq.in/api/${-examId}/pdf`, {
           method: 'POST',
           body: formData,
         });
@@ -388,7 +394,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
       throw error;
     } finally {
       setIsUploadingImage(false);
-    }  };  const uploadPdfToExam = async (examId: string, pdfFile: File): Promise<void> => {
+    }
+  };
+
+  const uploadPdfToExam = async (examId: string, pdfFile: File): Promise<void> => {
     console.log('uploadPdfToExam called with examId:', examId, 'file:', pdfFile.name);
     const formData = new FormData();
     formData.append('file', pdfFile);
@@ -407,6 +416,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     const responseText = await response.text();
     console.log('PDF upload success response:', responseText);
   };
+
   const handleSaveExam = async () => {
     console.log('handleSaveExam called, isEditing:', isEditing, 'editingExamId:', editingExamId);
     console.log('pdfFiles:', pdfFiles);
@@ -423,7 +433,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             console.warn('Image upload failed, proceeding without server upload');
             finalImageUrl = imagePreview;
           }
-        }        const examData = {
+        }
+        const examData = {
           title: newExam.title,
           date: newExam.date,
           time: newExam.time,
@@ -431,8 +442,12 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           description: newExam.description,
           image: finalImageUrl,
           status: newExam.status,
-          duration: newExam.duration
-        };if (isEditing && editingExamId) {
+          duration: newExam.duration,
+          registrationDeadline: newExam.registrationDeadline,
+          eligibility: newExam.eligibility
+        };
+
+        if (isEditing && editingExamId) {
           console.log('Updating exam with ID:', editingExamId);
           const response = await fetch(`https://enlightiq.enlightiq.in/api/exams/${editingExamId}`, {
             method: 'PUT',
@@ -446,14 +461,12 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           const updatedExam = await response.json();
           console.log('Updated exam received:', updatedExam);
           
-          // Upload PDF if one is selected during editing
           if (pdfFiles.length > 0) {
             console.log('Uploading PDF for editing exam:', pdfFiles[0].name);
             try {
               setIsUploadingPdfs(true);
-              await uploadPdfToExam(editingExamId, pdfFiles[0]); // Upload first PDF only
+              await uploadPdfToExam(editingExamId, pdfFiles[0]);
               console.log('PDF upload successful');
-              // Refresh the exam data to get the updated syllabus URL
               const refreshResponse = await fetch(`https://enlightiq.enlightiq.in/api/exams/${editingExamId}`);
               if (refreshResponse.ok) {
                 const refreshedExam = await refreshResponse.json();
@@ -483,21 +496,20 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             ));
           }
         } else {
-          const response = await fetch('https://enlightiq.enlightiq.in/api/exams', {
+          const response = await fetch('http://localhost:8081/api/exams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
-          });          if (!response.ok) {
+          });
+          if (!response.ok) {
             throw new Error(`Failed to add exam: ${response.status}`);
           }
           const newExamData = await response.json();
           
-          // Upload PDF if one is selected
           if (pdfFiles.length > 0) {
             try {
               setIsUploadingPdfs(true);
-              await uploadPdfToExam(newExamData.id, pdfFiles[0]); // Upload first PDF only
-              // Refresh the exam data to get the updated syllabus URL
+              await uploadPdfToExam(newExamData.id, pdfFiles[0]);
               const refreshResponse = await fetch(`https://enlightiq.enlightiq.in/api/exams/${newExamData.id}`);
               if (refreshResponse.ok) {
                 const refreshedExam = await refreshResponse.json();
@@ -516,8 +528,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             setExams(prevExams => [...prevExams, newExamData]);
           }
         }
-          // Reset form
-        setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
+        setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '', registrationDeadline: '', eligibility: '' });
         setImageFile(null);
         setImagePreview('');
         setPdfFiles([]);
@@ -534,7 +545,9 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     } else {
       alert('Please fill in all required fields (Title, Subject, Date, Time).');
     }
-  };  const handleGenerateCertificate = (examId: string) => {
+  };
+
+  const handleGenerateCertificate = (examId: string) => {
     const exam = exams.find(e => e.id === examId);
     if (exam) {
       setSelectedExam(exam);
@@ -664,25 +677,25 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
     );
   }
 
-  return (    <div className="p-3 sm:p-4 md:p-6">
+  return (
+    <div className="p-3 sm:p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Upcoming Exams</h1>
-        {(userType === 'admin' || userType === 'school') && (          <button 
+        {(userType === 'admin' || userType === 'school') && (
+          <button 
             onClick={() => {
               if (showAddExam) {
-                // Hide the form
                 setShowAddExam(false);
                 setIsEditing(false);
                 setEditingExamId(null);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '', registrationDeadline: '', eligibility: '' });
                 setImagePreview('');
                 setImageFile(null);
               } else {
-                // Show the form
                 setShowAddExam(true);
                 setIsEditing(false);
                 setEditingExamId(null);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '', registrationDeadline: '', eligibility: '' });
                 setImagePreview('');
                 setImageFile(null);
               }
@@ -717,7 +730,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 </div>
                 <div className="p-6">
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h3 className="text-lg font-medium mb-4">Step 1: Select Certificate Template</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {CERTIFICATE_TEMPLATES.map((template) => (
                         <div
                           key={template.name}
@@ -729,7 +743,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:border-blue-300'
                           }`}
-                        >                          <div className="h-0 bg-gray-100 rounded mb-3 overflow-hidden flex items-center justify-center">
+                        >
+                          <div className="h-0 bg-gray-100 rounded mb-3 overflow-hidden flex items-center justify-center">
                             <div className="text-center">
                               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                               <p className="text-sm text-gray-500">PDF Template</p>
@@ -755,7 +770,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                             )}
                           </div>
                         </div>
-                      ))}                    </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="mb-8">
                     <h3 className="text-lg font-medium mb-4">Step 2: Upload Student Data (CSV)</h3>
@@ -897,7 +913,8 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 onChange={(e) => setNewExam({...newExam, date: e.target.value})}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>            <div>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Time *</label>
               <input
                 type="time"
@@ -913,6 +930,25 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 value={newExam.duration || ''}
                 onChange={(e) => setNewExam({...newExam, duration: e.target.value})}
                 placeholder="e.g., 2 hours, 90 minutes"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Registration Deadline</label>
+              <input
+                type="datetime-local"
+                value={newExam.registrationDeadline || ''}
+                onChange={(e) => setNewExam({...newExam, registrationDeadline: e.target.value})}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Eligibility</label>
+              <input
+                type="text"
+                value={newExam.eligibility || ''}
+                onChange={(e) => setNewExam({...newExam, eligibility: e.target.value})}
+                placeholder="e.g., Class 6 to 8"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1018,7 +1054,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     alt="Exam preview" 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQ2iIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDE1LjA5IDguMjZMMjIgOUwxNS4wOSAxNS43NE0xMiAyMkw4LjkxIDE1Ljc0TDIgOUw5LjkxIDguMjZMMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA5TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
                       e.currentTarget.alt = 'Failed to load image';
                     }}
                   />
@@ -1034,10 +1070,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                     <X size={14} />
                   </button>
                 </div>
-              </div>            )}
+              </div>
+            )}
           </div>
           
-          {/* PDF Upload Section */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Syllabus PDF (Optional)</label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
@@ -1088,11 +1124,13 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           <div className="flex justify-end space-x-2">
             <button
               type="button"
-              onClick={() => {                setShowAddExam(false);
+              onClick={() => {
+                setShowAddExam(false);
                 setImagePreview('');
-                setImageFile(null);                setPdfFiles([]);
+                setImageFile(null);
+                setPdfFiles([]);
                 setIsDragOver(false);
-                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
+                setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '', registrationDeadline: '', eligibility: '' });
                 setIsEditing(false);
                 setEditingExamId(null);
               }}
@@ -1102,17 +1140,17 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             </button>
             <button
               type="button"
-              onClick={handleSaveExam}              disabled={isProcessing || isUploadingImage || isUploadingPdfs}
+              onClick={handleSaveExam}
+              disabled={isProcessing || isUploadingImage || isUploadingPdfs}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {isProcessing || isUploadingImage || isUploadingPdfs ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Exam' : 'Add Exam')}
             </button>
-          </div>        </div>
+          </div>
+        </div>
       )}
 
-      {/* Search and Filter Section - moved below the form */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
-        {/* Search Input */}
         <div className="mb-4">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -1128,7 +1166,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
           </div>
         </div>
 
-        {/* Filter Toggle Buttons */}
         <div className="filter-buttons">
           <div className="btn-group flex">
             <button
@@ -1159,10 +1196,10 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">        {exams.length > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {exams.length > 0 ? (
           exams
             .filter(exam => {
-              // Filter by status
               const statusMatch = (() => {
                 if (examFilter === 'all') return true;
                 if (examFilter === 'recommended') return exam.status === 'recommended';
@@ -1170,7 +1207,6 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
                 return true;
               })();
 
-              // Filter by search term
               const searchMatch = searchTerm === '' || 
                 exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 exam.subject.toLowerCase().includes(searchTerm.toLowerCase());
@@ -1178,180 +1214,190 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
               return statusMatch && searchMatch;
             })
             .map(exam => (
-            <div key={exam.id} className="group bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
-              {/* Image on top */}
-              {exam.image && (
-                <div className="h-48 overflow-hidden relative">
-                  <img 
-                    src={exam.image} 
-                    alt={exam.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA9TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA9TDE4LjA5IDguMjZMMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
-                      e.currentTarget.alt = 'Failed to load exam image';
-                    }}
-                  />
-                  {/* Status indicator overlay */}
-                  {exam.status === 'recommended' && (
-                    <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      Recommended
-                    </div>
-                  )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                </div>
-              )}
-              
-              {/* Content below image */}
-              <div className="p-6">
-                <div className="flex flex-col h-full">
-                  <h3 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                    {exam.title}
-                  </h3>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 text-blue-500" />
-                      <span>{formatDate(exam.date)}</span>
-                    </div>                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                      <span>{exam.time}</span>
-                    </div>
-                    {exam.duration && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock className="h-4 w-4 text-green-500" />
-                        <span>Duration: {exam.duration}</span>
+              <div key={exam.id} className="group bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
+                {exam.image && (
+                  <div className="h-48 overflow-hidden relative">
+                    <img 
+                      src={exam.image} 
+                      alt={exam.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA5TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iIzk5OSIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==';
+                        e.currentTarget.alt = 'Failed to load exam image';
+                      }}
+                    />
+                    {exam.status === 'recommended' && (
+                      <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        Recommended
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Info className="h-4 w-4 text-blue-500" />
-                      <span className="font-medium">{exam.subject}</span>
-                    </div>
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
                   </div>
-                  
-                  {exam.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{exam.description}</p>
-                  )}
-                  
-                  {/* Status controls for admin/school */}
-                  {(userType === 'admin' || userType === 'school') && (
-                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <label className="flex items-center text-sm text-gray-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`status-${exam.id}`}
-                            checked={exam.status === 'recommended'}
-                            onChange={() => handleUpdateExamStatus(exam.id, true)}
-                            disabled={isProcessing}
-                            className="mr-2 accent-green-600"
-                          />
-                          <span className="text-green-700 font-medium">Recommend</span>
-                        </label>
-                        <label className="flex items-center text-sm text-gray-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`status-${exam.id}`}
-                            checked={exam.status === null}
-                            onChange={() => handleUpdateExamStatus(exam.id, false)}
-                            disabled={isProcessing}
-                            className="mr-2 accent-gray-600"
-                          />
-                          <span className="text-gray-700 font-medium">Not Recommended</span>
-                        </label>
+                )}
+                
+                <div className="p-6">
+                  <div className="flex flex-col h-full">
+                    <h3 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                      {exam.title}
+                    </h3>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                        <span>{formatDate(exam.date)}</span>
                       </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="h-4 w-4 text-blue-500" />
+                        <span>{exam.time}</span>
+                      </div>
+                      {exam.duration && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-4 w-4 text-green-500" />
+                          <span>Duration: {exam.duration}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Info className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">{exam.subject}</span>
+                      </div>
+                      {exam.registrationDeadline && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="h-4 w-4 text-purple-500" />
+                          <span>Registration by: {formatDate(exam.registrationDeadline)}</span>
+                        </div>
+                      )}
+                      {exam.eligibility && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Info className="h-4 w-4 text-purple-500" />
+                          <span>Eligibility: {exam.eligibility}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                    {/* Action buttons */}
-                  <div className="flex flex-wrap gap-2 mt-auto">
-                    {userType === 'student' && (
-                      <>
-                        <button 
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-1 justify-center"
-                          onClick={() => { /* Add download materials functionality */ }}
-                        >
-                          <Download size={16} />
-                          Materials
-                        </button>
-                        <button
-                          onClick={() => handleViewResults(exam.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
-                        >
-                          <Info size={16} />
-                          Results
-                        </button>
-                      </>
+                    
+                    {exam.description && (
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{exam.description}</p>
                     )}
+                    
                     {(userType === 'admin' || userType === 'school') && (
-                      <>
-                        <button
-                          onClick={() => handleGenerateCertificate(exam.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex-1 justify-center"
-                        >
-                          <FileText size={16} />
-                          Certificates
-                        </button>
-                        <button
-                          onClick={() => handleViewResults(exam.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
-                        >
-                          <Info size={16} />
-                          Results
-                        </button>
-                        <button
-                          onClick={() => handleEditExam(exam)}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteExam(exam.id, exam.title)}
-                          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                        >
-                          <Trash2 size={16} />
-                          Delete
-                        </button>
-                      </>
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`status-${exam.id}`}
+                              checked={exam.status === 'recommended'}
+                              onChange={() => handleUpdateExamStatus(exam.id, true)}
+                              disabled={isProcessing}
+                              className="mr-2 accent-green-600"
+                            />
+                            <span className="text-green-700 font-medium">Recommend</span>
+                          </label>
+                          <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`status-${exam.id}`}
+                              checked={exam.status === null}
+                              onChange={() => handleUpdateExamStatus(exam.id, false)}
+                              disabled={isProcessing}
+                              className="mr-2 accent-gray-600"
+                            />
+                            <span className="text-gray-700 font-medium">Not Recommended</span>
+                          </label>
+                        </div>
+                      </div>
                     )}
+                    <div className="flex flex-wrap gap-2 mt-auto">
+                      {userType === 'student' && (
+                        <>
+                          <button 
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-1 justify-center"
+                            onClick={() => { /* Add download materials functionality */ }}
+                          >
+                            <Download size={16} />
+                            Materials
+                          </button>
+                          <button
+                            onClick={() => handleViewResults(exam.id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
+                          >
+                            <Info size={16} />
+                            Results
+                          </button>
+                        </>
+                      )}
+                      {(userType === 'admin' || userType === 'school') && (
+                        <>
+                          <button
+                            onClick={() => handleGenerateCertificate(exam.id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex-1 justify-center"
+                          >
+                            <FileText size={16} />
+                            Certificates
+                          </button>
+                          <button
+                            onClick={() => handleViewResults(exam.id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex-1 justify-center"
+                          >
+                            <Info size={16} />
+                            Results
+                          </button>
+                          <button
+                            onClick={() => handleEditExam(exam)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteExam(exam.id, exam.title)}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center bg-white p-12 rounded-lg shadow-sm border border-gray-200 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Calendar className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No exams found</h3>
+              <p className="text-gray-500 mb-6">
+                {searchTerm !== '' 
+                  ? `No exams match your search "${searchTerm}".`
+                  : examFilter === 'recommended' 
+                  ? 'No recommended exams available.' 
+                  : examFilter === 'not_recommended' 
+                  ? 'No non-recommended exams available.' 
+                  : isLoading 
+                  ? 'Loading exams...' 
+                  : 'No upcoming exams scheduled.'}
+              </p>
+              {(userType === 'admin' || userType === 'school') && !isLoading && searchTerm === '' && examFilter === 'all' && (
+                <button
+                  onClick={() => {
+                    setShowAddExam(true);
+                    setIsEditing(false);
+                    setEditingExamId(null);
+                    setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '', registrationDeadline: '', eligibility: '' });
+                    setImagePreview('');
+                    setImageFile(null);
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <Plus size={16} />
+                  Add Your First Exam
+                </button>
+              )}
             </div>
-          ))
-        ) : (
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center bg-white p-12 rounded-lg shadow-sm border border-gray-200 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Calendar className="h-8 w-8 text-gray-400" />
-            </div>            <h3 className="text-lg font-medium text-gray-900 mb-2">No exams found</h3>
-            <p className="text-gray-500 mb-6">
-              {searchTerm !== '' 
-                ? `No exams match your search "${searchTerm}".`
-                : examFilter === 'recommended' 
-                ? 'No recommended exams available.' 
-                : examFilter === 'not_recommended' 
-                ? 'No non-recommended exams available.' 
-                : isLoading 
-                ? 'Loading exams...' 
-                : 'No upcoming exams scheduled.'}
-            </p>            {(userType === 'admin' || userType === 'school') && !isLoading && searchTerm === '' && examFilter === 'all' && (
-              <button
-                onClick={() => {
-                  setShowAddExam(true);                  setIsEditing(false);
-                  setEditingExamId(null);
-                  setNewExam({ title: '', date: '', time: '', subject: '', description: '', image: '', status: null, duration: '' });
-                  setImagePreview('');
-                  setImageFile(null);
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                <Plus size={16} />
-                Add Your First Exam
-              </button>            )}
-          </div>
-        )}
+          )}
       </div>
 
-      {/* Results Modal */}
       {showResultsModal && (
         <>
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
