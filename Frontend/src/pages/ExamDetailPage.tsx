@@ -73,6 +73,11 @@ const ExamDetailPage = () => {
       return;
     }
 
+    if (user.role !== 'user') {
+      setRegistrationError("Only users can register for exams");
+      return;
+    }
+
     setRegistrationLoading(true);
     setRegistrationError(null);
     setRegistrationStatus(null);
@@ -135,6 +140,11 @@ const ExamDetailPage = () => {
   const handleStartMockTest = () => {
     if (!user) {
       setRegistrationError("Please login to start the mock test");
+      return;
+    }
+    
+    if (user.role !== 'user') {
+      setRegistrationError("Only users can start mock tests");
       return;
     }
     
@@ -202,39 +212,45 @@ const ExamDetailPage = () => {
             location={exam.location || "Not specified"}
           />
           
-          {/* Registration Section */}
-          <div className="p-6 border-t border-gray-200">
-            <h3 className="text-xl font-semibold text-education-dark mb-4">Register for Exam</h3>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              {!user ? (
-                <div className="p-3 bg-yellow-100 text-yellow-800 rounded-md">
-                  Please login to register for the exam and start the mock test.
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={handleRegister}
-                    disabled={registrationLoading || !user}
-                    className={`w-full px-4 py-2 bg-education-blue text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-education-blue focus:ring-offset-2 ${
-                      registrationLoading || !user ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {registrationLoading ? "Registering..." : "Register for Exam"}
-                  </button>
-                  {registrationStatus && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">
-                      {registrationStatus}
-                    </div>
-                  )}
-                  {registrationError && (
-                    <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md">
-                      {registrationError}
-                    </div>
-                  )}
-                </>
-              )}
+          {/* Registration Section - Only for Users */}
+          {(!user || user.role === 'user') && (
+            <div className="p-6 border-t border-gray-200">
+              <h3 className="text-xl font-semibold text-education-dark mb-4">Register for Exam</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                {!user ? (
+                  <div className="p-3 bg-yellow-100 text-yellow-800 rounded-md">
+                    Please login as a user to register for the exam and start the mock test.
+                  </div>
+                ) : user.role !== 'user' ? (
+                  <div className="p-3 bg-blue-100 text-blue-800 rounded-md">
+                    Only users can register for exams. You are logged in as {user.role}.
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleRegister}
+                      disabled={registrationLoading || !user}
+                      className={`w-full px-4 py-2 bg-education-blue text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-education-blue focus:ring-offset-2 ${
+                        registrationLoading || !user ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {registrationLoading ? "Registering..." : "Register for Exam"}
+                    </button>
+                    {registrationStatus && (
+                      <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">
+                        {registrationStatus}
+                      </div>
+                    )}
+                    {registrationError && (
+                      <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md">
+                        {registrationError}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
           {/* Action Buttons - Start Mock Test Disabled if Not Logged In */}
           {/* <div className="p-6 border-t border-gray-200">
