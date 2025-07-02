@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"; // Add useLoc
 import { ArrowRight } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 import Hero from "../components/home/Hero";
+import Gallery from "../pages/gallerry";
 import ExamCard from "../components/exams/ExamCard";
 import TestimonialCard from "../components/home/TestimonialCard";
 
@@ -642,6 +643,11 @@ const HomePage = ({ onRegisterClick, isLoggedIn = false }: { onRegisterClick: ()
           )}
         </div>
       </section>
+    <div className="text-center px-4">
+      <h1 className="text-4xl font-bold mb-8">Gallery</h1>
+      <Gallery />
+    </div>
+
 
       {!isAnyoneLoggedIn && (
         <>

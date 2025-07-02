@@ -496,7 +496,7 @@ const UpcomingExams: React.FC<UpcomingExamsProps> = ({ userType }) => {
             ));
           }
         } else {
-          const response = await fetch('http://localhost:8081/api/exams', {
+          const response = await fetch('https://enlightiq.enlightiq.in/api/exams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(examData),
