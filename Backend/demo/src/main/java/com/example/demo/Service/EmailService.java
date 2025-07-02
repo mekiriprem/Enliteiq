@@ -13,9 +13,14 @@ public class EmailService {
 
     public void sendContactMessage(String name, String email, String subject, String messageBody) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("your-receiving-email@gmail.com"); // Your email to receive messages
+
+        message.setTo("enlightiqedu@gmail.com"); // Your inbox to receive messages
         message.setSubject("Contact Us Form: " + subject);
         message.setText("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + messageBody);
+        
+        message.setFrom("enlightiqedu@gmail.com"); // Gmail forces this to match your SMTP username
+        message.setReplyTo(email); // 👈 This makes 'Reply' go to user's email
+
         mailSender.send(message);
     }
 }
