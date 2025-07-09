@@ -367,7 +367,7 @@ const AboutPage = () => {
             </div>
 
             <section className="py-16 px-4">
-              <h2 className="text-3xl sm:text-4xl font-semibold text-gray-800 mb-12 text-center">Founders’ Messages</h2>
+              <h2 className="text-3xl sm:text-4xl font-semibold text-gray-800 mb-12 text-center">Founder’s Messages</h2>
               <div className="space-y-16">
                 {/* First Founder: Image on Left, Message on Right */}
                 <div className="flex flex-col lg:flex-row items-center gap-10">
